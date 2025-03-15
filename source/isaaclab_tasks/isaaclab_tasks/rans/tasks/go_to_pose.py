@@ -6,7 +6,7 @@
 import math
 import torch
 
-from isaaclab.markers import BICOLOR_DIAMOND_CFG, PIN_ARROW_CFG, VisualizationMarkers
+from isaaclab.markers import BICOLOR_DIAMOND_CFG, ARROW_CFG, PIN_ARROW_CFG, VisualizationMarkers
 from isaaclab.scene import InteractiveScene
 
 from isaaclab_tasks.rans import GoToPoseCfg
@@ -30,6 +30,7 @@ class GoToPoseTask(TaskCore):
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
         decimation: int = 1,
+        num_tasks: int = 1,
     ) -> None:
         """
         Initializes the GoToPose task.
@@ -42,9 +43,7 @@ class GoToPoseTask(TaskCore):
             task_id: The id of the task.
             env_ids: The ids of the environments used by this task."""
 
-        super().__init__(
-            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
-        )
+        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, num_tasks=num_tasks)
 
         # Task and reward parameters
         self._task_cfg = task_cfg
@@ -54,7 +53,7 @@ class GoToPoseTask(TaskCore):
         self._dim_gen_act = self._task_cfg.gen_space
 
         # Buffers
-        self.initialize_buffers()
+        self.initialize_buffers(env_ids=env_ids)
 
     @property
     def eval_data_keys(self) -> list[str]:
@@ -126,16 +125,16 @@ class GoToPoseTask(TaskCore):
 
         super().create_logs()
 
-        self.scalar_logger.add_log("task_state", "AVG/normed_linear_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "AVG/absolute_angular_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "EMA/position_distance", "ema")
-        self.scalar_logger.add_log("task_state", "EMA/heading_distance", "ema")
-        self.scalar_logger.add_log("task_state", "EMA/boundary_distance", "ema")
-        self.scalar_logger.add_log("task_reward", "AVG/position", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/heading", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/linear_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/angular_velocity", "max")
-        self.scalar_logger.add_log("task_reward", "AVG/boundary", "min")
+        self.scalar_logger.add_log("task_state", "GoToPose/AVG/normed_linear_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "GoToPose/AVG/absolute_angular_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "GoToPose/EMA/position_distance", "ema")
+        self.scalar_logger.add_log("task_state", "GoToPose/EMA/heading_distance", "ema")
+        self.scalar_logger.add_log("task_state", "GoToPose/EMA/boundary_distance", "ema")
+        self.scalar_logger.add_log("task_reward", "GoToPose/AVG/position", "mean")
+        self.scalar_logger.add_log("task_reward", "GoToPose/AVG/heading", "mean")
+        self.scalar_logger.add_log("task_reward", "GoToPose/AVG/linear_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "GoToPose/AVG/angular_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "GoToPose/AVG/boundary", "mean")
         self.scalar_logger.set_ema_coeff(self._task_cfg.ema_coeff)
 
     def get_observations(self) -> torch.Tensor:
@@ -196,7 +195,7 @@ class GoToPoseTask(TaskCore):
             randomizer.observations(observations=self._task_data)
 
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations()), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(task_uid=self._task_uid)), dim=-1)
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -230,11 +229,11 @@ class GoToPoseTask(TaskCore):
         progress = self._previous_position_dist - self._position_dist
 
         # Update logs (exponential moving average to see the performance at the end of the episode)
-        self.scalar_logger.log("task_state", "EMA/position_distance", self._position_dist)
-        self.scalar_logger.log("task_state", "EMA/heading_distance", heading_dist)
-        self.scalar_logger.log("task_state", "EMA/boundary_distance", boundary_dist)
-        self.scalar_logger.log("task_state", "AVG/normed_linear_velocity", linear_velocity)
-        self.scalar_logger.log("task_state", "AVG/absolute_angular_velocity", angular_velocity)
+        self.scalar_logger.log("task_state", "GoToPose/EMA/position_distance", self._position_dist)
+        self.scalar_logger.log("task_state", "GoToPose/EMA/heading_distance", heading_dist)
+        self.scalar_logger.log("task_state", "GoToPose/EMA/boundary_distance", boundary_dist)
+        self.scalar_logger.log("task_state", "GoToPose/AVG/normed_linear_velocity", linear_velocity)
+        self.scalar_logger.log("task_state", "GoToPose/AVG/absolute_angular_velocity", angular_velocity)
 
         # position reward
         position_rew = torch.exp(-self._position_dist / self._task_cfg.position_exponential_reward_coeff)
@@ -266,11 +265,11 @@ class GoToPoseTask(TaskCore):
         self._goal_reached += goal_is_reached  # if it is add 1
 
         # Update logs (exponential moving average to see the performance at the end of the episode)
-        self.scalar_logger.log("task_reward", "AVG/position", position_rew)
-        self.scalar_logger.log("task_reward", "AVG/heading", heading_rew)
-        self.scalar_logger.log("task_reward", "AVG/linear_velocity", linear_velocity_rew)
-        self.scalar_logger.log("task_reward", "AVG/angular_velocity", angular_velocity_rew)
-        self.scalar_logger.log("task_reward", "AVG/boundary", boundary_rew)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/position", position_rew)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/heading", heading_rew)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/linear_velocity", linear_velocity_rew)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/angular_velocity", angular_velocity_rew)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/boundary", boundary_rew)
 
         # Return the reward by combining the different components and adding the robot rewards
         return (
@@ -279,7 +278,7 @@ class GoToPoseTask(TaskCore):
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
             + boundary_rew * self._task_cfg.boundary_weight
             + progress_rew * self._task_cfg.progress_weight
-        ) + self._robot.compute_rewards()
+        ) + self._robot.compute_rewards(task_uid=self._task_uid)
 
     def reset(
         self,
@@ -305,7 +304,8 @@ class GoToPoseTask(TaskCore):
             task_actions (torch.Tensor | None): The actions for the task. Defaults to None.
             env_seeds (torch.Tensor | None): The seeds for the environments. Defaults to None.
         """
-
+        # print("pose" + "%"*100)
+        # print(env_ids)
         super().reset(env_ids, gen_actions=gen_actions, env_seeds=env_seeds)
 
         # Randomizes goals and initial conditions
@@ -459,7 +459,7 @@ class GoToPoseTask(TaskCore):
 
         # Define the visual markers and edit their properties
         goal_marker_cfg = PIN_ARROW_CFG.copy()
-        robot_marker_cfg = BICOLOR_DIAMOND_CFG.copy()
+        robot_marker_cfg = ARROW_CFG.copy()
         goal_marker_cfg.prim_path = f"/Visuals/Command/task_{self._task_uid}/goal_pose"
         robot_marker_cfg.prim_path = f"/Visuals/Command/task_{self._task_uid}/robot_pose"
         # We should create only one of them.
@@ -469,6 +469,11 @@ class GoToPoseTask(TaskCore):
     def update_task_visualization(self) -> None:
         """Updates the visual marker to the scene."""
 
-        self.goal_pos_visualizer.visualize(self._markers_pos, self._markers_quat)
-        self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[:, :2]
-        self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
+        if self._num_tasks == 1:
+            self.goal_pos_visualizer.visualize(self._markers_pos)
+            self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[:, :2]
+            self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
+        else:            
+            self.goal_pos_visualizer.visualize(self._markers_pos)
+            self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[self._num_envs:, :2]
+            self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)

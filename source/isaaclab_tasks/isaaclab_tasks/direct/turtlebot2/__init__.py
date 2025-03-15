@@ -16,6 +16,16 @@ from . import agents
 ##
 gym.register(
     id="Isaac-Turtlebot2-TrackVelocities-Direct-v0",
+    entry_point=f"{__name__}.turtlebot2_double_task_env:TurtleBot2DoubleTaskEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.turtlebot2_double_task_env:TurtleBot2DoubleTaskEnvCfg",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+    },
+)
+gym.register(
+    id="Isaac-Turtlebot2-TrackVelocities-Direct-v0",
     entry_point=f"{__name__}.turtlebot2_track_velocities_env:TurtleBot2TrackVelocitiesEnv",
     disable_env_checker=True,
     kwargs={

@@ -20,6 +20,7 @@ class RobotCore:
         robot_uid: int = 0,
         num_envs: int = 1,
         decimation: int = 1,
+        num_tasks: int = 1,
         device: str = "cuda",
     ):
         """Initializes the robot core.
@@ -38,6 +39,9 @@ class RobotCore:
         # Number of environments and device to be used
         self._num_envs = num_envs
         self._device = device
+
+        # Number of task the robot is part of
+        self._num_tasks = num_tasks
 
         # Defines the observation and actions space sizes for this task
         self._dim_robot_obs: int = MISSING
@@ -155,11 +159,11 @@ class RobotCore:
         for randomizer in self.randomizers:
             randomizer.setup()
 
-    def get_observations(self):
+    def get_observations(self, task_uid: int = 0):
         """Returns the observations of the robot."""
         raise NotImplementedError
 
-    def compute_rewards(self):
+    def compute_rewards(self, task_uid: int = 0):
         """Computes the rewards of the robot."""
         raise NotImplementedError
 

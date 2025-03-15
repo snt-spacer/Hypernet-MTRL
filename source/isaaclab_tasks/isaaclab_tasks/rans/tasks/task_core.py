@@ -32,6 +32,7 @@ class TaskCore:
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
         decimation: int = 1,
+        num_tasks: int = 1,
     ) -> None:
         """
         The base class for the different subtasks.
@@ -64,6 +65,9 @@ class TaskCore:
         # RNG
         seeds = torch.randint(0, 2**31, (self._num_envs,), dtype=torch.int32, device=self._device)
         self._rng = PerEnvSeededRNG(seeds, self._num_envs, self._device)
+
+        # Multi-tasking
+        self._num_tasks = num_tasks
 
         # Logs
         self.create_logs()
@@ -197,7 +201,7 @@ class TaskCore:
         self._rng.set_seeds(self._seeds[env_ids], env_ids)
 
         # Reset the robot
-        self._robot.reset(env_ids)
+        # self._robot.reset(env_ids)
 
         # Updates the task actions
         if gen_actions is None:

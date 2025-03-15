@@ -23,9 +23,10 @@ class TurtleBot2Robot(RobotCore):
         robot_uid: int = 0,
         num_envs: int = 1,
         decimation: int = 4,
+        num_tasks: int = 1,
         device: str = "cuda",
     ):
-        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, device=device)
+        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, num_tasks=num_tasks, device=device)
         self._robot_cfg = robot_cfg
         self._dim_robot_obs = self._robot_cfg.observation_space
         self._dim_robot_act = self._robot_cfg.action_space
@@ -110,10 +111,18 @@ class TurtleBot2Robot(RobotCore):
         self.scalar_logger.add_log("robot_reward", "AVG/action_rate", "mean")
         self.scalar_logger.add_log("robot_reward", "AVG/joint_acceleration", "mean")
 
-    def get_observations(self) -> torch.Tensor:
-        return self._unaltered_actions
+    def get_observations(self, task_uid: int = 0) -> torch.Tensor:
+        # TODO: rethink the following:
+        if self._num_tasks == 1:
+            return self._unaltered_actions
+        else:
+            chunk_size = self._num_envs // self._num_tasks
+            start_idx = (task_uid - 1) * chunk_size
+            end_idx = start_idx + chunk_size
+            return self._unaltered_actions[start_idx : end_idx]
+            
 
-    def compute_rewards(self):
+    def compute_rewards(self, task_uid: int = 0):
         # Compute
         action_rate = torch.sum(torch.square(self._unaltered_actions - self._previous_unaltered_actions), dim=1)
         joint_accelerations = torch.sum(torch.square(self.joint_acc), dim=1)
@@ -124,10 +133,20 @@ class TurtleBot2Robot(RobotCore):
         self.scalar_logger.log("robot_reward", "AVG/action_rate", action_rate)
         self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", joint_accelerations)
 
-        return (
-            action_rate * self._robot_cfg.rew_action_rate_scale
-            + joint_accelerations * self._robot_cfg.rew_joint_accel_scale
-        )
+        if self._num_tasks == 1:
+            return (
+                action_rate * self._robot_cfg.rew_action_rate_scale
+                + joint_accelerations * self._robot_cfg.rew_joint_accel_scale
+            )
+        else:
+            chunk_size = self._num_envs // self._num_tasks
+            start_idx = (task_uid - 1) * chunk_size
+            end_idx = start_idx + chunk_size
+            return (
+                action_rate[start_idx : end_idx] * self._robot_cfg.rew_action_rate_scale
+                + joint_accelerations[start_idx : end_idx] * self._robot_cfg.rew_joint_accel_scale
+            )
+
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
         task_failed = torch.zeros(self._num_envs, dtype=torch.int32, device=self._device)
