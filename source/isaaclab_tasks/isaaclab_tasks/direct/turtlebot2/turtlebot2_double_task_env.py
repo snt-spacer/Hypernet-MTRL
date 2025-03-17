@@ -101,10 +101,10 @@ class TurtleBot2DoubleTaskEnv(DirectRLEnv):
         task_0_env_ids = self.env_ids[:num_envs_per_task]
         task_1_env_ids = self.env_ids[num_envs_per_task:]
         self.task_api_0 = GoToPositionTask(
-            scene=self.scene, 
-            task_cfg=self.cfg.task_cfg_0, 
-            task_uid=1, 
-            num_envs=num_envs_per_task, 
+            scene=self.scene,
+            task_cfg=self.cfg.task_cfg_0,
+            task_uid=1,
+            num_envs=num_envs_per_task,
             device=self.device,
             num_tasks=self.num_tasks,
             env_ids=task_0_env_ids
@@ -139,7 +139,6 @@ class TurtleBot2DoubleTaskEnv(DirectRLEnv):
     def _get_observations(self) -> dict:
         task_0_obs = self.task_api_0.get_observations()
         task_1_obs = self.task_api_1.get_observations()
-        # TODO
         max_len = max(tensor.shape[-1] for tensor in [task_0_obs, task_1_obs]) + 1  # Task uid
         for i, task_obs in enumerate([task_0_obs, task_1_obs]):
             padding_size = max_len - task_obs.shape[-1]

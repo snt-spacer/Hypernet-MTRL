@@ -99,7 +99,7 @@ def update_class_from_dict(obj, data: dict[str, Any], _ns: str = "") -> None:
                 continue
             if isinstance(value, Iterable) and not isinstance(value, str):
                 # check length of value to be safe
-                if len(obj_mem) != len(value) and obj_mem is not None:
+                if len(obj_mem) != len(value) and obj_mem is not None and key != "tasks_names":
                     raise ValueError(
                         f"[Config]: Incorrect length under namespace: {key_ns}."
                         f" Expected: {len(obj_mem)}, Received: {len(value)}."

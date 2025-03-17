@@ -148,6 +148,14 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         agent_cfg["agent"]["experiment"]["directory"] = "Single"
         agent_cfg["agent"]["experiment"]["experiment_name"] = env.env.cfg.robot_name + "-" + env.env.cfg.task_name
         log_root_path = os.path.join("logs", "skrl", args_cli.task.split("-")[2])
+    elif "MultiTask" in args_cli.task:
+        if "wandb_kwargs" in agent_cfg["agent"]["experiment"]:
+            agent_cfg["agent"]["experiment"]["wandb_kwargs"]["project"] = (
+                args_cli.task.split("-")[2] + "-" + env.env.cfg.robot_name + "-" + "-".join(env.env.cfg.tasks_names)
+            )
+        agent_cfg["agent"]["experiment"]["directory"] = "MultiTask"
+        agent_cfg["agent"]["experiment"]["experiment_name"] = env.env.cfg.robot_name + "-" + "-".join(env.env.cfg.tasks_names)
+        log_root_path = os.path.join("logs", "skrl", args_cli.task.split("-")[2])       
     else:
         agent_cfg["agent"]["experiment"]["experiment_name"] = args_cli.task.split("-")[2]
         log_root_path = os.path.join("logs", "skrl", agent_cfg["agent"]["experiment"]["directory"])

@@ -22,7 +22,7 @@ from isaaclab_assets.robots.turtlebot2 import TURTLEBOT2_CFG  # isort: skip
 class TurtleBot2RobotCfg(RobotCoreCfg):
     """Core configuration for a RANS task."""
 
-    robot_name: str = "Turtlebot2"
+    robot_name: str = "TurtleBot2"
 
     robot_cfg: ArticulationCfg = TURTLEBOT2_CFG.replace(prim_path="/World/envs/env_.*/Robot")
     marker_height = 0.5

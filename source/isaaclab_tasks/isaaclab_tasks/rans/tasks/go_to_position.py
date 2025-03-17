@@ -285,8 +285,6 @@ class GoToPositionTask(TaskCore):
             gen_actions (torch.Tensor | None): The actions for the task. Defaults to None.
             env_seeds (torch.Tensor | None): The seeds for the environments. Defaults to None.
         """
-        # print("position" + "#"*100)
-        # print(env_ids)
         super().reset(env_ids, gen_actions=gen_actions, env_seeds=env_seeds)
 
         # Randomizes goals and initial conditions
@@ -380,7 +378,11 @@ class GoToPositionTask(TaskCore):
         theta = self._rng.sample_uniform_torch(-math.pi, math.pi, 1, ids=env_ids)
         initial_pose[:, 0] = r * torch.cos(theta) + self._target_positions[env_ids, 0]
         initial_pose[:, 1] = r * torch.sin(theta) + self._target_positions[env_ids, 1]
-        initial_pose[:, 2] = self._robot_origins[env_ids, 2]
+
+        chunck_size = self.scene.num_envs // self._num_tasks
+        start_indx = (self._task_uid - 1) * chunck_size
+        shifted_env_ids = env_ids + start_indx
+        initial_pose[:, 2] = self._robot_origins[shifted_env_ids, 2]
 
         # Orientation
         # Compute the heading to the target
@@ -419,8 +421,8 @@ class GoToPositionTask(TaskCore):
         initial_velocity[:, 5] = angular_velocity
 
         # Apply to articulation
-        self._robot.set_pose(initial_pose, env_ids)
-        self._robot.set_velocity(initial_velocity, env_ids)
+        self._robot.set_pose(initial_pose, shifted_env_ids)
+        self._robot.set_velocity(initial_velocity, shifted_env_ids)
 
     def create_task_visualization(self) -> None:
         """Adds the visual marker to the scene.
@@ -450,8 +452,12 @@ class GoToPositionTask(TaskCore):
             self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[:, :2]
             self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
         else:
+            chunk_size = self.scene.num_envs // self._num_tasks
+            start_indx = (self._task_uid - 1) * chunk_size
+            end_indx = start_indx + chunk_size
+
             self.goal_pos_visualizer.visualize(self._markers_pos)
-            self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[:self._num_envs, :2]
+            self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[start_indx:end_indx, :2]
             self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
 
         

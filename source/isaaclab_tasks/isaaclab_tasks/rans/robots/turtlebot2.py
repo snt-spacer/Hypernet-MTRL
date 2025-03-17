@@ -112,7 +112,6 @@ class TurtleBot2Robot(RobotCore):
         self.scalar_logger.add_log("robot_reward", "AVG/joint_acceleration", "mean")
 
     def get_observations(self, task_uid: int = 0) -> torch.Tensor:
-        # TODO: rethink the following:
         if self._num_tasks == 1:
             return self._unaltered_actions
         else:
@@ -120,7 +119,6 @@ class TurtleBot2Robot(RobotCore):
             start_idx = (task_uid - 1) * chunk_size
             end_idx = start_idx + chunk_size
             return self._unaltered_actions[start_idx : end_idx]
-            
 
     def compute_rewards(self, task_uid: int = 0):
         # Compute
