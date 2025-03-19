@@ -32,6 +32,9 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     # scene
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=7.5, replicate_physics=True)
 
+    # Steps per episode
+    #spe = 1/hz * decumation * episode_length_s
+
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1.0 / 60.0, render_interval=decimation)
     # Simulation
@@ -223,6 +226,9 @@ class MultiTaskEnv(DirectRLEnv):
 
     def _get_rewards(self) -> torch.Tensor:
         task_rewards = [task_api.compute_rewards() for task_api in self.tasks_apis]
+        # print("#"*50)
+        # print(task_rewards[0])
+        # print(task_rewards[1])
         return torch.cat(task_rewards, dim=0)
 
     def _get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
@@ -273,8 +279,16 @@ class MultiTaskEnv(DirectRLEnv):
         super()._reset_idx(env_ids)
         self.robot_api.reset(env_ids)
         for i, task_api in enumerate(self.tasks_apis):
+
+            # Curriculum
+            if self.common_step_counter < 10 * 500:
+                scale = self.common_step_counter / (10 * 500 )
+                gen_actions = torch.zeros((len(env_ids) // self.num_tasks, self.tasks_cfgs[i].gen_space), device=self.device) * scale
+            else:
+                gen_actions = None
+
             if len(tasks_env_ids[i]) > 0:
-                task_api.reset(tasks_env_ids[i])
+                task_api.reset(tasks_env_ids[i], gen_actions=gen_actions)
 
     def _set_debug_vis_impl(self, debug_vis: bool) -> None:
         if debug_vis:

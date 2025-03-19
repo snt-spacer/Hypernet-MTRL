@@ -68,6 +68,7 @@ class TaskCore:
 
         # Multi-tasking
         self._num_tasks = num_tasks
+        self._env_ids = env_ids
 
         # Logs
         self.create_logs()
@@ -204,10 +205,14 @@ class TaskCore:
         # self._robot.reset(env_ids)
 
         # Updates the task actions
-        if gen_actions is None:
-            self._gen_actions[env_ids] = torch.rand((len(env_ids), self.num_gen_actions), device=self._device)
-        else:
-            self._gen_actions[env_ids] = gen_actions
+        try:
+            if gen_actions is None:
+                self._gen_actions[env_ids] = torch.rand((len(env_ids), self.num_gen_actions), device=self._device)
+            else:
+                self._gen_actions[env_ids] = gen_actions
+        except Exception as e:
+            print("Error in TaskCore reset: ", e)
+            print("gen_actions: ", gen_actions)
 
         # Reset the randomizers
         for randomizer in self.randomizers:

@@ -145,7 +145,11 @@ class GoToPositionTask(TaskCore):
 
         Returns:
             torch.Tensor: The observation tensor."""
-
+        
+        # print("$"*50)
+        # print("GoToPositionTask get_observations")
+        # print(self._target_positions[:, :2])
+        # print(self._robot.root_link_pos_w[self._env_ids, :2])
         # position error
         position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
         position_dist = torch.norm(position_error, dim=-1)
@@ -168,7 +172,7 @@ class GoToPositionTask(TaskCore):
             randomizer.observations(observations=self._task_data)
 
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(task_uid=self._task_uid)), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -218,6 +222,13 @@ class GoToPositionTask(TaskCore):
 
         # position reward
         position_rew = torch.exp(-self._position_dist / self._task_cfg.position_exponential_reward_coeff)
+
+        progress_rew = 1 - torch.clamp(
+            torch.linalg.norm(self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2], dim=-1)
+            / (self._task_cfg.maximum_robot_distance + EPS),
+            min=0.0,
+            max=1.0,
+        )
         # heading reward + distance scaling
         dist_scaling = (
             torch.clamp(
@@ -256,11 +267,12 @@ class GoToPositionTask(TaskCore):
         # Return the reward by combining the different components and adding the robot rewards
         return (
             position_rew * self._task_cfg.position_weight
+            + progress_rew * self._task_cfg.progress_weight
             + heading_rew * self._task_cfg.heading_weight
             + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
             + boundary_rew * self._task_cfg.boundary_weight
-        ) + self._robot.compute_rewards(task_uid=self._task_uid)
+        ) + self._robot.compute_rewards(env_ids=self._env_ids)
 
     def reset(
         self,
@@ -379,10 +391,10 @@ class GoToPositionTask(TaskCore):
         initial_pose[:, 0] = r * torch.cos(theta) + self._target_positions[env_ids, 0]
         initial_pose[:, 1] = r * torch.sin(theta) + self._target_positions[env_ids, 1]
 
-        chunck_size = self.scene.num_envs // self._num_tasks
-        start_indx = (self._task_uid - 1) * chunck_size
-        shifted_env_ids = env_ids + start_indx
-        initial_pose[:, 2] = self._robot_origins[shifted_env_ids, 2]
+        # chunck_size = self.scene.num_envs // self._num_tasks
+        # start_indx = (self._task_uid - 1) * chunck_size
+        # shifted_env_ids = env_ids + start_indx
+        initial_pose[:, 2] = self._robot_origins[self._env_ids[env_ids], 2]
 
         # Orientation
         # Compute the heading to the target
@@ -421,8 +433,8 @@ class GoToPositionTask(TaskCore):
         initial_velocity[:, 5] = angular_velocity
 
         # Apply to articulation
-        self._robot.set_pose(initial_pose, shifted_env_ids)
-        self._robot.set_velocity(initial_velocity, shifted_env_ids)
+        self._robot.set_pose(initial_pose, self._env_ids[env_ids])
+        self._robot.set_velocity(initial_velocity, self._env_ids[env_ids])
 
     def create_task_visualization(self) -> None:
         """Adds the visual marker to the scene.
@@ -452,13 +464,13 @@ class GoToPositionTask(TaskCore):
             self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[:, :2]
             self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
         else:
-            chunk_size = self.scene.num_envs // self._num_tasks
-            start_indx = (self._task_uid - 1) * chunk_size
-            end_indx = start_indx + chunk_size
+            # chunk_size = self.scene.num_envs // self._num_tasks
+            # start_indx = (self._task_uid - 1) * chunk_size
+            # end_indx = start_indx + chunk_size
 
             self.goal_pos_visualizer.visualize(self._markers_pos)
-            self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[start_indx:end_indx, :2]
-            self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
+            self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[self._env_ids, :2]
+            self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w[self._env_ids])
 
         
 

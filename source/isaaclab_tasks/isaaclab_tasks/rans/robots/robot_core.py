@@ -159,11 +159,11 @@ class RobotCore:
         for randomizer in self.randomizers:
             randomizer.setup()
 
-    def get_observations(self, task_uid: int = 0):
+    def get_observations(self, env_ids: torch.Tensor):
         """Returns the observations of the robot."""
         raise NotImplementedError
 
-    def compute_rewards(self, task_uid: int = 0):
+    def compute_rewards(self, env_ids: torch.Tensor):
         """Computes the rewards of the robot."""
         raise NotImplementedError
 

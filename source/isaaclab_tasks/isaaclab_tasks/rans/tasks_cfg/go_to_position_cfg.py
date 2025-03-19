@@ -59,6 +59,7 @@ class GoToPositionCfg(TaskCoreCfg):
     angular_velocity_max_value: float = 20.0
     boundary_exponential_reward_coeff: float = 1.0
     position_weight: float = 1.0
+    progress_weight: float = 0.2
     heading_weight: float = 0.25
     linear_velocity_weight: float = -0.05
     angular_velocity_weight: float = -0.1
