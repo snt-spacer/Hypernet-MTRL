@@ -127,6 +127,12 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         log_root_path = os.path.join(
             "logs", "rl_games", args_cli.task.split("-")[2], agent_cfg["params"]["config"]["name"]
         )
+        
+    elif "MultiTask" in args_cli.task:
+        agent_cfg["params"]["config"]["name"] = env.env.cfg.robot_name + "-" + "-".join(env.env.cfg.tasks_names)
+        log_root_path = os.path.join(
+            "logs", "rl_games", args_cli.task.split("-")[2], agent_cfg["params"]["config"]["name"]
+        )
     else:
         log_root_path = os.path.join(
             "logs", "rl_games", agent_cfg["params"]["config"]["name"], args_cli.task.split("-")[2]
@@ -190,7 +196,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         experiment_name = f"{args_cli.task.split('-')[2]}-{date_str}"
         # use robot and task name as entity
         print(f"Using entity: {args_cli.task}")
-        if "Single" in args_cli.task:
+        if "Single" in args_cli.task or "MultiTask" in args_cli.task:
             name = agent_cfg["params"]["config"]["name"]
             agent_cfg["params"]["wandb"]["project"] = args_cli.task.split("-")[2] + "-" + name
             experiment_name = f"{date_str}_{name}_{algorithm}_rlgames"

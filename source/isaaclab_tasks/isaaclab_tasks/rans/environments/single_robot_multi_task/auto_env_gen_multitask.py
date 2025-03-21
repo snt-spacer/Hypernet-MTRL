@@ -116,13 +116,14 @@ class MultiTaskEnv(DirectRLEnv):
             raise ValueError(f"Number of environments ({self.num_envs}) must be divisible by the number of tasks ({self.num_tasks})")
         
         self.env_seeds = torch.randint(0, 100000, (self.num_envs,), dtype=torch.int32, device=self.device)
+        
         self.robot_api.run_setup(self.robot)
-        chunk_size = self.num_envs // self.num_tasks
+
+        self.env_origins_chunks = torch.chunk(self.scene.env_origins, self.num_tasks)
         for i, task_api in enumerate(self.tasks_apis):
-            start_idx = i * chunk_size
-            end_idx = start_idx + chunk_size
-            task_api.run_setup(self.robot_api, self.scene.env_origins[start_idx:end_idx])
+            task_api.run_setup(self.robot_api, self.env_origins_chunks[i])
             task_api.register_rigid_objects()
+
         self.set_debug_vis(self.cfg.debug_vis)
         self.observation_buffer = torch.zeros((self.num_envs, self.cfg.observation_space), device=self.device)
 
@@ -175,10 +176,8 @@ class MultiTaskEnv(DirectRLEnv):
         self.tasks_apis = []
         num_envs_per_task = self.num_envs // self.num_tasks
         self.env_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.int32)
-        chunk_size = self.num_envs // self.num_tasks
+        self.tasks_env_ids = torch.chunk(self.env_ids, self.num_tasks)
         for i, task_name in enumerate(self.cfg.tasks_names):
-            start_idx = i * chunk_size
-            end_idx = start_idx + chunk_size
             task_api = TASK_FACTORY(
                 task_name,
                 scene=self.scene,
@@ -187,7 +186,7 @@ class MultiTaskEnv(DirectRLEnv):
                 num_envs=num_envs_per_task,
                 device=self.device,
                 num_tasks=self.num_tasks,
-                env_ids=self.env_ids[start_idx:end_idx]
+                env_ids=self.tasks_env_ids[i],
             )
             self.tasks_apis.append(task_api)
 
@@ -213,22 +212,16 @@ class MultiTaskEnv(DirectRLEnv):
 
     def _get_observations(self) -> dict:
         tasks_obs = [task_api.get_observations() for task_api in self.tasks_apis]
-        max_len = max(tensor.shape[-1] for tensor in tasks_obs) + 1  # +1 for task uid
 
         for i, task_obs in enumerate(tasks_obs):
-            padding_size = max_len - task_obs.shape[-1]
-            padded_obs = torch.nn.functional.pad(task_obs, (0, padding_size), "constant", 0)
-            padded_obs[:, -1] = i + 1  # Task uid
-            self.observation_buffer[i * self.num_envs // self.num_tasks : (i + 1) * self.num_envs // self.num_tasks] = padded_obs
+            self.observation_buffer[self.tasks_env_ids[i], :task_obs.shape[-1]] = task_obs
+            self.observation_buffer[self.tasks_env_ids[i], -1] = i + 1  # Task uid
 
         observations = {"policy": self.observation_buffer}
         return observations
 
     def _get_rewards(self) -> torch.Tensor:
         task_rewards = [task_api.compute_rewards() for task_api in self.tasks_apis]
-        # print("#"*50)
-        # print(task_rewards[0])
-        # print(task_rewards[1])
         return torch.cat(task_rewards, dim=0)
 
     def _get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
@@ -253,18 +246,18 @@ class MultiTaskEnv(DirectRLEnv):
         if (env_ids is None) or (len(env_ids) == self.num_envs):
             env_ids = self.robot._ALL_INDICES
 
-        tasks_env_ids = []
+        shifted_tasks_env_ids = []
         tasks_extras = []
         chunk_size = self.num_envs // self.num_tasks
         for i in range(self.num_tasks):
             start_idx = i * chunk_size
             end_idx = start_idx + chunk_size
             tasks_env_ids_indx = torch.where((env_ids >= start_idx) & (env_ids < end_idx))[0]
-            task_env_ids = env_ids[tasks_env_ids_indx] - start_idx
-            tasks_env_ids.append(task_env_ids)
+            single_task_shifted_env_ids = env_ids[tasks_env_ids_indx] - start_idx
+            shifted_tasks_env_ids.append(single_task_shifted_env_ids)
 
             # Reset / Compute tasks logs
-            self.tasks_apis[i].reset_logs(task_env_ids, self.episode_length_buf[start_idx:end_idx])
+            self.tasks_apis[i].reset_logs(single_task_shifted_env_ids, self.episode_length_buf[start_idx:end_idx])
             tasks_extras.append(self.tasks_apis[i].compute_logs())
 
         # Logging
@@ -281,14 +274,15 @@ class MultiTaskEnv(DirectRLEnv):
         for i, task_api in enumerate(self.tasks_apis):
 
             # Curriculum
-            if self.common_step_counter < 10 * 500:
-                scale = self.common_step_counter / (10 * 500 )
-                gen_actions = torch.zeros((len(env_ids) // self.num_tasks, self.tasks_cfgs[i].gen_space), device=self.device) * scale
-            else:
-                gen_actions = None
+            # if self.common_step_counter < 10 * 500:
+            #     scale = self.common_step_counter / (10 * 500 )
+            #     gen_actions = torch.zeros((len(env_ids) // self.num_tasks, self.tasks_cfgs[i].gen_space), device=self.device) * scale
+            # else:
+            #     gen_actions = None
+            gen_actions = None
 
-            if len(tasks_env_ids[i]) > 0:
-                task_api.reset(tasks_env_ids[i], gen_actions=gen_actions)
+            if len(shifted_tasks_env_ids[i]) > 0:
+                task_api.reset(env_ids=shifted_tasks_env_ids[i], gen_actions=gen_actions)
 
     def _set_debug_vis_impl(self, debug_vis: bool) -> None:
         if debug_vis:
