@@ -46,6 +46,51 @@ class KingfisherRobot(RobotCore):
         # Buffers
         self.initialize_buffers()
 
+    @property
+    def eval_data_keys(self) -> list[str]:
+        return [
+            "position", 
+            "heading", 
+            "linear_velocity", 
+            "angular_velocity", 
+            "hydrostatic_force", 
+            "hydrodynamic_force",
+            "thruster_force",
+            "no_torque", 
+            "actions",
+            "unaltered_actions",
+        ]
+    
+    @property
+    def eval_data_specs(self)->dict[str, list[str]]:
+        return {
+            "position": [".robot_pos.x.m", ".robot_pos.y.m", ".robot_pos.z.m"],
+            "heading": [".robot_heading.rad"],
+            "linear_velocity": [".robot_lin_vel.x.m/s", ".robot_lin_vel.y.m/s", ".robot_lin_vel.z.m/s"],
+            "angular_velocity": [".robot_ang_vel.x.rad/s", ".robot_ang_vel.y.rad/s", ".robot_ang_vel.z.rad/s"],
+            "hydrostatic_force": [".robot_hydrostatic_force.x.u", ".robot_hydrostatic_force.y.u", ".robot_hydrostatic_force.z.u", ".robot_hydrostatic_torque.x.u", ".robot_hydrostatic_torque.y.u", ".robot_hydrostatic_torque.z.u"],
+            "hydrodynamic_force": [".robot_hydrodynamic_force.x.u", ".robot_hydrodynamic_force.y.u", ".robot_hydrodynamic_force.z.u", ".robot_hydrodynamic_torque.x.u", ".robot_hydrodynamic_torque.y.u", ".robot_hydrodynamic_torque.z.u"],
+            "thruster_force": [".robot_thruster_force.x.u", ".robot_thruster_force.y.u", ".robot_thruster_force.z.u", ".robot_thruster_torque.x.u", ".robot_thruster_torque.y.u", ".robot_thruster_torque.z.u"],
+            "no_torque": [".robot_no_torque.x.u", ".robot_no_torque.y.u", ".robot_no_torque.z.u"],
+            "actions": [f".robot_actions{i}.u" for i in range(self._robot_cfg.action_space)],
+            "unaltered_actions": [f".robot_unaltered_actions{i}.u" for i in range(self._robot_cfg.action_space)],
+        }
+    
+    @property
+    def eval_data(self) -> dict:
+        return {
+            "position": self.root_pos_w,
+            "heading": self.heading_w,
+            "linear_velocity": self.root_lin_vel_b,
+            "angular_velocity": self.root_ang_vel_b,
+            "hydrostatic_force": self._hydrostatic_force,
+            "hydrodynamic_force": self._hydrodynamic_force,
+            "thruster_force": self._thruster_force,
+            "no_torque": self._no_torque,
+            "actions": self._actions,
+            "unaltered_actions": self._unaltered_actions,
+        }
+
     def initialize_buffers(self, env_ids=None):
         super().initialize_buffers(env_ids)
         self._actions = torch.zeros((self._num_envs, self._dim_robot_act), device=self._device, dtype=torch.float32)

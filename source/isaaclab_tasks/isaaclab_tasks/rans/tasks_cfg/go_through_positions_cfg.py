@@ -51,7 +51,7 @@ class GoThroughPositionsCfg(TaskCoreCfg):
     """Whether the goals should loop or not. Defaults to True."""
 
     # Observation
-    num_subsequent_goals: int = 2
+    num_subsequent_goals: int = 3
     """Number of subsequent goals available in the observation. Defaults to 2."""
 
     # Tolerance

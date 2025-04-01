@@ -35,6 +35,67 @@ class ModularFreeflyerRobot(RobotCore):
         # Buffers
         self.initialize_buffers()
 
+    @property
+    def eval_data_keys(self) -> list[str]:
+        """
+        Returns the keys of the data used for evaluation.
+
+        Returns:
+            list[str]: The keys of the data used for evaluation."""
+        
+        return [
+            "position",
+            "heading",
+            "linear_velocity",
+            "angular_velocity",
+            "thruster_action",
+            "reaction_wheel_actions",
+            "thrust_forces",
+            "thrust_torques",
+            "thrust_positions",
+            "actions",
+            "unaltered_actions",
+        ]
+    
+
+    @property
+    def eval_data_specs(self)->dict[str, list[str]]:
+        return {
+            "position": [".robot_pos.x.m", ".robot_pos.y.m", ".robot_pos.z.m"],
+            "heading": [".robot_heading.rad"],
+            "linear_velocity": [".robot_lin_vel.x.m/s", ".robot_lin_vel.y.m/s", ".robot_lin_vel.z.m/s"],
+            "angular_velocity": [".robot_ang_vel.x.rad/s", ".robot_ang_vel.y.rad/s", ".robot_ang_vel.z.rad/s"],
+            "thruster_action": [f".robot_thrust_action_{i}.x.u" for i in range(self._robot_cfg.num_thrusters)],
+            "reaction_wheel_actions": [".reaction_wheel_action.u"],
+            "thrust_forces": [".robot_thrust_forces.x.m/s", ".robot_thrust_forces.y.m/s", ".robot_thrust_forces.z.m/s"],
+            "thrust_torques": [".robot_thrust_torques.x.m/s", ".robot_thrust_torques.y.m/s", ".robot_thrust_torques.z.m/s"],
+            "thrust_positions": [".robot_thrust_positions.x.m", ".robot_thrust_positions.y.m", ".robot_thrust_positions.z.m"],
+            "actions": [f".robot_actions{i}.u" for i in range(self._robot_cfg.action_space)],
+            "unaltered_actions": [f".robot_unaltered_actions{i}.u" for i in range(self._robot_cfg.action_space)],
+        }
+    
+    @property
+    def eval_data(self) -> dict:
+        """
+        Returns the data used for evaluation.
+
+        Returns:
+            dict: The data used for evaluation."""
+        
+        return {
+            "position": self.root_pos_w,
+            "heading": self.heading_w,
+            "linear_velocity": self.root_lin_vel_b,
+            "angular_velocity": self.root_ang_vel_b,
+            "thruster_action": self._thrust_actions,
+            "reaction_wheel_actions": self._reaction_wheel_actions,
+            "thrust_forces": self._thrust_forces,
+            "thrust_torques": self._thrust_torques,
+            "thrust_positions": self._thrust_positions,
+            "actions": self._actions,
+            "unaltered_actions": self._unaltered_actions,
+        }
+
     def initialize_buffers(self, env_ids=None) -> None:
         super().initialize_buffers(env_ids)
         self._previous_actions = torch.zeros(

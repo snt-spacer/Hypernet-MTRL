@@ -56,6 +56,51 @@ class GoToPositionTask(TaskCore):
         # Buffers
         self.initialize_buffers()
 
+    @property
+    def eval_data_keys(self) -> list[str]:
+        """
+        Returns the keys of the data used for evaluation.
+
+        Returns:
+            list[str]: The keys of the data used for evaluation."""
+        
+        return [
+            "target_position", 
+            "position_distance", 
+            "cos_heading_to_target_error", 
+            "sin_heading_to_target_error",
+        ]
+    
+    @property
+    def eval_data_specs(self)-> dict[str, list[str]]:
+        """
+        Returns the specifications of the data used for evaluation.
+
+        Returns:
+            dict: The specifications of the data used for evaluation."""
+        
+        return {
+            "target_position": [".x.m", ".y.m"],
+            "position_distance": [".distance.m"],
+            "cos_heading_to_target_error": [".cos(heading).u"],
+            "sin_heading_to_target_error": [".sin(heading).u"],
+        }
+    
+    @property
+    def eval_data(self) -> dict:
+        """
+        Returns the data used for evaluation.
+
+        Returns:
+            dict: The data used for evaluation."""
+        
+        return {
+            "target_position": self._target_positions,
+            "position_distance": self._task_data[:, 0],
+            "cos_heading_to_target_error": self._task_data[:, 1],
+            "sin_heading_to_target_error": self._task_data[:, 2],
+        }
+
     def initialize_buffers(self, env_ids: torch.Tensor | None = None) -> None:
         """
         Initializes the buffers used by the task.

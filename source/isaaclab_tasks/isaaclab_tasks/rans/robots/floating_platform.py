@@ -37,6 +37,45 @@ class FloatingPlatformRobot(RobotCore):
         # Buffers
         self.initialize_buffers()
 
+    @property
+    def eval_data_keys(self) -> list[str]:
+        return [
+            "position",
+            "heading",
+            "linear_velocity",
+            "angular_velocity",
+            "thrust_action",
+            "reaction_wheel_action",
+            "actions",
+            "unaltered_actions",
+        ]
+    
+    @property
+    def eval_data_specs(self)->dict[str, list[str]]:
+        return {
+            "position": [".robot_pos.x.m", ".robot_pos.y.m", ".robot_pos.z.m"],
+            "heading": [".robot_heading.rad"],
+            "linear_velocity": [".robot_lin_vel.x.m/s", ".robot_lin_vel.y.m/s", ".robot_lin_vel.z.m/s"],
+            "angular_velocity": [".robot_ang_vel.x.rad/s", ".robot_ang_vel.y.rad/s", ".robot_ang_vel.z.rad/s"],
+            "thrust_action": [".robot_thrust.x.u", ".robot_thrust.y.u", ".robot_thrust.z.u"],
+            "reaction_wheel_action": [".reaction_wheel_action.u"],
+            "actions": [f".robot_actions{i}.u" for i in range(self._robot_cfg.action_space)],
+            "unaltered_actions": [f".robot_unaltered_actions{i}.u" for i in range(self._robot_cfg.action_space)],
+        }
+    
+    @property
+    def eval_data(self) -> dict:
+        return {
+            "position": self.root_pos_w,
+            "heading": self.heading_w,
+            "linear_velocity": self.root_lin_vel_b,
+            "angular_velocity": self.root_ang_vel_b,
+            "thrust_action": self._thrust_action,
+            "reaction_wheel_action": self._reaction_wheel_action,
+            "actions": self._actions,
+            "unaltered_actions": self._unaltered_actions,
+        }
+
     def initialize_buffers(self, env_ids=None):
         super().initialize_buffers(env_ids)
         self._actions = torch.zeros((self._num_envs, self._dim_robot_act), device=self._device, dtype=torch.float32)
@@ -46,8 +85,8 @@ class FloatingPlatformRobot(RobotCore):
         self._thrust_action = torch.zeros(
             (self._num_envs, self._robot_cfg.num_thrusters, 3), device=self._device, dtype=torch.float32
         )
-        if self._robot_cfg.has_reaction_wheel:
-            self._reaction_wheel_action = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
+        
+        self._reaction_wheel_action = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
 
     def run_setup(self, robot: Articulation):
         super().run_setup(robot)

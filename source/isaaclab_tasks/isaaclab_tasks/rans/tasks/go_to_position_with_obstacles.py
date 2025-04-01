@@ -80,6 +80,57 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
 
         self.design_scene()
 
+    @property
+    def eval_data_keys(self) -> list[str]:
+        """
+        Returns the keys of the data used for evaluation.
+
+        Returns:
+            list[str]: The keys of the data used for evaluation."""
+        
+        return [
+            "target_position", 
+            "pos_obstacles_in_env",
+            "position_distance",
+            "cos_heading_to_target_error",
+            "sin_heading_to_target_error",
+            "obstacles_distance",
+            "cos_obstacles_heading_error",
+            "sin_obstacles_heading_error",
+        ]
+    
+    @property
+    def eval_data_specs(self)->dict[str, list[str]]:
+        return {
+            "target_position": [".x.m", ".y.m"],
+            "pos_obstacles_in_env": [coord for i in range(self._task_cfg.max_num_vis_obstacles) for coord in (f".x_{i}.m", f".y_{i}.m", f".z_{i}.m", f".qx_{i}.u", f".qy_{i}.u", f".qz_{i}.u", f".qw_{i}.u")],
+            "position_distance": [".distance.m"],
+            "cos_heading_to_target_error": [".cos(heading).u"],
+            "sin_heading_to_target_error": [".sin(heading).u"],
+            "obstacles_distance": [".distance.m"],
+            "cos_obstacles_heading_error": [".cos(heading).u"],
+            "sin_obstacles_heading_error": [".sin(heading).u"],
+        }
+    
+    @property
+    def eval_data(self) -> dict:
+        """
+        Returns the data used for evaluation.
+
+        Returns:
+            dict: The data used for evaluation."""
+        
+        return {
+            "target_position": self._target_positions,
+            "pos_obstacles_in_env": self._pos_obstacles_in_env,
+            "position_distance": self._task_data[:, 0],
+            "cos_heading_to_target_error": self._task_data[:, 1],
+            "sin_heading_to_target_error": self._task_data[:, 2],
+            "obstacles_distance": self._task_data[:, 6:9],
+            "cos_obstacles_heading_error": self._task_data[:, 9:12],
+            "sin_obstacles_heading_error": self._task_data[:, 12:15],
+        }
+
     def register_robot(self, robot) -> None:
         self._robot = robot
 
@@ -133,6 +184,8 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
             env_ids: The ids of the environments used by this task."""
         super().initialize_buffers(env_ids)
         self._previous_position_dist = torch.zeros((self._num_envs,), device=self._device, dtype=torch.float32)
+        self._pos_obstacles_in_env = torch.zeros(
+            (self._num_envs, self._task_cfg.max_num_vis_obstacles, 7), device=self._device, dtype=torch.float32) # [x, y, z, qx, qy, qz, qw]
 
     def run_setup(self, robot, envs_origin):
         super().run_setup(robot, envs_origin)
@@ -320,9 +373,9 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
         super().set_initial_conditions(env_ids)
 
         obstacles_positions, mask = self.randomize_obstacles_positions(env_ids)
-        pos_obstacles_in_env = self.obstacles_generator.get_positions_with_storage(obstacles_positions, mask, env_ids)
+        self._pos_obstacles_in_env = self.obstacles_generator.get_positions_with_storage(obstacles_positions, mask, env_ids)
         # pos_obstacles_in_env[:, :, 3:] = self.obstacles.data.object_com_quat_w[env_ids]
-        self.obstacles.write_object_link_pose_to_sim(pos_obstacles_in_env, env_ids=env_ids)
+        self.obstacles.write_object_link_pose_to_sim(self._pos_obstacles_in_env, env_ids=env_ids)
 
     def randomize_obstacles_positions(self, env_ids: torch.tensor) -> tuple:
         """

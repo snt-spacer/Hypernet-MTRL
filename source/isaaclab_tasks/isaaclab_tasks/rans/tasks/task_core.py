@@ -237,3 +237,7 @@ class TaskCore:
     @property
     def eval_data_keys(self) -> list[str]:
         raise NotImplementedError
+    
+    @property
+    def eval_data_specs(self) -> list[tuple[str, str]]:
+        raise NotImplementedError
