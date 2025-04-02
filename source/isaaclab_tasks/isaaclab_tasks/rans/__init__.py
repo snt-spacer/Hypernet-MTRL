@@ -5,7 +5,7 @@
 
 # isort: off
 
-from .utils import TrackGenerator, PerEnvSeededRNG, ScalarLogger  # noqa: F401, F403
+from .utils import TrackGenerator, PerEnvSeededRNG, ScalarLogger, EvalMetrics  # noqa: F401, F403
 from .domain_randomization import RandomizerFactory, RandomizationCoreCfg, RandomizationCore  # noqa: F401, F403
 
 from .robots_cfg import (  # noqa: F401, F403

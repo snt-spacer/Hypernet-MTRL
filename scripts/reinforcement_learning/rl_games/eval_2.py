@@ -27,6 +27,12 @@ parser.add_argument(
     action="store_true",
     help="When no checkpoint provided, use the last saved model. Otherwise use the best saved model.",
 )
+parser.add_argument(
+    "--runs_per_env",
+    type=int,
+    default=4,
+    help="The number of runs to be performed for each environment.",
+)
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
 # parse the arguments
@@ -66,6 +72,7 @@ from rl_games.common import env_configurations, vecenv
 from rl_games.common.player import BasePlayer
 from rl_games.torch_runner import Runner
 
+from isaaclab_tasks.rans.utils import EvalMetrics
 
 @hydra_task_config(args_cli.task, "rl_games_cfg_entry_point")
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: dict):
@@ -122,6 +129,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # wrap around environment for rl-games
     env = RlGamesVecEnvWrapper(env, rl_device, clip_obs, clip_actions)
 
+    eval_metrics = EvalMetrics(env)
+
     # register the environment to rl-games registry
     # note: in agents configuration: environment name must be "rlgpu"
     vecenv.register(
@@ -161,7 +170,6 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     data = {k: [] for k in env.env.eval_data_keys}
     data["dones"] = []
-    data["timestep"] = []
 
     while simulation_app.is_running():
         # run everything in inference mode
@@ -174,9 +182,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             _, _, dones, _ = env.step(actions)
 
             new_data = env.env.unwrapped.eval_data
-            breakpoint()
             for k, v in new_data.items():
                 data[k].append(v)
+
+            data["dones"].append(dones)
 
             # perform operations for terminated episodes
             if len(dones) > 0:
@@ -184,6 +193,17 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 if agent.is_rnn and agent.states is not None:
                     for s in agent.states:
                         s[:, dones, :] = 0.0
+
+        # Check if the number of runs per env is reached
+        if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
+            print("[INFO] Collected all runs per env.")
+            eval_metrics.calculate_metrics(data)
+            breakpoint()
+            padded_trajectories, trajectory_masks = eval_metrics.split_and_pad_trajectories(
+                torch.stack(data, dim=-1),
+                torch.stack(data["dones"], dim=-1),
+            )
+            break
 
         if args_cli.video:
             timestep += 1
