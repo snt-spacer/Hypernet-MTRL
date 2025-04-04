@@ -217,7 +217,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     # close the simulator
     env.close()
-
+    
+    data = {k: torch.stack(v, dim=0) for k, v in data.items()}
     eval_metrics.calculate_metrics(data=data)
 
 

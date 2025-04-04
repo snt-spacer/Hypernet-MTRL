@@ -63,6 +63,7 @@ class JetbotRobot(RobotCore):
     
     @property
     def eval_data(self) -> dict:
+        # breakpoint()
         return {
             "position": self.root_pos_w,
             "heading": self.heading_w,

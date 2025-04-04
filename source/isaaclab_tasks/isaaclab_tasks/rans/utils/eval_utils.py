@@ -7,8 +7,18 @@ class EvalMetrics:
         self.device = device
         self.num_runs_per_env = num_runs_per_env
 
-        self.task_metrics_factory = TaskMetricsFactory.create(task_name, folder_path=folder_path)
-        self.robot_metrics_factory = RobotMetricsFactory.create(robot_name, folder_path=folder_path)
+        self.task_metrics_factory = TaskMetricsFactory.create(
+            task_name, 
+            folder_path=folder_path, 
+            physics_dt=self._env.env.unwrapped.scene.physics_dt, 
+            step_dt=self._env.env.unwrapped.robot_api._step_dt
+        )
+        self.robot_metrics_factory = RobotMetricsFactory.create(
+            robot_name, 
+            folder_path=folder_path,
+            physics_dt=self._env.env.unwrapped.scene.physics_dt,
+            step_dt=self._env.env.unwrapped.robot_api._step_dt
+        )
 
     def calculate_metrics(self, data: dict)->None:
 
@@ -36,9 +46,7 @@ class EvalMetrics:
             Returns:
                 tuple[dict[str, torch.Tensor], torch.Tensor]: Truncated data tensors and a tensor indicating done steps.
         """
-        # Calculate cutoff indices for each environment
-        cat_data = {k: torch.stack(v, dim=0) for k, v in self.data.items()}
-        all_dones = cat_data["dones"]
+        all_dones = self.data["dones"]
         self.num_steps = all_dones.shape[0]
         self.num_envs = all_dones.shape[1]
         cumulative_dones = torch.cumsum(all_dones, dim=0)
@@ -55,7 +63,7 @@ class EvalMetrics:
 
         max_cutoff_idx = torch.max(self.cutoff_indices).item()
         max_len = max_cutoff_idx + 1
-        truncated_data = {k: v[:max_len] for k, v in cat_data.items()}
+        truncated_data = {k: v[:max_len] for k, v in self.data.items()}
         dones_tensor = all_dones[:max_len]
 
         return truncated_data, dones_tensor
@@ -92,7 +100,7 @@ class EvalMetrics:
             last_end_step = -1
             for i, current_end_step in enumerate(end_steps_for_env):
                 start_step = last_end_step + 1
-                length = current_end_step - start_step + 1
+                length = current_end_step - start_step 
 
                 # If dones happen on consecutive steps
                 if length <= 0:
@@ -102,7 +110,7 @@ class EvalMetrics:
 
                 # Extract data slice for this trajectory from each data tensor
                 for key, data_tensor in truncated_data.items():
-                    trajectory_slice = data_tensor[start_step : current_end_step + 1, env_idx]
+                    trajectory_slice = data_tensor[start_step : current_end_step, env_idx]
                     all_extracted_trajectories[key].append(trajectory_slice)
 
                 last_end_step = current_end_step # Update for the next trajectory's start

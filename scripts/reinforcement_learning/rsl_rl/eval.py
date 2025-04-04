@@ -29,6 +29,12 @@ parser.add_argument(
     help="Use the pre-trained checkpoint from Nucleus.",
 )
 parser.add_argument("--real-time", action="store_true", default=False, help="Run in real-time, if possible.")
+parser.add_argument(
+    "--runs_per_env",
+    type=int,
+    default=4,
+    help="The number of runs to be performed for each environment.",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -48,6 +54,7 @@ import gymnasium as gym
 import os
 import time
 import torch
+import copy
 
 from rsl_rl.runners import OnPolicyRunner
 
@@ -60,6 +67,9 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlVecEnvWrapper, expor
 
 import isaaclab_tasks  # noqa: F401
 from isaaclab_tasks.utils import get_checkpoint_path, parse_env_cfg
+
+
+from isaaclab_tasks.rans.utils import EvalMetrics
 
 
 def main():
@@ -108,6 +118,17 @@ def main():
     # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env)
 
+    robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
+    task_name = env.env.get_wrapper_attr('task_api').__class__.__name__[:-4] # remove "Task" suffix
+    eval_metrics = EvalMetrics(
+        env=env, 
+        robot_name=robot_name, 
+        task_name=task_name, 
+        folder_path=log_root_path, 
+        device=env.unwrapped.device,
+        num_runs_per_env=args_cli.runs_per_env,
+    )
+
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
     # load previously trained model
     ppo_runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
@@ -127,6 +148,9 @@ def main():
 
     dt = env.unwrapped.physics_dt
 
+    data = {k: [] for k in env.env.get_wrapper_attr('eval_data_keys')}
+    data["dones"] = []
+
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
@@ -138,7 +162,20 @@ def main():
             # agent stepping
             actions = policy(obs)
             # env stepping
-            obs, _, _, _ = env.step(actions)
+            _, _, dones, _ = env.step(actions)
+
+            new_data = copy.deepcopy(env.env.unwrapped.eval_data)
+            for k, v in new_data.items():
+
+                data[k].append(v)
+
+            data["dones"].append(dones)
+
+        # Check if the number of runs per env is reached
+        if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
+            print("[INFO] Collected all runs per env.")
+            break
+
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
@@ -152,6 +189,10 @@ def main():
 
     # close the simulator
     env.close()
+
+    data = {k: torch.stack(v, dim=0) for k, v in data.items()}
+    breakpoint()
+    eval_metrics.calculate_metrics(data=data)
 
 
 if __name__ == "__main__":

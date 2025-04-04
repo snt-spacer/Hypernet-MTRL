@@ -93,7 +93,6 @@ class GoToPositionTask(TaskCore):
 
         Returns:
             dict: The data used for evaluation."""
-        
         return {
             "target_position": self._target_positions,
             "position_distance": self._task_data[:, 0],
