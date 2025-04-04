@@ -129,7 +129,16 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # wrap around environment for rl-games
     env = RlGamesVecEnvWrapper(env, rl_device, clip_obs, clip_actions)
 
-    eval_metrics = EvalMetrics(env)
+    robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
+    task_name = env.env.get_wrapper_attr('task_api').__class__.__name__[:-4] # remove "Task" suffix
+    eval_metrics = EvalMetrics(
+        env=env, 
+        robot_name=robot_name, 
+        task_name=task_name, 
+        folder_path=log_root_path, 
+        device=rl_device,
+        num_runs_per_env=args_cli.runs_per_env,
+    )
 
     # register the environment to rl-games registry
     # note: in agents configuration: environment name must be "rlgpu"
@@ -168,9 +177,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     #   attempt to have complete control over environment stepping. However, this removes other
     #   operations such as masking that is used for multi-agent learning by RL-Games.
 
-    data = {k: [] for k in env.env.eval_data_keys}
+    data = {k: [] for k in env.env.get_wrapper_attr('eval_data_keys')}
     data["dones"] = []
 
+    print("[INFO] Starting evaluation...")
     while simulation_app.is_running():
         # run everything in inference mode
         with torch.inference_mode():
@@ -197,12 +207,6 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         # Check if the number of runs per env is reached
         if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
             print("[INFO] Collected all runs per env.")
-            eval_metrics.calculate_metrics(data)
-            breakpoint()
-            padded_trajectories, trajectory_masks = eval_metrics.split_and_pad_trajectories(
-                torch.stack(data, dim=-1),
-                torch.stack(data["dones"], dim=-1),
-            )
             break
 
         if args_cli.video:
@@ -213,6 +217,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     # close the simulator
     env.close()
+
+    eval_metrics.calculate_metrics(data=data)
+
 
 
 if __name__ == "__main__":
