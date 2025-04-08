@@ -1,7 +1,7 @@
 from . import BaseTaskMetrics, Registerable
 import torch
 
-class GoThroughPositionsMetrics(BaseTaskMetrics, Registerable):
+class GoThroughPosesMetrics(BaseTaskMetrics, Registerable):
     def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str) -> None:
         super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
     

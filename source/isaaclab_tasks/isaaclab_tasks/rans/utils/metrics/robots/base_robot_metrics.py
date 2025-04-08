@@ -4,7 +4,9 @@ class AutoRegister:
     def __init_subclass__(cls, **kwargs):
         """Ensure each subclass gets its own independent registry."""
         super().__init_subclass__(**kwargs)
-        cls._registry: dict[str, callable] = {}  # Unique for each subclass
+
+        # Unique for each subclass + inherit from parent class
+        cls._registry = getattr(super(cls, cls), '_registry', {}).copy()
 
         for name, value in cls.__dict__.items():
             # If an attribute is a function and has our marker, register it.
@@ -26,10 +28,15 @@ class AutoRegister:
 
 
 class BaseRobotMetrics(AutoRegister):
-    def __init__(self, folder_path: str, physics_dt: float, step_dt: float) -> None:
+    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, robot_name: str) -> None:
+        self.env = env
         self.folder_path = folder_path
         self.physics_dt = physics_dt
         self.step_dt = step_dt
+
+        self.robot_name = robot_name
+
+        self.metrics = {}
 
     def generate_metrics(
             self, 
@@ -42,3 +49,52 @@ class BaseRobotMetrics(AutoRegister):
 
         for metric_fnc in self.get_registered_methods().values():
             metric_fnc(self)
+
+        for key, value in self.metrics.items():
+            self.metrics
+
+    @property
+    def last_true_index(self) -> torch.Tensor:
+        """Returns the last true index of a masked tensor along the first dimension.
+            Args:
+                masked_tensor (torch.Tensor): The tensor to find the last true index for.
+            Returns:
+                torch.Tensor: A tensor containing the last true indices for each row.
+        """
+        traj_len = self.trajectories_masks.shape[1]
+        last_true_idx = torch.argmax(~self.trajectories_masks.int(), dim=1)
+        all_true = torch.all(self.trajectories_masks, dim=1)
+        last_true_idx[all_true] = traj_len
+        return last_true_idx
+    
+    @AutoRegister.register
+    def action_rate(self):
+        print("[INFO][METRICS][ROBOT] Action rate")
+        masked_unaltered_actions = self.trajectories['actions'] * self.trajectories_masks.unsqueeze(-1)
+        action_rate = torch.mean(
+            torch.sum(
+                torch.square(masked_unaltered_actions[:, 1:] - masked_unaltered_actions[:, :-1]), dim=-1
+            )[:, 1:], dim=1)
+        self.metrics[f"{self.robot_name}/mean_trajectory_action_rate"] = action_rate
+    
+    @AutoRegister.register
+    def jerckiness(self):
+        print("[INFO][METRICS][ROBOT] Jerkiness")
+        last_n_steps = 20
+        masked_pos_dist = self.trajectories['position_distance'] * self.trajectories_masks
+        last_pos = torch.stack([row[start_idx - last_n_steps: start_idx] for row, start_idx in zip(masked_pos_dist, self.last_true_index)])
+
+        vel = last_pos[:, 1:] - last_pos[:, :-1]
+        acc = vel[:, 1:] - vel[:, :-1]
+        jerk = torch.mean(acc[:, 1:] - acc[:, :-1], dim=1)
+
+        self.metrics[f"{self.robot_name}/mean_last_{last_n_steps}_steps_jerk"] = jerk
+
+    @AutoRegister.register
+    def energy(self):
+        print("[INFO][METRICS][ROBOT] Energy")
+        masked_actions = self.trajectories['actions'] * self.trajectories_masks.unsqueeze(-1)
+
+        energy = torch.stack([torch.mean(row[:end_idx]) for row, end_idx in zip(masked_actions, self.last_true_index)])
+        energy = torch.mean(torch.sum(masked_actions ** 2, dim=-1), dim=1)
+        self.metrics[f"{self.robot_name}/mean_trajectory_energy"] = energy

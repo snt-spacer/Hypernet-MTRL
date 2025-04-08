@@ -79,6 +79,18 @@ class TurtleBot2RaceGatesEnv(DirectRLEnv):
         super()._configure_gym_env_spaces()
         self.single_action_space, self.action_space = self.robot_api.configure_gym_env_spaces()
 
+    @property
+    def eval_data_keys(self) -> list[str]:
+        task_data_keys = self.task_api.eval_data_keys
+        robot_data_keys = self.robot_api.eval_data_keys
+        return task_data_keys + robot_data_keys
+    
+    @property
+    def eval_data(self) -> dict:
+        task_eval_data = self.task_api.eval_data
+        robot_eval_data = self.robot_api.eval_data
+        return {**task_eval_data, **robot_eval_data}
+
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot_cfg.robot_cfg)
         self.robot_api = TurtleBot2Robot(

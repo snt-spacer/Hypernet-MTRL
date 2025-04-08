@@ -1,24 +1,48 @@
 import torch
 from .metrics.tasks import TaskMetricsFactory
 from .metrics.robots import RobotMetricsFactory
+
+import pandas as pd
+import os
+import datetime
+
 class EvalMetrics:
     def __init__(self, env, robot_name: str, task_name: str, folder_path: str, device: str = "cuda", num_runs_per_env: int = 1):
         self._env = env
         self.device = device
         self.num_runs_per_env = num_runs_per_env
+        self.task_name = task_name
+        self.robot_name = robot_name
+        self.save_path = folder_path
 
         self.task_metrics_factory = TaskMetricsFactory.create(
             task_name, 
+            env=self._env,
             folder_path=folder_path, 
             physics_dt=self._env.env.unwrapped.scene.physics_dt, 
-            step_dt=self._env.env.unwrapped.robot_api._step_dt
+            step_dt=self._env.env.unwrapped.robot_api._step_dt,
+            task_name=self.task_name
+            
         )
         self.robot_metrics_factory = RobotMetricsFactory.create(
             robot_name, 
+            env=self._env,
             folder_path=folder_path,
             physics_dt=self._env.env.unwrapped.scene.physics_dt,
-            step_dt=self._env.env.unwrapped.robot_api._step_dt
+            step_dt=self._env.env.unwrapped.robot_api._step_dt,
+            robot_name=self.robot_name
         )
+
+    def convert_metrics_to_pd(self) -> pd.DataFrame:
+        """Converts the metrics to pandas DataFrames"""
+        metrics = self.task_metrics_factory.metrics | self.robot_metrics_factory.metrics
+
+        data = {}
+        for k,v in metrics.items():
+            numpy_log = v.cpu().numpy()
+            data[k] = numpy_log
+        return pd.DataFrame(data)
+
 
     def calculate_metrics(self, data: dict)->None:
 
@@ -38,6 +62,12 @@ class EvalMetrics:
             trajectories=trajectories, 
             trajectories_masks=trajectories_mask, 
         )
+        
+        date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        name = f"{self.robot_name}_{self.task_name}_{date}"
+        save_path = os.path.join(self.save_path, name)
+        df = self.convert_metrics_to_pd()
+        df.to_csv(f"{save_path}_metrics.csv", index=False)
 
     def cutoff_indices_per_env(self)-> tuple[dict[str, torch.Tensor], torch.Tensor]:
         """Calculates the cutoff indices for each environment based on the number of runs per environment.

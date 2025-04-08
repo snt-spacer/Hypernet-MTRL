@@ -120,11 +120,19 @@ def main():
 
     robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
     task_name = env.env.get_wrapper_attr('task_api').__class__.__name__[:-4] # remove "Task" suffix
+
+    metrics_dir = os.path.abspath("metrics")
+    if not os.path.exists(metrics_dir):
+        os.makedirs(metrics_dir)
+    save_dir = os.path.join(metrics_dir, "rsl_rl")
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
     eval_metrics = EvalMetrics(
         env=env, 
         robot_name=robot_name, 
         task_name=task_name, 
-        folder_path=log_root_path, 
+        folder_path=save_dir, 
         device=env.unwrapped.device,
         num_runs_per_env=args_cli.runs_per_env,
     )
@@ -162,11 +170,10 @@ def main():
             # agent stepping
             actions = policy(obs)
             # env stepping
-            _, _, dones, _ = env.step(actions)
+            obs, _, dones, _ = env.step(actions)
 
             new_data = copy.deepcopy(env.env.unwrapped.eval_data)
             for k, v in new_data.items():
-
                 data[k].append(v)
 
             data["dones"].append(dones)
@@ -191,7 +198,6 @@ def main():
     env.close()
 
     data = {k: torch.stack(v, dim=0) for k, v in data.items()}
-    breakpoint()
     eval_metrics.calculate_metrics(data=data)
 
 
