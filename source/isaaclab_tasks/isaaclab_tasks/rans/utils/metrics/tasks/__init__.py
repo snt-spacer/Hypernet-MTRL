@@ -51,6 +51,7 @@ class TaskMetricsFactory:
     
 
 from .go_through_positions_metrics import GoThroughPositionsMetrics
-from .go_to_position import GoToPositionMetrics
-from .go_to_pose import GoToPoseMetrics
-from .go_through_poses import GoThroughPosesMetrics
+from .go_to_position_metrics import GoToPositionMetrics
+from .go_to_pose_metrics import GoToPoseMetrics
+from .go_through_poses_metrics import GoThroughPosesMetrics
+from .track_velocities_metrics import TrackVelocitiesMetrics

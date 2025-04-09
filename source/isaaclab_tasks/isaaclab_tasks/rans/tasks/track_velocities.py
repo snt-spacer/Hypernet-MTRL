@@ -68,7 +68,7 @@ class TrackVelocitiesTask(TaskCore):
             "linear_velocity_target", 
             "lateral_velocity_target", 
             "angular_velocity_target", 
-            "goal_reached"
+            "goal_reached",
             "error_linear_velocity",
             "error_lateral_velocity",
             "error_angular_velocity",
