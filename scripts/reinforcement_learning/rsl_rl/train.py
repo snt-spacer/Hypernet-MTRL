@@ -31,6 +31,7 @@ parser.add_argument(
     default="PPO",
     help="The RL algorithm used for training the skrl agent.",
 )
+parser.add_argument("--run_num",type=int,default=0,help="The run number for the current experiment.")
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -97,6 +98,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     env_cfg.seed = agent_cfg.seed
     env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device
 
+    # create isaac environment
+    env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
+
     # specify directory for logging experiments
     log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
     log_root_path = os.path.abspath(log_root_path)
@@ -106,11 +110,17 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # This way, the Ray Tune workflow can extract experiment name.
     print(f"Exact experiment name requested from command line: {log_dir}")
     if agent_cfg.run_name:
-        log_dir += f"_{agent_cfg.run_name}"
-    log_dir = os.path.join(log_root_path, log_dir)
+        log_dir += f"_run-{agent_cfg.run_name}"
 
-    # create isaac environment
-    env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
+    if "Single" in args_cli.task:
+        robot_name = env.env.cfg.robot_name
+        task_name = env.env.cfg.task_name
+    else:
+        robot_name = env_cfg.robot_cfg.robot_name
+        task_name = env_cfg.task_cfg.__class__.__name__[:-3] # remove the last 3 characters "cfg"
+
+    log_dir += f"_rsl-rl_{task_name}_{robot_name}_r-{args_cli.run_num}_seed-{agent_cfg.seed}"
+    log_dir = os.path.join(log_root_path, log_dir)
 
     # convert to single-agent instance if required by the RL algorithm
     if isinstance(env.unwrapped, DirectMARLEnv):

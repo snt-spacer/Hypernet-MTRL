@@ -56,6 +56,21 @@ def parse_rsl_rl_cfg(task_name: str, args_cli: argparse.Namespace) -> RslRlOnPol
     rslrl_cfg = update_rsl_rl_cfg(rslrl_cfg, args_cli)
     return rslrl_cfg
 
+def load_rsl_rl_cfg(checkpoint_path: str, task_name:str) -> RslRlOnPolicyRunnerCfg:
+    """Load configuration for RSL-RL agent from checkpoint.
+
+    Args:
+        checkpoint_path: The path to the checkpoint file.
+
+    Returns:
+        The loaded configuration for RSL-RL agent.
+    """
+    from isaaclab_tasks.utils.parse_cfg import load_cfg_from_checkpoint
+
+    # load the configuration from checkpoint
+    rslrl_cfg: RslRlOnPolicyRunnerCfg = load_cfg_from_checkpoint(checkpoint_path, task_name, "rsl_rl_cfg_entry_point")
+    return rslrl_cfg
+
 
 def update_rsl_rl_cfg(agent_cfg: RslRlOnPolicyRunnerCfg, args_cli: argparse.Namespace):
     """Update configuration for RSL-RL agent based on inputs.

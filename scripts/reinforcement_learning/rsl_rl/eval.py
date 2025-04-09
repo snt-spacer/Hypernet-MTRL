@@ -35,6 +35,11 @@ parser.add_argument(
     default=4,
     help="The number of runs to be performed for each environment.",
 )
+parser.add_argument(
+    "--overload-experiment-cfg", 
+    action="store_true", 
+    default=True, help="Overload experiment config. If set to True, it will load the cfg of the model that was used for training."
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -78,8 +83,15 @@ def main():
     env_cfg = parse_env_cfg(
         args_cli.task, device=args_cli.device, num_envs=args_cli.num_envs, use_fabric=not args_cli.disable_fabric
     )
-    agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(args_cli.task, args_cli)
 
+    if args_cli.overload_experiment_cfg:
+        if args_cli.checkpoint:
+            agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.load_rsl_rl_cfg(args_cli.checkpoint, args_cli.task)
+        else:
+            raise ValueError("Missing checkpoint path for loading the experiment config.")
+    else:
+        agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(args_cli.task, args_cli)
+    
     # specify directory for logging experiments
     log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
     log_root_path = os.path.abspath(log_root_path)
@@ -120,19 +132,19 @@ def main():
 
     robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
     task_name = env.env.get_wrapper_attr('task_api').__class__.__name__[:-4] # remove "Task" suffix
-
-    metrics_dir = os.path.abspath("metrics")
+    
+    metrics_dir = os.path.join(log_dir, "metrics")
     if not os.path.exists(metrics_dir):
         os.makedirs(metrics_dir)
-    save_dir = os.path.join(metrics_dir, "rsl_rl")
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    plots_dir = os.path.join(log_dir, "plots")
+    if not os.path.exists(plots_dir):
+        os.makedirs(plots_dir)
 
     eval_metrics = EvalMetrics(
         env=env, 
         robot_name=robot_name, 
         task_name=task_name, 
-        folder_path=save_dir, 
+        folder_path=log_dir, 
         device=env.unwrapped.device,
         num_runs_per_env=args_cli.runs_per_env,
     )

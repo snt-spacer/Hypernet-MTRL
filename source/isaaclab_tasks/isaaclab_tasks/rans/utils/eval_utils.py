@@ -63,9 +63,8 @@ class EvalMetrics:
             trajectories_masks=trajectories_mask, 
         )
         
-        date = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        name = f"{self.robot_name}_{self.task_name}_{date}"
-        save_path = os.path.join(self.save_path, name)
+        name = self.save_path.split("/")[-1]
+        save_path = os.path.join(self.save_path, "metrics", name)
         df = self.convert_metrics_to_pd()
         df.to_csv(f"{save_path}_metrics.csv", index=False)
 

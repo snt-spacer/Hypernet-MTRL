@@ -99,3 +99,16 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
 
         efficiency = shortest_path / total_distance
         self.metrics[f"{self.task_name}/trajectory_efficiency"] = efficiency
+
+    @BaseTaskMetrics.register
+    def jerckiness(self):
+        print("[INFO][METRICS][ROBOT] Jerkiness")
+        last_n_steps = 20
+        masked_pos_dist = self.trajectories['position_distance'] * self.trajectories_masks
+        last_pos = torch.stack([row[start_idx - last_n_steps: start_idx] for row, start_idx in zip(masked_pos_dist, self.last_true_index)])
+
+        vel = last_pos[:, 1:] - last_pos[:, :-1]
+        acc = vel[:, 1:] - vel[:, :-1]
+        jerk = torch.mean(acc[:, 1:] - acc[:, :-1], dim=1)
+
+        self.metrics[f"{self.task_name}/mean_last_{last_n_steps}_steps_jerk"] = jerk
