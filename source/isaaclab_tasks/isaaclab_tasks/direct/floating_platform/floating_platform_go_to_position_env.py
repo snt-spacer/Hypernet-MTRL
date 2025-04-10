@@ -89,7 +89,12 @@ class FloatingPlatformGoToPositionEnv(DirectRLEnv):
             device=self.device,
         )
         self.task_api = GoToPositionTask(
-            self.scene, self.cfg.task_cfg, task_uid=0, num_envs=self.num_envs, device=self.device
+            self.scene,
+            self.cfg.task_cfg,
+            task_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
 
         # add ground plane

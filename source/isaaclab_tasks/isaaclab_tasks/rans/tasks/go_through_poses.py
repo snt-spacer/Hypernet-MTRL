@@ -29,6 +29,7 @@ class GoThroughPosesTask(TaskCore):
         num_envs: int = 1,
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
+        decimation: int = 1,
     ) -> None:
         """
         Initializes the GoThroughPoses task.
@@ -41,7 +42,9 @@ class GoThroughPosesTask(TaskCore):
             task_id: The id of the task.
             env_ids: The ids of the environments used by this task."""
 
-        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids)
+        super().__init__(
+            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
+        )
 
         # Task and reward parameters
         self._task_cfg = task_cfg
@@ -133,11 +136,11 @@ class GoThroughPosesTask(TaskCore):
             torch.Tensor: The observation tensor."""
 
         # position error
-        self._position_error = (
+        position_error = (
             self._target_positions[self._ALL_INDICES, self._target_index]
             - self._robot.root_link_pos_w[self._env_ids, :2]
         )
-        self._position_dist = torch.linalg.norm(self._position_error, dim=-1)
+        position_dist = torch.linalg.norm(position_error, dim=-1)
 
         # position error expressed as distance and angular error (to the position)
         heading = self._robot.heading_w[self._env_ids]
@@ -156,7 +159,7 @@ class GoThroughPosesTask(TaskCore):
         # Store in buffer
         self._task_data[:, 0:2] = self._robot.root_com_lin_vel_b[self._env_ids, :2]
         self._task_data[:, 2] = self._robot.root_com_ang_vel_w[self._env_ids, -1]
-        self._task_data[:, 3] = self._position_dist
+        self._task_data[:, 3] = position_dist
         self._task_data[:, 4] = torch.cos(target_heading_error)
         self._task_data[:, 5] = torch.sin(target_heading_error)
         self._task_data[:, 6] = torch.cos(heading_error)
@@ -222,6 +225,11 @@ class GoThroughPosesTask(TaskCore):
             torch.Tensor: The reward for the current state of the robot."""
 
         # position error expressed as distance and angular error (to the position)
+        self._position_error = (
+            self._target_positions[self._ALL_INDICES, self._target_index]
+            - self._robot.root_link_pos_w[self._env_ids, :2]
+        )
+        self._position_dist = torch.linalg.norm(self._position_error, dim=-1)
         heading = self._robot.heading_w[self._env_ids]
         heading_error = torch.atan2(
             torch.sin(self._target_heading[self._ALL_INDICES, self._target_index] - heading),
@@ -345,6 +353,21 @@ class GoThroughPosesTask(TaskCore):
 
         super().reset(env_ids, gen_actions=gen_actions, env_seeds=env_seeds)
 
+        # The first 6 env actions define ranges, we need to make sure they don't exceed the [0,1] range.
+        # They are given as [min, delta] we will convert them to [min, max] that is max = min + delta
+        # Note that they are defined as [min, delta] to make sure the min is the min and the max is the max. This
+        # is always true as they are strictly positive.
+        self._gen_actions[env_ids, 1] = torch.clip(self._gen_actions[env_ids, 0] + self._gen_actions[env_ids, 1], max=1)
+        self._gen_actions[env_ids, 3] = torch.clip(self._gen_actions[env_ids, 2] + self._gen_actions[env_ids, 3], max=1)
+        self._gen_actions[env_ids, 5] = torch.clip(self._gen_actions[env_ids, 4] + self._gen_actions[env_ids, 5], max=1)
+
+        # Randomizes goals and initial conditions
+        self.set_goals(env_ids)
+        self.set_initial_conditions(env_ids)
+
+        # Resets the goal reached flag
+        self._goal_reached[env_ids] = 0
+
         # Reset the target index and trajectory completed
         self._target_index[env_ids] = 0
         self._trajectory_completed[env_ids] = False
@@ -356,14 +379,6 @@ class GoThroughPosesTask(TaskCore):
         )
         self._position_dist[env_ids] = torch.linalg.norm(self._position_error[env_ids], dim=-1)
         self._previous_position_dist[env_ids] = self._position_dist[env_ids].clone()
-
-        # The first 6 env actions define ranges, we need to make sure they don't exceed the [0,1] range.
-        # They are given as [min, delta] we will convert them to [min, max] that is max = min + delta
-        # Note that they are defined as [min, delta] to make sure the min is the min and the max is the max. This
-        # is always true as they are strictly positive.
-        self._gen_actions[env_ids, 1] = torch.clip(self._gen_actions[env_ids, 0] + self._gen_actions[env_ids, 1], max=1)
-        self._gen_actions[env_ids, 3] = torch.clip(self._gen_actions[env_ids, 2] + self._gen_actions[env_ids, 3], max=1)
-        self._gen_actions[env_ids, 5] = torch.clip(self._gen_actions[env_ids, 4] + self._gen_actions[env_ids, 5], max=1)
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
         """

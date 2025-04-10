@@ -32,6 +32,7 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
         num_envs: int = 1,
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
+        decimation: int = 1,
     ) -> None:
         """
         Initializes the GoToPosition task.
@@ -47,7 +48,13 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
         self._task_cfg = task_cfg
 
         super().__init__(
-            scene=scene, task_cfg=task_cfg, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids
+            scene=scene,
+            task_cfg=task_cfg,
+            task_uid=task_uid,
+            num_envs=num_envs,
+            device=device,
+            env_ids=env_ids,
+            decimation=decimation,
         )
 
         # Defines the observation and actions space sizes for this task
@@ -151,8 +158,8 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
         Returns:
             torch.Tensor: The observation tensor."""
         # position error
-        self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
-        self._position_dist = torch.norm(self._position_error, dim=-1)
+        position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        position_dist = torch.norm(position_error, dim=-1)
         # position error expressed as distance and angular error (to the position)
         heading = self._robot.heading_w[self._env_ids]
         target_heading_w = torch.atan2(
@@ -188,7 +195,7 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
         )
 
         # Store in buffer [distance, cos(angle), sin(angle), lin_vel_x, lin_vel_y, ang_vel, obstacles_dist, obstacles_cos_angle, obstacles_sin_angle]
-        self._task_data[:, 0] = self._position_dist
+        self._task_data[:, 0] = position_dist
         self._task_data[:, 1] = torch.cos(target_heading_error)
         self._task_data[:, 2] = torch.sin(target_heading_error)
         self._task_data[:, 3:5] = self._robot.root_com_lin_vel_b[self._env_ids, :2]
@@ -230,6 +237,9 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
         Returns:
             torch.Tensor: The reward for the current state of the robot."""
 
+        # position error
+        self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        self._position_dist = torch.norm(self._position_error, dim=-1)
         # boundary distance
         boundary_dist = torch.abs(self._task_cfg.maximum_robot_distance - self._position_dist)
         # normed linear velocity
@@ -316,7 +326,9 @@ class GoToPositionWithObstaclesTask(GoToPositionTask):
 
     def randomize_obstacles_positions(self, env_ids: torch.tensor) -> tuple:
         """
-        This function randomizes the positions of obstacles within a specified environment in a grid-based layout, ensuring that they are not placed too close to the target or robot. It also generates random orientations for the obstacles and creates a mask indicating which obstacles are visible.
+        This function randomizes the positions of obstacles within a specified environment in a grid-based layout,
+        ensuring that they are not placed too close to the target or robot. It also generates random orientations for
+        the obstacles and creates a mask indicating which obstacles are visible.
 
         Args:
             env_ids (torch.tensor): The ids of the environments to randomize the obstacles in.

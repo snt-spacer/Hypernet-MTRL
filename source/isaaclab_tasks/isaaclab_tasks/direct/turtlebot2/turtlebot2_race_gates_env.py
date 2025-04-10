@@ -16,23 +16,23 @@ from isaaclab.sim import SimulationCfg
 from isaaclab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
 from isaaclab.utils import configclass
 
-from isaaclab_tasks.rans import RaceWayposesCfg, RaceWayposesTask, TurtleBot2Robot, TurtleBot2RobotCfg
+from isaaclab_tasks.rans import RaceGatesCfg, RaceGatesTask, TurtleBot2Robot, TurtleBot2RobotCfg
 
 
 @configclass
-class TurtleBot2RaceWayposesEnvCfg(DirectRLEnvCfg):
-    # Env settings TODO: get from config or task.
+class TurtleBot2RaceGatesEnvCfg(DirectRLEnvCfg):
+    # env
     decimation = 6
     episode_length_s = 30.0
 
     # scene
-    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=20.0, replicate_physics=True)
+    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=7.5, replicate_physics=True)
 
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1.0 / 60.0, render_interval=decimation)
 
     robot_cfg: TurtleBot2RobotCfg = TurtleBot2RobotCfg()
-    task_cfg: RaceWayposesCfg = RaceWayposesCfg()
+    task_cfg: RaceGatesCfg = RaceGatesCfg()
     debug_vis: bool = True
 
     action_space = robot_cfg.action_space + task_cfg.action_space
@@ -41,7 +41,7 @@ class TurtleBot2RaceWayposesEnvCfg(DirectRLEnvCfg):
     gen_space = robot_cfg.gen_space + task_cfg.gen_space
 
 
-class TurtleBot2RaceWayposesEnv(DirectRLEnv):
+class TurtleBot2RaceGatesEnv(DirectRLEnv):
     # Workflow: Step
     #   - self._pre_physics_step
     #   - (Loop over N skipped steps)
@@ -63,19 +63,21 @@ class TurtleBot2RaceWayposesEnv(DirectRLEnv):
     #   - (Check if noise is required)
     #       - self._add_noise
 
-    cfg: TurtleBot2RaceWayposesEnvCfg
+    cfg: TurtleBot2RaceGatesEnvCfg
 
-    def __init__(
-        self,
-        cfg: TurtleBot2RaceWayposesEnvCfg,
-        render_mode: str | None = None,
-        **kwargs,
-    ):
+    def __init__(self, cfg: TurtleBot2RaceGatesEnvCfg, render_mode: str | None = None, **kwargs):
         super().__init__(cfg, render_mode, **kwargs)
         self.env_seeds = torch.randint(0, 100000, (self.num_envs,), dtype=torch.int32, device=self.device)
         self.robot_api.run_setup(self.robot)
         self.task_api.run_setup(self.robot_api, self.scene.env_origins)
         self.set_debug_vis(self.cfg.debug_vis)
+        # Expand the robot's action space dimension to include num_envs
+
+    def _configure_gym_env_spaces(self):
+        """Configure the action and observation spaces for the Gym environment."""
+        # observation space (unbounded since we don't impose any limits)
+        super()._configure_gym_env_spaces()
+        self.single_action_space, self.action_space = self.robot_api.configure_gym_env_spaces()
 
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot_cfg.robot_cfg)
@@ -87,8 +89,13 @@ class TurtleBot2RaceWayposesEnv(DirectRLEnv):
             decimation=self.cfg.decimation,
             device=self.device,
         )
-        self.task_api = RaceWayposesTask(
-            self.scene, self.cfg.task_cfg, task_uid=0, num_envs=self.num_envs, device=self.device
+        self.task_api = RaceGatesTask(
+            self.scene,
+            self.cfg.task_cfg,
+            task_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
 
         # add ground plane
@@ -104,6 +111,7 @@ class TurtleBot2RaceWayposesEnv(DirectRLEnv):
 
     def _pre_physics_step(self, actions: torch.Tensor) -> None:
         self.robot_api.process_actions(actions)
+        # print(f"Robots Pose: {self.robot_api.body_pos_w[:3]}")
 
     def _apply_action(self) -> None:
         self.robot_api.apply_actions()

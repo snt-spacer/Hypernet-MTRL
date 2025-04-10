@@ -29,6 +29,7 @@ class GoToPositionTask(TaskCore):
         num_envs: int = 1,
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
+        decimation: int = 1,
     ) -> None:
         """
         Initializes the GoToPosition task.
@@ -41,7 +42,9 @@ class GoToPositionTask(TaskCore):
             task_id: The id of the task.
             env_ids: The ids of the environments used by this task."""
 
-        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids)
+        super().__init__(
+            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
+        )
 
         # Task and reward parameters
         self._task_cfg = task_cfg
@@ -63,6 +66,7 @@ class GoToPositionTask(TaskCore):
         super().initialize_buffers(env_ids)
         self._position_error = torch.zeros((self._num_envs, 2), device=self._device, dtype=torch.float32)
         self._position_dist = torch.zeros((self._num_envs,), device=self._device, dtype=torch.float32)
+        self._previous_position_dist = torch.zeros((self._num_envs,), device=self._device, dtype=torch.float32)
         self._target_positions = torch.zeros((self._num_envs, 2), device=self._device, dtype=torch.float32)
         self._markers_pos = torch.zeros((self._num_envs, 3), device=self._device, dtype=torch.float32)
 
@@ -100,8 +104,8 @@ class GoToPositionTask(TaskCore):
             torch.Tensor: The observation tensor."""
 
         # position error
-        self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
-        self._position_dist = torch.norm(self._position_error, dim=-1)
+        position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        position_dist = torch.norm(position_error, dim=-1)
         # position error expressed as distance and angular error (to the position)
         heading = self._robot.heading_w[self._env_ids]
         target_heading_w = torch.atan2(
@@ -111,7 +115,7 @@ class GoToPositionTask(TaskCore):
         target_heading_error = torch.atan2(torch.sin(target_heading_w - heading), torch.cos(target_heading_w - heading))
 
         # Store in buffer [distance, cos(angle), sin(angle), lin_vel_x, lin_vel_y, ang_vel, prev_action]
-        self._task_data[:, 0] = self._position_dist
+        self._task_data[:, 0] = position_dist
         self._task_data[:, 1] = torch.cos(target_heading_error)
         self._task_data[:, 2] = torch.sin(target_heading_error)
         self._task_data[:, 3:5] = self._robot.root_com_lin_vel_b[self._env_ids, :2]
@@ -146,6 +150,9 @@ class GoToPositionTask(TaskCore):
             step (int, optional): The current step. Defaults to 0.
         Returns:
             torch.Tensor: The reward for the current state of the robot."""
+        # position error
+        self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        self._position_dist = torch.norm(self._position_error, dim=-1)
         # boundary distance
         boundary_dist = torch.abs(self._task_cfg.maximum_robot_distance - self._position_dist)
         # normed linear velocity
@@ -237,6 +244,13 @@ class GoToPositionTask(TaskCore):
         """
 
         super().reset(env_ids, gen_actions=gen_actions, env_seeds=env_seeds)
+
+        # Randomizes goals and initial conditions
+        self.set_goals(env_ids)
+        self.set_initial_conditions(env_ids)
+
+        # Resets the goal reached flag
+        self._goal_reached[env_ids] = 0
 
         # Make sure the position error and position dist are up to date after the reset
         self._position_error[env_ids] = (

@@ -77,10 +77,20 @@ class KingfisherGoThroughPositionsEnv(DirectRLEnv):
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot_cfg.robot_cfg)
         self.robot_api = KingfisherRobot(
-            self.scene, self.cfg.robot_cfg, robot_uid=0, num_envs=self.num_envs, device=self.device
+            self.scene,
+            self.cfg.robot_cfg,
+            robot_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
         self.task_api = GoThroughPositionsTask(
-            self.scene, self.cfg.task_cfg, task_uid=0, num_envs=self.num_envs, device=self.device
+            self.scene,
+            self.cfg.task_cfg,
+            task_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
 
         # add ground plane

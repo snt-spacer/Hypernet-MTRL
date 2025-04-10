@@ -31,6 +31,7 @@ class TaskCore:
         num_envs: int = 1,
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
+        decimation: int = 1,
     ) -> None:
         """
         The base class for the different subtasks.
@@ -57,6 +58,8 @@ class TaskCore:
 
         # Robot
         self._robot: RobotCore = MISSING
+        self._physics_dt = self.scene.physics_dt
+        self._step_dt = self.scene.physics_dt * decimation
 
         # RNG
         seeds = torch.randint(0, 2**31, (self._num_envs,), dtype=torch.int32, device=self._device)
@@ -205,13 +208,6 @@ class TaskCore:
         # Reset the randomizers
         for randomizer in self.randomizers:
             randomizer.reset(env_ids)
-
-        # Randomizes goals and initial conditions
-        self.set_goals(env_ids)
-        self.set_initial_conditions(env_ids)
-
-        # Resets the goal reached flag
-        self._goal_reached[env_ids] = 0
 
     def set_goals(self, env_ids: torch.Tensor) -> None:
         raise NotImplementedError

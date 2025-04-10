@@ -80,22 +80,11 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-Turtlebot2-RaceWaypoints-Direct-v0",
-    entry_point=f"{__name__}.turtlebot2_race_waypoints_env:TurtleBot2RaceWaypointsEnv",
+    id="Isaac-Turtlebot2-RaceGates-Direct-v0",
+    entry_point=f"{__name__}.turtlebot2_push_block_env:TurtleBot2RaceGatesEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.turtlebot2_race_waypoints_env:TurtleBot2RaceWaypointsEnvCfg",
-        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
-        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
-    },
-)
-
-gym.register(
-    id="Isaac-Turtlebot2-RaceWayposes-Direct-v0",
-    entry_point=f"{__name__}.turtlebot2_race_wayposes_env:TurtleBot2RaceWayposesEnv",
-    disable_env_checker=True,
-    kwargs={
-        "env_cfg_entry_point": f"{__name__}.turtlebot2_race_wayposes_env:TurtleBot2RaceWayposesEnvCfg",
+        "env_cfg_entry_point": f"{__name__}.turtlebot2_push_block_env:TurtleBot2RaceGatesEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },

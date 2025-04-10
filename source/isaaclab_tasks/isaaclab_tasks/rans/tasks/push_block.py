@@ -31,6 +31,7 @@ class PushBlockTask(TaskCore):
         num_envs: int = 1,
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
+        decimation: int = 1,
     ) -> None:
         """
         Initializes the GoToPosition task.
@@ -43,7 +44,9 @@ class PushBlockTask(TaskCore):
             task_id: The id of the task.
             env_ids: The ids of the environments used by this task."""
 
-        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids)
+        super().__init__(
+            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
+        )
 
         # Task and reward parameters
         self._task_cfg = task_cfg
@@ -148,19 +151,15 @@ class PushBlockTask(TaskCore):
             torch.Tensor: The observation tensor."""
 
         # Position error between robot and block
-        self._position_robot_block_error = self._block_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
-        self._position_robot_block_dist = torch.norm(self._position_robot_block_error, dim=-1)
+        position_robot_block_error = self._block_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        position_robot_block_dist = torch.norm(position_robot_block_error, dim=-1)
 
         # Position error between block and target
-        self._position_block_target_error = self._target_positions[:, :2] - self._block_positions[:, :2]
-        self._previous_position_block_target_dist = self._position_block_target_dist
-        self._position_block_target_dist = torch.norm(self._position_block_target_error, dim=-1)
+        position_block_target_error = self._target_positions[:, :2] - self._block_positions[:, :2]
+        position_block_target_dist = torch.norm(position_block_target_error, dim=-1)
 
         # Position error between robot and target
-        self._position_robot_target_error = (
-            self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
-        )
-        self._position_robot_target_dist = torch.norm(self._position_robot_target_error, dim=-1)
+        position_robot_target_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
 
         heading = self._robot.heading_w[self._env_ids]
         # Position error between robot and block expressed as distance and angular error (robot to block)
@@ -177,8 +176,8 @@ class PushBlockTask(TaskCore):
         target_heading_error = torch.atan2(torch.sin(target_heading_w - heading), torch.cos(target_heading_w - heading))
 
         # Store in buffer
-        self._task_data[:, 0] = self._position_robot_block_dist
-        self._task_data[:, 1] = self._position_block_target_dist
+        self._task_data[:, 0] = position_robot_block_dist
+        self._task_data[:, 1] = position_block_target_dist
         self._task_data[:, 2] = torch.cos(block_heading_error)
         self._task_data[:, 3] = torch.sin(block_heading_error)
         self._task_data[:, 4] = torch.cos(target_heading_error)
@@ -225,6 +224,20 @@ class PushBlockTask(TaskCore):
 
         Returns:
             torch.Tensor: The reward for the current state of the robot."""
+        # Position error between robot and block
+        self._position_robot_block_error = self._block_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        self._position_robot_block_dist = torch.norm(self._position_robot_block_error, dim=-1)
+
+        # Position error between block and target
+        self._position_block_target_error = self._target_positions[:, :2] - self._block_positions[:, :2]
+        self._previous_position_block_target_dist = self._position_block_target_dist
+        self._position_block_target_dist = torch.norm(self._position_block_target_error, dim=-1)
+
+        # Position error between robot and target
+        self._position_robot_target_error = (
+            self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        )
+        self._position_robot_target_dist = torch.norm(self._position_robot_target_error, dim=-1)
 
         # boundary rew
         boundary_dist = torch.abs(self._task_cfg.maximum_robot_distance - self._position_robot_target_dist)
@@ -321,6 +334,13 @@ class PushBlockTask(TaskCore):
         # Reset the block
         self.block.reset(env_ids)
         self._block_positions = self.block.data.root_state_w[:, :3]
+
+        # Randomizes goals and initial conditions
+        self.set_goals(env_ids)
+        self.set_initial_conditions(env_ids)
+
+        # Resets the goal reached flag
+        self._goal_reached[env_ids] = 0
 
         # Make sure the position error and position dist are up to date after the reset
         # Position error between robot and block

@@ -22,6 +22,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.kingfisher_go_through_positions_env:KingfisherGoThroughPositionsEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:KingfisherPPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:KingfisherPPORunnerCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )
@@ -33,6 +35,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.kingfisher_go_through_poses_env:KingfisherGoThroughPosesEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:KingfisherPPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:KingfisherPPORunnerCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )
@@ -44,6 +48,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.kingfisher_go_to_position_env:KingfisherGoToPositionEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:KingfisherPPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:KingfisherPPORunnerCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )
@@ -55,6 +61,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.kingfisher_go_to_pose_env:KingfisherGoToPoseEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:KingfisherPPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:KingfisherPPORunnerCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )
@@ -66,6 +74,8 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.kingfisher_track_velocities_env:KingfisherTrackVelocitiesEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:KingfisherPPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:KingfisherPPORunnerCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )

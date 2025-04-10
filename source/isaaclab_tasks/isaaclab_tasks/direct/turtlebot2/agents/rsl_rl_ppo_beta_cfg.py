@@ -5,7 +5,7 @@
 
 from isaaclab.utils import configclass
 
-from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
+from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticBetaCfg, RslRlPpoAlgorithmCfg
 
 
 @configclass
@@ -13,31 +13,30 @@ class LeatherbackPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
     max_iterations = 350
     save_interval = 50
-    experiment_name = "leatherback_direct"
-    empirical_normalization = False
+    experiment_name = "turtlebot2_direct"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "leatherback_direct",
+        "project": "turtlebot2_direct",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
-    policy = RslRlPpoActorCriticCfg(
+    empirical_normalization = False
+    policy = RslRlPpoActorCriticBetaCfg(
         init_noise_std=1.0,
         actor_hidden_dims=[32, 32],
         critic_hidden_dims=[32, 32],
         activation="elu",
-        clip_actions=True,
         clip_actions_range=[-1, 1],
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
-        entropy_coef=0.005,
+        entropy_coef=0.01,
         num_learning_epochs=5,
         num_mini_batches=4,
-        learning_rate=1.0e-3,
-        schedule="adaptive",
+        learning_rate=2.0e-3,
+        schedule="fixed",
         gamma=0.99,
         lam=0.95,
         desired_kl=0.01,

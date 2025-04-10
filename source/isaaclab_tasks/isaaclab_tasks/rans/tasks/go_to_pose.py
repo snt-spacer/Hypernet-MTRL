@@ -29,6 +29,7 @@ class GoToPoseTask(TaskCore):
         num_envs: int = 1,
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
+        decimation: int = 1,
     ) -> None:
         """
         Initializes the GoToPose task.
@@ -41,7 +42,9 @@ class GoToPoseTask(TaskCore):
             task_id: The id of the task.
             env_ids: The ids of the environments used by this task."""
 
-        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids)
+        super().__init__(
+            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
+        )
 
         # Task and reward parameters
         self._task_cfg = task_cfg
@@ -116,8 +119,8 @@ class GoToPoseTask(TaskCore):
             torch.Tensor: The observation tensor."""
 
         # position error
-        self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
-        self._position_dist = torch.norm(self._position_error, dim=-1)
+        position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        position_dist = torch.norm(position_error, dim=-1)
         # position error expressed as distance and angular error (to the position)
         heading = self._robot.heading_w[self._env_ids]
         target_heading_w = torch.atan2(
@@ -127,17 +130,17 @@ class GoToPoseTask(TaskCore):
         target_heading_error = torch.atan2(torch.sin(target_heading_w - heading), torch.cos(target_heading_w - heading))
 
         # heading error (to the target heading)
-        self._heading_error = torch.arctan2(
+        heading_error = torch.arctan2(
             torch.sin(self._target_headings - heading),
             torch.cos(self._target_headings - heading),
         )
 
         # Store in buffer [distance, cos(target_heading_error), sin(target_heading_error), cos(heading_error), sin(heading_error), vx, vy, w, prev_action]
-        self._task_data[:, 0] = self._position_dist
+        self._task_data[:, 0] = position_dist
         self._task_data[:, 1] = torch.cos(target_heading_error)
         self._task_data[:, 2] = torch.sin(target_heading_error)
-        self._task_data[:, 3] = torch.cos(self._heading_error)
-        self._task_data[:, 4] = torch.sin(self._heading_error)
+        self._task_data[:, 3] = torch.cos(heading_error)
+        self._task_data[:, 4] = torch.sin(heading_error)
         self._task_data[:, 5:7] = self._robot.root_com_lin_vel_b[self._env_ids, :2]
         self._task_data[:, 7] = self._robot.root_com_ang_vel_w[self._env_ids, -1]
 
@@ -159,6 +162,14 @@ class GoToPoseTask(TaskCore):
         Returns:
             torch.Tensor: The reward for the current state of the robot."""
 
+        # position error
+        self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
+        self._position_dist = torch.norm(self._position_error, dim=-1)
+        # heading error (to the target heading)
+        self._heading_error = torch.arctan2(
+            torch.sin(self._target_headings - self._robot.heading_w[self._env_ids]),
+            torch.cos(self._target_headings - self._robot.heading_w[self._env_ids]),
+        )
         # heading distance
         heading_dist = torch.abs(self._heading_error)
         # boundary distance
@@ -248,6 +259,13 @@ class GoToPoseTask(TaskCore):
         """
 
         super().reset(env_ids, gen_actions=gen_actions, env_seeds=env_seeds)
+
+        # Randomizes goals and initial conditions
+        self.set_goals(env_ids)
+        self.set_initial_conditions(env_ids)
+
+        # Resets the goal reached flag
+        self._goal_reached[env_ids] = 0
 
         # Make sure the position error and position dist are up to date after the reset
         self._position_error[env_ids] = (

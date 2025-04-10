@@ -97,6 +97,12 @@ RUN echo "export ISAACLAB_PATH=${ISAACLAB_PATH}" >> ${HOME}/.bashrc && \
     echo "alias tensorboard='${ISAACLAB_PATH}/_isaac_sim/python.sh ${ISAACLAB_PATH}/_isaac_sim/tensorboard'" >> ${HOME}/.bashrc && \
     echo "export TZ=$(date +%Z)" >> ${HOME}/.bashrc
 
+RUN ${ISAACLAB_PATH}/_isaac_sim/python.sh -m pip install --upgrade pip
+RUN git clone https://github.com/AntoineRichard/skrl.git /root/skrl && \
+    ${ISAACLAB_PATH}/_isaac_sim/python.sh -m pip install --editable /root/skrl
+RUN git clone https://github.com/AntoineRichard/rsl_rl.git /root/rsl_rl && \
+    ${ISAACLAB_PATH}/_isaac_sim/python.sh -m pip install --editable /root/rsl_rl
+
 # make working directory as the Isaac Lab directory
 # this is the default directory when the container is run
 WORKDIR ${ISAACLAB_PATH}

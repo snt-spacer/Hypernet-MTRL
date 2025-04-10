@@ -25,6 +25,12 @@ parser.add_argument("--num_envs", type=int, default=None, help="Number of enviro
 parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment")
 parser.add_argument("--max_iterations", type=int, default=None, help="RL Policy training iterations.")
+parser.add_argument(
+    "--algorithm",
+    type=str,
+    default="PPO",
+    help="The RL algorithm used for training the skrl agent.",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -72,8 +78,11 @@ torch.backends.cudnn.allow_tf32 = True
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False
 
+algorithm = args_cli.algorithm.lower()
+agent_cfg_entry_point = "rsl_rl_cfg_entry_point" if algorithm in ["ppo"] else f"rsl_rl_{algorithm}_cfg_entry_point"
 
-@hydra_task_config(args_cli.task, "rsl_rl_cfg_entry_point")
+
+@hydra_task_config(args_cli.task, agent_cfg_entry_point)
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlOnPolicyRunnerCfg):
     """Train with RSL-RL agent."""
     # override configurations with non-hydra CLI arguments

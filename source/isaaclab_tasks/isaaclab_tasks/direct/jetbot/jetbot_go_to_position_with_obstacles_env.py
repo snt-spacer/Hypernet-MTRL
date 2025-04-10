@@ -66,7 +66,12 @@ class JetbotGoToPositionWithObstaclesEnv(JetbotGoToPositionEnv):
             scene=self.scene, robot_cfg=self.cfg.robot_cfg, robot_uid=0, num_envs=self.num_envs, device=self.device
         )
         self.task_api = GoToPositionWithObstaclesTask(
-            scene=self.scene, task_cfg=self.cfg.task_cfg, task_uid=0, num_envs=self.num_envs, device=self.device
+            scene=self.scene,
+            task_cfg=self.cfg.task_cfg,
+            task_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
 
         self.task_api.register_robot(self.robot_api)

@@ -30,6 +30,7 @@ class TrackVelocitiesTask(TaskCore):
         num_envs: int = 1,
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
+        decimation: int = 1,
     ) -> None:
         """
         Initializes the TrackVelocities task.
@@ -42,7 +43,9 @@ class TrackVelocitiesTask(TaskCore):
             task_id: The id of the task.
             env_ids: The ids of the environments used by this task."""
 
-        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids)
+        super().__init__(
+            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
+        )
 
         # Defines the observation and actions space sizes for this task
         # Task and reward parameters
@@ -235,6 +238,13 @@ class TrackVelocitiesTask(TaskCore):
             env_ids (torch.Tensor): The ids of the environments."""
 
         super().reset(env_ids, gen_actions=gen_actions, env_seeds=env_seeds)
+
+        # Randomizes goals and initial conditions
+        self.set_goals(env_ids)
+        self.set_initial_conditions(env_ids)
+
+        # Resets the goal reached flag
+        self._goal_reached[env_ids] = 0
 
         self._num_steps[env_ids] = 0
         self.update_goals()

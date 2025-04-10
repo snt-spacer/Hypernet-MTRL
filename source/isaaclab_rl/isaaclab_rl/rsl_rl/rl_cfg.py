@@ -28,6 +28,35 @@ class RslRlPpoActorCriticCfg:
     activation: str = MISSING
     """The activation function for the actor and critic networks."""
 
+    clip_actions: bool = False
+    """Whether to clip the actions. Default is False."""
+
+    clip_actions_range: list[float] = [-1.0, 1.0]
+    """The range for clipping the actions. Default is [-1, 1]."""
+
+
+@configclass
+class RslRlPpoActorCriticBetaCfg:
+    """Configuration for the PPO actor-critic networks."""
+
+    class_name: str = "ActorCriticBeta"
+    """The policy class name. Default is ActorCritic."""
+
+    init_noise_std: float = MISSING
+    """The initial noise standard deviation for the policy."""
+
+    actor_hidden_dims: list[int] = MISSING
+    """The hidden dimensions of the actor network."""
+
+    critic_hidden_dims: list[int] = MISSING
+    """The hidden dimensions of the critic network."""
+
+    activation: str = MISSING
+    """The activation function for the actor and critic networks."""
+
+    clip_actions_range: list[float] = [-1.0, 1.0]
+    """The range for clipping the actions. Default is [-1, 1]."""
+
 
 @configclass
 class RslRlPpoAlgorithmCfg:
@@ -126,8 +155,8 @@ class RslRlOnPolicyRunnerCfg:
     neptune_project: str = "isaaclab"
     """The neptune project name. Default is "isaaclab"."""
 
-    wandb_project: str = "isaaclab"
-    """The wandb project name. Default is "isaaclab"."""
+    wandb_kwargs: dict = {"project": "isaaclab", "entity": "isaaclab"}
+    """wandb kwargs (see https://docs.wandb.ai/ref/python/init)"""
 
     ##
     # Loading parameters

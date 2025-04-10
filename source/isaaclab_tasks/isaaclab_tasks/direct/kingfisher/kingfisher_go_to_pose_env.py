@@ -91,7 +91,12 @@ class KingfisherGoToPoseEnv(DirectRLEnv):
             device=self.device,
         )
         self.task_api = GoToPoseTask(
-            self.scene, self.cfg.task_cfg, task_uid=0, num_envs=self.num_envs, device=self.device
+            self.scene,
+            self.cfg.task_cfg,
+            task_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
 
         # add ground plane
@@ -132,12 +137,6 @@ class KingfisherGoToPoseEnv(DirectRLEnv):
         if (env_ids is None) or (len(env_ids) == self.num_envs):
             env_ids = self.robot._ALL_INDICES
 
-        if self.common_step_counter < 48 * 700:
-            scale = self.common_step_counter / (48 * 700)
-            gen_actions = torch.ones((len(env_ids), self.cfg.gen_space), device=self.device) * scale
-        else:
-            gen_actions = None
-
         # Logging
         self.task_api.reset_logs(env_ids, self.episode_length_buf)
         task_extras = self.task_api.compute_logs()
@@ -149,7 +148,7 @@ class KingfisherGoToPoseEnv(DirectRLEnv):
 
         super()._reset_idx(env_ids)
 
-        self.task_api.reset(env_ids, gen_actions=gen_actions)
+        self.task_api.reset(env_ids)
 
     def _set_debug_vis_impl(self, debug_vis: bool) -> None:
         if debug_vis:

@@ -74,6 +74,6 @@ class JetbotRobotCfg(RobotCoreCfg):
     )
 
     # Reward
-    rew_energy_penalty = -0.025
+    rew_energy_penalty = 0.0
     rew_action_rate_scale = -0.12
-    rew_joint_accel_scale = -2.5e-6
+    rew_joint_accel_scale = 0.0

@@ -9,15 +9,15 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 
 
 @configclass
-class LeatherbackPPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class Turtlebot2PPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
     max_iterations = 350
     save_interval = 50
-    experiment_name = "leatherback_direct"
+    experiment_name = "turtlebot2_direct"
     empirical_normalization = False
     logger = "wandb"
     wandb_kwargs = {
-        "project": "leatherback_direct",
+        "project": "turtlebot2_direct",
         "entity": "spacer-rl",
         "group": "zeroG",
     }

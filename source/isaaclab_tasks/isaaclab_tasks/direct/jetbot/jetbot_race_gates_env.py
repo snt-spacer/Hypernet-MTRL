@@ -16,23 +16,23 @@ from isaaclab.sim import SimulationCfg
 from isaaclab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
 from isaaclab.utils import configclass
 
-from isaaclab_tasks.rans import LeatherbackRobot, LeatherbackRobotCfg, RaceWaypointsCfg, RaceWaypointsTask
+from isaaclab_tasks.rans import JetbotRobot, JetbotRobotCfg, RaceGatesCfg, RaceGatesTask
 
 
 @configclass
-class LeatherbackRaceWaypointsEnvCfg(DirectRLEnvCfg):
-    # Env settings TODO: get from config or task.
+class JetbotRaceGatesEnvCfg(DirectRLEnvCfg):
+    # env
     decimation = 4
     episode_length_s = 20.0
 
     # scene
-    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=20.0, replicate_physics=True)
+    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=7.5, replicate_physics=True)
 
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1.0 / 60.0, render_interval=decimation)
 
-    robot_cfg: LeatherbackRobotCfg = LeatherbackRobotCfg()
-    task_cfg: RaceWaypointsCfg = RaceWaypointsCfg()
+    robot_cfg: JetbotRobotCfg = JetbotRobotCfg()
+    task_cfg: RaceGatesCfg = RaceGatesCfg()
     debug_vis: bool = True
 
     action_space = robot_cfg.action_space + task_cfg.action_space
@@ -41,7 +41,7 @@ class LeatherbackRaceWaypointsEnvCfg(DirectRLEnvCfg):
     gen_space = robot_cfg.gen_space + task_cfg.gen_space
 
 
-class LeatherbackRaceWaypointsEnv(DirectRLEnv):
+class JetbotRaceGatesEnv(DirectRLEnv):
     # Workflow: Step
     #   - self._pre_physics_step
     #   - (Loop over N skipped steps)
@@ -63,11 +63,11 @@ class LeatherbackRaceWaypointsEnv(DirectRLEnv):
     #   - (Check if noise is required)
     #       - self._add_noise
 
-    cfg: LeatherbackRaceWaypointsEnvCfg
+    cfg: JetbotRaceGatesEnvCfg
 
     def __init__(
         self,
-        cfg: LeatherbackRaceWaypointsEnvCfg,
+        cfg: JetbotRaceGatesEnvCfg,
         render_mode: str | None = None,
         **kwargs,
     ):
@@ -79,7 +79,7 @@ class LeatherbackRaceWaypointsEnv(DirectRLEnv):
 
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot_cfg.robot_cfg)
-        self.robot_api = LeatherbackRobot(
+        self.robot_api = JetbotRobot(
             self.scene,
             self.cfg.robot_cfg,
             robot_uid=0,
@@ -87,8 +87,13 @@ class LeatherbackRaceWaypointsEnv(DirectRLEnv):
             decimation=self.cfg.decimation,
             device=self.device,
         )
-        self.task_api = RaceWaypointsTask(
-            self.scene, self.cfg.task_cfg, task_uid=0, num_envs=self.num_envs, device=self.device
+        self.task_api = RaceGatesTask(
+            self.scene,
+            self.cfg.task_cfg,
+            task_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
 
         # add ground plane

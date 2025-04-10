@@ -20,8 +20,6 @@ from .go_to_position_cfg import GoToPositionCfg  # noqa: F401, F403
 from .go_to_position_with_obstacles_cfg import GoToPositionWithObstaclesCfg
 from .push_block_cfg import PushBlockCfg  # noqa: F401, F403
 from .race_gates_cfg import RaceGatesCfg  # noqa: F401, F403
-from .race_waypoints_cfg import RaceWaypointsCfg  # noqa: F401, F403
-from .race_wayposes_cfg import RaceWayposesCfg  # noqa: F401, F403
 from .track_velocities_6DoF_cfg import TrackVelocities3DCfg  # noqa: F401, F403
 from .track_velocities_cfg import TrackVelocitiesCfg  # noqa: F401, F403
 
@@ -34,8 +32,6 @@ TASK_CFG_FACTORY.register("GoToPose3D", GoToPose3DCfg)
 TASK_CFG_FACTORY.register("GoToPosition", GoToPositionCfg)
 TASK_CFG_FACTORY.register("GoToPosition3D", GoToPosition3DCfg)
 TASK_CFG_FACTORY.register("PushBlock", PushBlockCfg)
-TASK_CFG_FACTORY.register("RaceWaypoints", RaceWaypointsCfg)
-TASK_CFG_FACTORY.register("RaceWayposes", RaceWayposesCfg)
 TASK_CFG_FACTORY.register("TrackVelocities", TrackVelocitiesCfg)
 TASK_CFG_FACTORY.register("TrackVelocities3D", TrackVelocities3DCfg)
 TASK_CFG_FACTORY.register("GoToPositionWithObstacles", GoToPositionWithObstaclesCfg)

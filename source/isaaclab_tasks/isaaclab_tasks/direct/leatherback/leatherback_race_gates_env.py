@@ -16,11 +16,11 @@ from isaaclab.sim import SimulationCfg
 from isaaclab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
 from isaaclab.utils import configclass
 
-from isaaclab_tasks.rans import LeatherbackRobot, LeatherbackRobotCfg, RaceWayposesCfg, RaceWayposesTask
+from isaaclab_tasks.rans import LeatherbackRobot, LeatherbackRobotCfg, RaceGatesCfg, RaceGatesTask
 
 
 @configclass
-class LeatherbackRaceWayposesEnvCfg(DirectRLEnvCfg):
+class LeatherbackRaceGatesEnvCfg(DirectRLEnvCfg):
     # Env settings TODO: get from config or task.
     decimation = 4
     episode_length_s = 20.0
@@ -32,7 +32,7 @@ class LeatherbackRaceWayposesEnvCfg(DirectRLEnvCfg):
     sim: SimulationCfg = SimulationCfg(dt=1.0 / 60.0, render_interval=decimation)
 
     robot_cfg: LeatherbackRobotCfg = LeatherbackRobotCfg()
-    task_cfg: RaceWayposesCfg = RaceWayposesCfg()
+    task_cfg: RaceGatesCfg = RaceGatesCfg()
     debug_vis: bool = True
 
     action_space = robot_cfg.action_space + task_cfg.action_space
@@ -41,7 +41,7 @@ class LeatherbackRaceWayposesEnvCfg(DirectRLEnvCfg):
     gen_space = robot_cfg.gen_space + task_cfg.gen_space
 
 
-class LeatherbackRaceWayposesEnv(DirectRLEnv):
+class LeatherbackRaceGatesEnv(DirectRLEnv):
     # Workflow: Step
     #   - self._pre_physics_step
     #   - (Loop over N skipped steps)
@@ -63,11 +63,11 @@ class LeatherbackRaceWayposesEnv(DirectRLEnv):
     #   - (Check if noise is required)
     #       - self._add_noise
 
-    cfg: LeatherbackRaceWayposesEnvCfg
+    cfg: LeatherbackRaceGatesEnvCfg
 
     def __init__(
         self,
-        cfg: LeatherbackRaceWayposesEnvCfg,
+        cfg: LeatherbackRaceGatesEnvCfg,
         render_mode: str | None = None,
         **kwargs,
     ):
@@ -87,8 +87,13 @@ class LeatherbackRaceWayposesEnv(DirectRLEnv):
             decimation=self.cfg.decimation,
             device=self.device,
         )
-        self.task_api = RaceWayposesTask(
-            self.scene, self.cfg.task_cfg, task_uid=0, num_envs=self.num_envs, device=self.device
+        self.task_api = RaceGatesTask(
+            self.scene,
+            self.cfg.task_cfg,
+            task_uid=0,
+            num_envs=self.num_envs,
+            device=self.device,
+            decimation=self.cfg.decimation,
         )
 
         # add ground plane
