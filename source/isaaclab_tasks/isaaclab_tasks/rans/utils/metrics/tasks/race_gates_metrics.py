@@ -17,4 +17,4 @@ class RaceGatesMetrics(BaseTaskMetrics, Registerable):
         env_idx = torch.arange(masked_target_index.shape[0], device=masked_target_index.device)
         max_target_reached = masked_target_index[env_idx, max_target_index_idx]
 
-        self.metrics[f"{self.task_name}/num_gates_reached_in_{fix_num_steps}_steps"] = max_target_reached
+        self.metrics["num_gates_reached_in_{fix_num_steps}_steps"] = max_target_reached

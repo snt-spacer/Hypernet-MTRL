@@ -1,6 +1,6 @@
 import torch
-from .metrics.tasks import TaskMetricsFactory
-from .metrics.robots import RobotMetricsFactory
+from .tasks import TaskMetricsFactory
+from .robots import RobotMetricsFactory
 
 import pandas as pd
 import os

@@ -75,7 +75,7 @@ class BaseRobotMetrics(AutoRegister):
             torch.sum(
                 torch.square(masked_unaltered_actions[:, 1:] - masked_unaltered_actions[:, :-1]), dim=-1
             )[:, 1:], dim=1)
-        self.metrics[f"{self.robot_name}/mean_trajectory_action_rate"] = action_rate
+        self.metrics["mean_trajectory_action_rate"] = action_rate
 
     @AutoRegister.register
     def energy(self):
@@ -84,4 +84,4 @@ class BaseRobotMetrics(AutoRegister):
 
         energy = torch.stack([torch.mean(row[:end_idx]) for row, end_idx in zip(masked_actions, self.last_true_index)])
         energy = torch.mean(torch.sum(masked_actions ** 2, dim=-1), dim=1)
-        self.metrics[f"{self.robot_name}/mean_trajectory_energy"] = energy
+        self.metrics["mean_trajectory_energy"] = energy

@@ -19,7 +19,7 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
 
         episode_length_in_s = reached_idx * self.step_dt
 
-        self.metrics[f"{self.task_name}/time_to_reach_position_threshold"] = episode_length_in_s
+        self.metrics["time_to_reach_position_threshold"] = episode_length_in_s
 
     @BaseTaskMetrics.register
     def final_position(self):
@@ -27,9 +27,9 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
         masked_distances = self.trajectories['position'] * self.trajectories_masks.unsqueeze(-1)
         final_positions = torch.stack([row[index.unsqueeze(-1) - 1][-1] for row, index in zip(masked_distances, self.last_true_index)])
         
-        self.metrics[f"{self.task_name}/final_position_x"] = final_positions[:, 0]
-        self.metrics[f"{self.task_name}/final_position_y"] = final_positions[:, 1]
-        self.metrics[f"{self.task_name}/final_position_z"] = final_positions[:, 2]
+        self.metrics["final_position_x"] = final_positions[:, 0]
+        self.metrics["final_position_y"] = final_positions[:, 1]
+        self.metrics["final_position_z"] = final_positions[:, 2]
 
     @BaseTaskMetrics.register
     def convergence_time(self):
@@ -52,10 +52,10 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
         overshoot_idx = torch.where(overshoot_idx == -1, 0, overshoot_idx)
         overshoot_num_steps = overshoot_idx - reached_idx 
 
-        self.metrics[f"{self.task_name}/num_steps_position_overshoot"] = overshoot_num_steps
+        self.metrics["num_steps_position_overshoot"] = overshoot_num_steps
         # Calculate the overshoot distance
         indx = torch.arange(masked_distances.shape[0], device=masked_distances.device)
-        self.metrics[f"{self.task_name}/overshoot_distance_error"] = masked_distances[indx, overshoot_idx] - masked_distances[indx, reached_idx]
+        self.metrics["overshoot_distance_error"] = masked_distances[indx, overshoot_idx] - masked_distances[indx, reached_idx]
         
     @BaseTaskMetrics.register
     def trajectory_efficiency(self):
@@ -73,7 +73,7 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
         shortest_path = torch.linalg.vector_norm(final_targets - start_positions[:, :2], dim=-1)
 
         efficiency = shortest_path / total_distance
-        self.metrics[f"{self.task_name}/trajectory_efficiency"] = efficiency
+        self.metrics["trajectory_efficiency"] = efficiency
 
     @BaseTaskMetrics.register
     def jerckiness(self):
@@ -86,6 +86,6 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
         acc = vel[:, 1:] - vel[:, :-1]
         jerk = torch.mean(acc[:, 1:] - acc[:, :-1], dim=1)
 
-        self.metrics[f"{self.task_name}/mean_last_{last_n_steps}_steps_jerk"] = jerk
+        self.metrics["mean_last_{last_n_steps}_steps_jerk"] = jerk
         
     
