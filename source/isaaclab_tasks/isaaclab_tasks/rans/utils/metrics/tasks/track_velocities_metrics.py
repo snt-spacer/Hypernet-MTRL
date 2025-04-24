@@ -17,9 +17,9 @@ class TrackVelocitiesMetrics(BaseTaskMetrics, Registerable):
         avg_lat_vel_error = torch.sum(masked_lat_vel_error, dim=1) / len_trajec
         avg_ang_vel_error = torch.sum(masled_ang_vel_error, dim=1) / len_trajec
 
-        self.metrics["linear_velocity_error"] = avg_lin_vel_error
-        self.metrics["lateral_velocity_error"] = avg_lat_vel_error
-        self.metrics["angular_velocity_error"] = avg_ang_vel_error
+        self.metrics["linear_velocity_error.m/s"] = avg_lin_vel_error
+        self.metrics["lateral_velocity_error.m/s"] = avg_lat_vel_error
+        self.metrics["angular_velocity_error.m/s"] = avg_ang_vel_error
 
     @BaseTaskMetrics.register
     def overshoot(self):
@@ -54,6 +54,6 @@ class TrackVelocitiesMetrics(BaseTaskMetrics, Registerable):
             overshoot_angv = torch.max(masled_ang_vel_error[current_env_id, first_reach_step:]).item()
             overshoot_ang_vel[current_env_id] = overshoot_angv   
         
-        self.metrics["overshoot_linear_velocity"] = overshoot_lin_vel
-        self.metrics["overshoot_lateral_velocity"] = overshoot_lat_vel
-        self.metrics["overshoot_angular_velocity"] = overshoot_ang_vel
+        self.metrics["overshoot_linear_velocity.m/s"] = overshoot_lin_vel
+        self.metrics["overshoot_lateral_velocity.m/s"] = overshoot_lat_vel
+        self.metrics["overshoot_angular_velocity.rad/s"] = overshoot_ang_vel

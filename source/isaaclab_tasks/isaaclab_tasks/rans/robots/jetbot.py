@@ -55,8 +55,8 @@ class JetbotRobot(RobotCore):
             "heading": [".robot_heading.rad"],
             "linear_velocity": [".robot_lin_vel.x.m/s", ".robot_lin_vel.y.m/s", ".robot_lin_vel.z.m/s"],
             "angular_velocity": [".robot_ang_vel.x.rad/s", ".robot_ang_vel.y.rad/s", ".robot_ang_vel.z.rad/s"],
-            "left_wheel_action": [".robot_left_wheel_action.u"],
-            "right_wheel_action": [".robot_right_wheel_action.u"],
+            "left_wheel_action": [".robot_left_wheel_action.rad/s"],
+            "right_wheel_action": [".robot_right_wheel_action.rad/s"],
             "actions": [f".robot_actions{i}.u" for i in range(self._robot_cfg.action_space)],
             "unaltered_actions": [f".robot_unaltered_actions{i}.u" for i in range(self._robot_cfg.action_space)],
         }

@@ -4,6 +4,9 @@ import torch
 class GoThroughPositionsMetrics(BaseTaskMetrics, Registerable):
     def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str) -> None:
         super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
+
+    def populate_env_info(self):
+        self.env_info["max_num_goals"] = self.env.unwrapped.task_api._task_cfg.max_num_goals
     
     @BaseTaskMetrics.register
     def avg_time_to_reach_goal(self):
@@ -22,7 +25,7 @@ class GoThroughPositionsMetrics(BaseTaskMetrics, Registerable):
         env_idx = torch.arange(masked_target_index.shape[0], device=masked_target_index.device)
         max_target_reached = masked_target_index[env_idx, max_target_index_idx]
 
-        self.metrics["num_goals_reached_in_{fix_num_steps}_steps"] = max_target_reached
+        self.metrics[f"num_goals_reached_in_{fix_num_steps}_steps.u"] = max_target_reached
 
     @BaseTaskMetrics.register
     def time_to_reach_goals(self):
@@ -34,6 +37,7 @@ class GoThroughPositionsMetrics(BaseTaskMetrics, Registerable):
         # Figure out number of goals per environment
         max_val = max(0, masked_num_goals.max().item())
         num_goals = max_val + 1  # From 0 to max_val
+        self.env_info["num_goals"] = num_goals
 
         # Prepare the result tensor: one row per environment, one col per goal.
         steps_per_goal = torch.full((masked_target_index.shape[0], num_goals), -1, 
@@ -72,4 +76,4 @@ class GoThroughPositionsMetrics(BaseTaskMetrics, Registerable):
         steps_per_goal_time[valid_goals_mask] *= self.step_dt
 
         for i in range(num_goals):
-            self.metrics["time_to_reach_goal_num_{i}"] = steps_per_goal_time[:, i]
+            self.metrics[f"time_to_reach_goal_num_{i}.u"] = steps_per_goal_time[:, i]

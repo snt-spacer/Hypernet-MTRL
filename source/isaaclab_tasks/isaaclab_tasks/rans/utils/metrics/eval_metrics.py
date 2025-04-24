@@ -5,6 +5,7 @@ from .robots import RobotMetricsFactory
 import pandas as pd
 import os
 import datetime
+import yaml
 
 class EvalMetrics:
     def __init__(self, env, robot_name: str, task_name: str, folder_path: str, device: str = "cuda", num_runs_per_env: int = 1):
@@ -42,6 +43,16 @@ class EvalMetrics:
             numpy_log = v.cpu().numpy()
             data[k] = numpy_log
         return pd.DataFrame(data)
+    
+    def save_env_info(self) -> None:
+        """Saves the env info into a yaml file"""
+        env_info = self.task_metrics_factory.env_info | self.robot_metrics_factory.env_info
+        env_info["timestamp"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        env_info["num_runs_per_env"] = self.num_runs_per_env
+
+        save_path = os.path.join(self.save_path, "metrics", "env_info.yaml")
+        with open(save_path, 'w') as f:
+            yaml.dump(env_info, f)
 
 
     def calculate_metrics(self, data: dict)->None:
@@ -58,15 +69,19 @@ class EvalMetrics:
             trajectories=trajectories, 
             trajectories_masks=trajectories_mask, 
         )
+        self.task_metrics_factory.populate_env_info()
         self.robot_metrics_factory.generate_metrics(
             trajectories=trajectories, 
             trajectories_masks=trajectories_mask, 
         )
+        self.robot_metrics_factory.populate_env_info()
         
         name = self.save_path.split("/")[-1]
         save_path = os.path.join(self.save_path, "metrics", name)
         df = self.convert_metrics_to_pd()
         df.to_csv(f"{save_path}_metrics.csv", index=False)
+
+        self.save_env_info()
 
     def cutoff_indices_per_env(self)-> tuple[dict[str, torch.Tensor], torch.Tensor]:
         """Calculates the cutoff indices for each environment based on the number of runs per environment.

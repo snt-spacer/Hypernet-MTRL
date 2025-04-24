@@ -36,6 +36,11 @@ class BaseTaskMetrics(AutoRegister):
         self.task_name = task_name
 
         self.metrics = {}
+        self.env_info = {}
+
+    def populate_env_info(self)-> None:
+        """Populate environment information. Subclass should implement this method."""
+        pass
 
     def generate_metrics(
             self, 
