@@ -122,7 +122,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         robot_name = env_cfg.robot_cfg.robot_name
         task_name = env_cfg.task_cfg.__class__.__name__[:-3] # remove the last 3 characters "cfg"
 
-    log_dir += f"_rsl-rl_{task_name}_{robot_name}_r-{args_cli.run_num}_seed-{agent_cfg.seed}"
+    log_dir += f"_rsl-rl_{algorithm}_{task_name}_{robot_name}_r-{args_cli.run_num}_seed-{agent_cfg.seed}"
     log_dir = os.path.join(log_root_path, log_dir)
 
     # convert to single-agent instance if required by the RL algorithm
