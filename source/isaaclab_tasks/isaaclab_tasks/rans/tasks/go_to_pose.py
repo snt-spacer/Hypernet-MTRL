@@ -208,7 +208,6 @@ class GoToPoseTask(TaskCore):
 
         Returns:
             torch.Tensor: The reward for the current state of the robot."""
-
         # position error
         self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
         self._position_dist = torch.norm(self._position_error, dim=-1)
@@ -474,9 +473,8 @@ class GoToPoseTask(TaskCore):
 
     def update_task_visualization(self) -> None:
         """Updates the visual marker to the scene."""
-
         if self._num_tasks == 1:
-            self.goal_pos_visualizer.visualize(self._markers_pos)
+            self.goal_pos_visualizer.visualize(self._markers_pos, self._markers_quat)
             self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[:, :2]
             self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
         else:
@@ -484,6 +482,6 @@ class GoToPoseTask(TaskCore):
             # start_indx = (self._task_uid - 1) * chunk_size
             # end_indx = start_indx + chunk_size          
 
-            self.goal_pos_visualizer.visualize(self._markers_pos)
+            self.goal_pos_visualizer.visualize(self._markers_pos, self._markers_quat)
             self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[self._env_ids, :2]
             self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w[self._env_ids])

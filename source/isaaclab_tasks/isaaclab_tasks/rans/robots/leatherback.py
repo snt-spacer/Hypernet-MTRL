@@ -24,9 +24,10 @@ class LeatherbackRobot(RobotCore):
         robot_uid: int = 0,
         num_envs: int = 1,
         decimation: int = 4,
+        num_tasks: int = 1,
         device: str = "cuda",
     ):
-        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, device=device)
+        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, num_tasks=num_tasks, device=device)
         self._robot_cfg = robot_cfg
         self._dim_robot_obs = self._robot_cfg.observation_space
         self._dim_robot_act = self._robot_cfg.action_space
@@ -100,10 +101,10 @@ class LeatherbackRobot(RobotCore):
         self.scalar_logger.add_log("robot_reward", "AVG/action_rate", "mean")
         self.scalar_logger.add_log("robot_reward", "AVG/joint_acceleration", "mean")
 
-    def get_observations(self) -> torch.Tensor:
-        return self._unaltered_actions
+    def get_observations(self, env_ids: torch.Tensor) -> torch.Tensor:
+        return self._unaltered_actions[env_ids]
 
-    def compute_rewards(self):
+    def compute_rewards(self, env_ids: torch.Tensor):
         # TODO: DT should be factored in?
 
         # Compute
@@ -117,8 +118,8 @@ class LeatherbackRobot(RobotCore):
         self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", joint_accelerations)
 
         return (
-            action_rate * self._robot_cfg.rew_action_rate_scale
-            + joint_accelerations * self._robot_cfg.rew_joint_accel_scale
+            action_rate[env_ids] * self._robot_cfg.rew_action_rate_scale
+            + joint_accelerations[env_ids] * self._robot_cfg.rew_joint_accel_scale
         )
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:

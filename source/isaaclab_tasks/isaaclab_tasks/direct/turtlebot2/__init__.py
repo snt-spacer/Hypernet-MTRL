@@ -15,13 +15,15 @@ from . import agents
 # Register Gym environments.
 ##
 gym.register(
-    id="Isaac-Turtlebot2-TrackVelocities-Direct-v0",
+    id="Isaac-Turtlebot2-DoubleTask-Direct-v0",
     entry_point=f"{__name__}.turtlebot2_double_task_env:TurtleBot2DoubleTaskEnv",
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": f"{__name__}.turtlebot2_double_task_env:TurtleBot2DoubleTaskEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )
 gym.register(
@@ -32,6 +34,8 @@ gym.register(
         "env_cfg_entry_point": f"{__name__}.turtlebot2_track_velocities_env:TurtleBot2TrackVelocitiesEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )
 gym.register(
@@ -42,6 +46,8 @@ gym.register(
         "env_cfg_entry_point": f"{__name__}.turtlebot2_go_through_poses_env:TurtleBot2GoThroughPosesEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )
 
@@ -53,6 +59,8 @@ gym.register(
         "env_cfg_entry_point": f"{__name__}.turtlebot2_go_through_positions_env:TurtleBot2GoThroughPositionsEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )
 
@@ -64,6 +72,8 @@ gym.register(
         "env_cfg_entry_point": f"{__name__}.turtlebot2_go_to_pose_env:TurtleBot2GoToPoseEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )
 
@@ -75,6 +85,8 @@ gym.register(
         "env_cfg_entry_point": f"{__name__}.turtlebot2_go_to_position_env:TurtleBot2GoToPositionEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )
 
@@ -86,6 +98,8 @@ gym.register(
         "env_cfg_entry_point": f"{__name__}.turtlebot2_push_block_env:TurtleBot2PushBlockEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )
 
@@ -97,5 +111,7 @@ gym.register(
         "env_cfg_entry_point": f"{__name__}.turtlebot2_push_block_env:TurtleBot2RaceGatesEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:Turtlebot2PPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:Turtlebot2PPORunnerCfg",
     },
 )

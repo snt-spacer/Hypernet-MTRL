@@ -164,7 +164,7 @@ class TurtleBot2Robot(RobotCore):
             actions (torch.Tensor): The actions to process."""
 
         # Enforce action limits at the robot level
-        actions.clip_(min=-1.0, max=1.0)
+        # actions.clip_(min=-1.0, max=1.0)
         # Store the unaltered actions, by default the robot should only observe the unaltered actions.
         self._previous_unaltered_actions = self._unaltered_actions.clone()
         self._unaltered_actions = actions.clone()
@@ -175,7 +175,7 @@ class TurtleBot2Robot(RobotCore):
 
         self._previous_actions = self._actions.clone()
 
-        self._actions = torch.clamp(actions - self._previous_actions, -0.2, 0.2) + self._previous_actions
+        # self._actions = torch.clamp(actions - self._previous_actions, -0.2, 0.2) + self._previous_actions
 
         linear_vel_scaled = self._actions[:, 0] * self._robot_cfg.max_speed
         angular_vel_scaled = self._actions[:, 1] * self._robot_cfg.max_rotational_speed

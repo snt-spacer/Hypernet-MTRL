@@ -112,11 +112,7 @@ class MultiTaskEnv(DirectRLEnv):
         cfg = self.edit_cfg(cfg)
         super().__init__(cfg, render_mode, **kwargs)
 
-        if self.num_envs % self.num_tasks != 0:
-            raise ValueError(f"Number of environments ({self.num_envs}) must be divisible by the number of tasks ({self.num_tasks})")
-        
         self.env_seeds = torch.randint(0, 100000, (self.num_envs,), dtype=torch.int32, device=self.device)
-        
         self.robot_api.run_setup(self.robot)
 
         self.env_origins_chunks = torch.chunk(self.scene.env_origins, self.num_tasks)
@@ -174,7 +170,6 @@ class MultiTaskEnv(DirectRLEnv):
         )
 
         self.tasks_apis = []
-        num_envs_per_task = self.num_envs // self.num_tasks
         self.env_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.int32)
         self.tasks_env_ids = torch.chunk(self.env_ids, self.num_tasks)
         for i, task_name in enumerate(self.cfg.tasks_names):
@@ -183,7 +178,7 @@ class MultiTaskEnv(DirectRLEnv):
                 scene=self.scene,
                 task_cfg=self.tasks_cfgs[i],
                 task_uid=i + 1,
-                num_envs=num_envs_per_task,
+                num_envs=len(self.tasks_env_ids[i]),
                 device=self.device,
                 num_tasks=self.num_tasks,
                 env_ids=self.tasks_env_ids[i],
@@ -248,8 +243,11 @@ class MultiTaskEnv(DirectRLEnv):
 
         shifted_tasks_env_ids = []
         tasks_extras = []
-        chunk_size = self.num_envs // self.num_tasks
+        # Shift the environment IDs to align with the task-specific indices
+        # This is necessary because each task operates on a subset of environments,
+        # and the IDs need to be adjusted to match the local indexing within each task.
         for i in range(self.num_tasks):
+            chunk_size = len(self.tasks_env_ids[i])
             start_idx = i * chunk_size
             end_idx = start_idx + chunk_size
             tasks_env_ids_indx = torch.where((env_ids >= start_idx) & (env_ids < end_idx))[0]

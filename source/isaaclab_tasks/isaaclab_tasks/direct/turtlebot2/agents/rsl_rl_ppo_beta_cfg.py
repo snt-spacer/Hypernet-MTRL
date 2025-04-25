@@ -9,7 +9,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticBetaCf
 
 
 @configclass
-class LeatherbackPPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class Turtlebot2PPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
     max_iterations = 350
     save_interval = 50
