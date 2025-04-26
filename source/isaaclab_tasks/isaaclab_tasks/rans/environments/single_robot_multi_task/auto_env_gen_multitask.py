@@ -267,6 +267,7 @@ class MultiTaskEnv(DirectRLEnv):
         self.extras["log"].update(robot_extras)
 
         # Reset
+        self.observation_buffer[env_ids, :] = 0.0
         super()._reset_idx(env_ids)
         self.robot_api.reset(env_ids)
         for i, task_api in enumerate(self.tasks_apis):
