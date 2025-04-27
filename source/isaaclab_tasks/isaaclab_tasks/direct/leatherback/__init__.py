@@ -16,6 +16,19 @@ from . import agents
 ##
 
 gym.register(
+    id="Isaac-Leatherback-DoubleTask-Direct-v0",
+    entry_point=f"{__name__}.leatherback_double_task_env:LeatherbackDoubleTaskEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.leatherback_double_task_env:LeatherbackDoubleTaskEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:LeatherbackPPORunnerCfg",
+        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:LeatherbackPPORunnerCfg",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
+        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
+    },
+)
+
+gym.register(
     id="Isaac-Leatherback-GoToPosition-Direct-v0",
     entry_point=f"{__name__}.leatherback_go_to_position_env:LeatherbackGoToPositionEnv",
     disable_env_checker=True,

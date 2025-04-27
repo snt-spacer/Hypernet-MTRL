@@ -118,6 +118,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     elif "MultiTask" in args_cli.task:
         robot_name = env.env.cfg.robot_name
         task_name = "-".join(env.env.cfg.tasks_names)
+    elif "DoubleTask" in args_cli.task:
+        robot_name = env_cfg.robot_cfg.robot_name
+        task_name = env_cfg.task_cfg_0.__class__.__name__[:-3] + "-" + env.env.cfg.task_cfg_1.__class__.__name__[:-3] # remove the last 3 characters "cfg"
     else:
         robot_name = env_cfg.robot_cfg.robot_name
         task_name = env_cfg.task_cfg.__class__.__name__[:-3] # remove the last 3 characters "cfg"
