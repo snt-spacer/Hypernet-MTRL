@@ -8,7 +8,10 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
     @BaseTaskMetrics.register
     def time_to_reach_position_threshold(self):
         print("[INFO][METRICS][TASK] Time to reach position threshold")
-        threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
+        if "MultiTask" in self.env.unwrapped.__class__.__name__:
+            threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.position_tolerance
+        else:
+            threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
         masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
         reached_threshold = masked_distances <= threshold
         len_trajec = self.trajectories['position_distance'].shape[1]
@@ -39,7 +42,10 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
     @BaseTaskMetrics.register
     def position_overshoot(self):
         print("[INFO][METRICS][TASK] Position overshoot")
-        threshold = 0.1 #self.env.unwrapped.task_api._task_cfg.position_tolerance
+        if "MultiTask" in self.env.unwrapped.__class__.__name__:
+            threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.position_tolerance
+        else:
+            threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
         masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
         reached_threshold = masked_distances <= threshold
         

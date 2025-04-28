@@ -8,6 +8,7 @@
 """Launch Isaac Sim Simulator first."""
 
 import argparse
+import sys
 
 from isaaclab.app import AppLauncher
 
@@ -40,14 +41,24 @@ parser.add_argument(
     action="store_true", 
     default=True, help="Overload experiment config. If set to True, it will load the cfg of the model that was used for training."
 )
+parser.add_argument(
+    "--algorithm",
+    type=str,
+    default="PPO",
+    help="The RL algorithm used for training the rsl-rl agent.",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
-args_cli = parser.parse_args()
+args_cli, hydra_args = parser.parse_known_args()
 # always enable cameras to record video
 if args_cli.video:
     args_cli.enable_cameras = True
+
+# clear out sys.argv for Hydra
+sys.argv = [sys.argv[0]] + hydra_args
+
 
 # launch omniverse app
 app_launcher = AppLauncher(args_cli)
@@ -63,7 +74,14 @@ import copy
 
 from rsl_rl.runners import OnPolicyRunner
 
-from isaaclab.envs import DirectMARLEnv, multi_agent_to_single_agent
+from isaaclab.envs import (
+    DirectMARLEnv,
+    DirectMARLEnvCfg,
+    DirectRLEnvCfg,
+    ManagerBasedRLEnvCfg,
+    multi_agent_to_single_agent,
+)
+
 from isaaclab.utils.assets import retrieve_file_path
 from isaaclab.utils.dict import print_dict
 from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkpoint
@@ -72,18 +90,19 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlVecEnvWrapper, expor
 
 import isaaclab_tasks  # noqa: F401
 from isaaclab_tasks.utils import get_checkpoint_path, parse_env_cfg
+from isaaclab_tasks.utils.hydra import hydra_task_config
 
 
 from isaaclab_tasks.rans.utils import EvalMetrics
 
+# config shortcuts
+algorithm = args_cli.algorithm.lower()
+agent_cfg_entry_point = "skrl_cfg_entry_point" if algorithm in ["ppo"] else f"skrl_{algorithm}_cfg_entry_point"
 
-def main():
-    """Play with RSL-RL agent."""
-    # parse configuration
-    env_cfg = parse_env_cfg(
-        args_cli.task, device=args_cli.device, num_envs=args_cli.num_envs, use_fabric=not args_cli.disable_fabric
-    )
 
+@hydra_task_config(args_cli.task, agent_cfg_entry_point)
+def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: dict):
+    
     if args_cli.overload_experiment_cfg:
         if args_cli.checkpoint:
             agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.load_rsl_rl_cfg(args_cli.checkpoint, args_cli.task)
@@ -130,8 +149,16 @@ def main():
     # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env)
 
-    robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
-    task_name = env.env.get_wrapper_attr('task_api').__class__.__name__[:-4] # remove "Task" suffix
+    if "MultiTask" in args_cli.task:
+        robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
+        print(f"[INFO] Evaluation only one task: {env.env.get_wrapper_attr('tasks_apis')[0].__class__.__name__}")
+        task_name = env.env.get_wrapper_attr('tasks_apis')[0].__class__.__name__[:-4] # remove "Task" suffix
+        num_tasks = len(env.env.get_wrapper_attr('tasks_apis'))
+        task_chunk = env_cfg.scene.num_envs // num_tasks
+    
+    else:
+        robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
+        task_name = env.env.get_wrapper_attr('task_api').__class__.__name__[:-4] # remove "Task" suffix
     
     metrics_dir = os.path.join(log_dir, "metrics")
     if not os.path.exists(metrics_dir):
@@ -188,12 +215,20 @@ def main():
             for k, v in new_data.items():
                 data[k].append(v)
 
-            data["dones"].append(dones)
+            if "MultiTask" in args_cli.task:
+                data["dones"].append(dones[:task_chunk])
 
-        # Check if the number of runs per env is reached
-        if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
-            print("[INFO] Collected all runs per env.")
-            break
+                # Check if the number of runs per env is reached
+                if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, task_chunk), dim=0) >= args_cli.runs_per_env).item():
+                    print(f"[INFO] Collected {args_cli.runs_per_env} runs per env.")
+                    break
+            else:
+                data["dones"].append(dones)
+
+                # Check if the number of runs per env is reached
+                if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
+                    print(f"[INFO] Collected {args_cli.runs_per_env} runs per env.")
+                    break
 
         if args_cli.video:
             timestep += 1

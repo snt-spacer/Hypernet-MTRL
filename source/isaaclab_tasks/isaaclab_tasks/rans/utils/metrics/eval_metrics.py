@@ -76,8 +76,15 @@ class EvalMetrics:
         )
         self.robot_metrics_factory.populate_env_info()
         
-        name = self.save_path.split("/")[-1]
-        save_path = os.path.join(self.save_path, "metrics", name)
+        if "MultiTask" in self._env.unwrapped.__class__.__name__:
+            # Swap all task names for only the evaluated one
+            name_list = self.save_path.split("/")[-1].split("_")
+            name_list[4] = self.task_name
+            name = "_".join(name_list)
+            save_path = os.path.join(self.save_path, "metrics", name)
+        else:
+            name = self.save_path.split("/")[-1]
+            save_path = os.path.join(self.save_path, "metrics", name)
         df = self.convert_metrics_to_pd()
         df.to_csv(f"{save_path}_metrics.csv", index=False)
 

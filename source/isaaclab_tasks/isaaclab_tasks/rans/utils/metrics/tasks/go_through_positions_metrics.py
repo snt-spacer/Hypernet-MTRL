@@ -6,7 +6,10 @@ class GoThroughPositionsMetrics(BaseTaskMetrics, Registerable):
         super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
 
     def populate_env_info(self):
-        self.env_info["max_num_goals"] = self.env.unwrapped.task_api._task_cfg.max_num_goals
+        if "MultiTask" in self.env.unwrapped.__class__.__name__:
+            self.env_info["max_num_goals"] = self.env.unwrapped.tasks_apis[0]._task_cfg.max_num_goals
+        else:
+            self.env_info["max_num_goals"] = self.env.unwrapped.task_api._task_cfg.max_num_goals
     
     @BaseTaskMetrics.register
     def avg_time_to_reach_goal(self):

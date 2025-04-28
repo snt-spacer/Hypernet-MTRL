@@ -9,48 +9,13 @@ import glob
 import yaml
 
 def main():
-    # list_of_folders = [
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_08-23-54_rsl-rl_GoToPosition_Jetbot_r-1_seed-4",
-    #     ],
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_08-03-24_rsl-rl_GoToPosition_Jetbot_r-1_seed-2",
-    #     ],
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_08-21-51_rsl-rl_GoToPosition_Jetbot_r-5_seed-3",
-
-    #     ],
-    # ]
-    # list_of_folders = [
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_08-44-23_rsl-rl_GoToPose_Jetbot_r-1_seed-1",
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_08-54-43_rsl-rl_GoToPose_Jetbot_r-1_seed-2",
-    #     ],
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_09-05-03_rsl-rl_GoToPose_Jetbot_r-1_seed-3",
-    #     ],
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_09-15-26_rsl-rl_GoToPose_Jetbot_r-1_seed-4",
-
-    #     ],
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_09-29-49_rsl-rl_GoToPose_Jetbot_r-1_seed-5",
-    #     ]
-    # ]
-    # list_of_folders = [
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_09-40-50_rsl-rl_GoThroughPositions_Jetbot_r-1_seed-1",
-    #     ],
-    #     [
-    #         "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-11_09-52-44_rsl-rl_GoThroughPositions_Jetbot_r-1_seed-2",
-    #     ]
-    # ]
+    
     list_of_folders = [
         [
-            "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-10_17-46-10_rsl-rl_TrackVelocities_Jetbot_r-3_seed-3",
+            "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-10_17-46-10_rsl-rl_ppo_TrackVelocities_Jetbot_r-3_seed-3",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-10_18-02-49_rsl-rl_TrackVelocities_Jetbot_r-1_seed-5",
+            "/workspace/isaaclab/logs/rsl_rl/jetbot_direct/2025-04-10_18-02-49_rsl-rl_ppo_TrackVelocities_Jetbot_r-1_seed-5",
         ]
     ]
 
@@ -61,8 +26,8 @@ def main():
     dfs = {}
     labels = {}
     for group_idx, group in enumerate(list_of_folders):
-        task_name = group[0].split("/")[-1].split("_")[3]
-        robot_name = group[0].split("/")[-1].split("_")[4]
+        task_name = group[0].split("/")[-1].split("_")[4]
+        robot_name = group[0].split("/")[-1].split("_")[5]
         gorup_key = f"{task_name}_group-{group_idx}"
         dfs[gorup_key] = []
         labels[gorup_key] = []

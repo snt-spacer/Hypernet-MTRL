@@ -7,12 +7,18 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
 
     def get_reached_idx(self) -> torch.Tensor:
         # Position threshold
-        pos_threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
+        if "MultiTask" in self.env.unwrapped.__class__.__name__:
+            pos_threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.position_tolerance
+        else:
+            pos_threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
         masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
         pos_reached_threshold = masked_distances <= pos_threshold
 
         # Heading threshold
-        heading_threshold = self.env.unwrapped.task_api._task_cfg.heading_tolerance
+        if "MultiTask" in self.env.unwrapped.__class__.__name__:
+            heading_threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.heading_tolerance
+        else:
+            heading_threshold = self.env.unwrapped.task_api._task_cfg.heading_tolerance
         heading_error = torch.arctan2(
             torch.sin(self.trajectories['target_headings'] - self.trajectories['heading']),
             torch.cos(self.trajectories['target_headings'] - self.trajectories['heading']),
@@ -63,7 +69,10 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
     @BaseTaskMetrics.register
     def position_overshoot(self):
         print("[INFO][METRICS][TASK] Position overshoot")
-        threshold = 0.1 #self.env.unwrapped.task_api._task_cfg.position_tolerance
+        if "MultiTask" in self.env.unwrapped.__class__.__name__:
+            threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.position_tolerance
+        else:
+            threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
         masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
         reached_threshold = masked_distances <= threshold
         
