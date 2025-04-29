@@ -62,11 +62,12 @@ class BaseTaskMetrics(AutoRegister):
             Returns:
                 torch.Tensor: A tensor containing the last true indices for each row.
         """
-        traj_len = self.trajectories_masks.shape[1]
-        last_true_idx = torch.argmax(~self.trajectories_masks.int(), dim=1)
-        all_true = torch.all(self.trajectories_masks, dim=1)
-        last_true_idx[all_true] = traj_len
-        return last_true_idx
+        # traj_len = self.trajectories_masks.shape[1]
+        # last_true_idx = torch.argmax(~self.trajectories_masks.int(), dim=1)
+        # all_true = torch.all(self.trajectories_masks, dim=1)
+        # last_true_idx[all_true] = traj_len
+        # return last_true_idx
+        return self.trajectories_masks.sum(dim=1) - 1
 
     def get_indx_of_n_true_values(self, num_consecutive: int, bool_tensor: torch.Tensor, init_indx: torch.Tensor) -> torch.Tensor:
         """ Check that there are N consecutive True values and return the index of the first one

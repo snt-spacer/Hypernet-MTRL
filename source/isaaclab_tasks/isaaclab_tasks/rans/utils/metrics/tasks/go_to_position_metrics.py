@@ -25,14 +25,17 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
         self.metrics["time_to_reach_position_threshold.s"] = episode_length_in_s
 
     @BaseTaskMetrics.register
-    def final_position(self):
-        print("[INFO][METRICS][TASK] Final position")
-        masked_distances = self.trajectories['position'] * self.trajectories_masks.unsqueeze(-1)
-        final_positions = torch.stack([row[index.unsqueeze(-1) - 1][-1] for row, index in zip(masked_distances, self.last_true_index)])
-        
-        self.metrics["final_position_x.m"] = final_positions[:, 0]
-        self.metrics["final_position_y.m"] = final_positions[:, 1]
-        self.metrics["final_position_z.m"] = final_positions[:, 2]
+    def final_position_distance(self):
+        """ Difference between the target position and the final position of the robot. """
+        print("[INFO][METRICS][TASK] Final position delta")
+
+        masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
+
+        final_position_delta = masked_distances[torch.arange(0, masked_distances.shape[0], device=masked_distances.device), self.last_true_index]
+
+        self.metrics["final_position_distance_x.m"] = final_position_delta[:, 0]
+        self.metrics["final_position_distance_y.m"] = final_position_delta[:, 1]
+        self.metrics["final_position_distance_z.m"] = final_position_delta[:, 2]
 
     @BaseTaskMetrics.register
     def convergence_time(self):
