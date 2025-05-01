@@ -56,7 +56,7 @@ class TrackVelocitiesTask(TaskCore):
         self._dim_gen_act = self._task_cfg.gen_space
 
         # Buffers
-        self.initialiaze_buffers()
+        self.initialiaze_buffers(env_ids=env_ids)
 
     @property
     def eval_data_keys(self) -> list[str]:
@@ -301,7 +301,7 @@ class TrackVelocitiesTask(TaskCore):
 
         # Kill the robot if it goes too far, but don't count it as an early termination.
         position_distance = torch.norm(
-            self._env_origins[self._env_ids, :2] - self._robot.root_link_pos_w[self._env_ids, :2], dim=-1
+            self._env_origins[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2], dim=-1
         )
         ones = torch.ones_like(self._goal_reached, dtype=torch.long)
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
