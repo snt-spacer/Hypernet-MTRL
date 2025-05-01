@@ -10,7 +10,6 @@
 
 # No USD files allowed in the repo
 **/*.usda
-**/*.usdc
 **/*.usdz
 
 # Python

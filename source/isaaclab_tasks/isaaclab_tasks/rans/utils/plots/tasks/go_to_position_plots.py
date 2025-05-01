@@ -5,6 +5,8 @@ class GoToPositionPlots(BaseTaskPlots, Registerable):
     def __init__(self, dfs: dict, labels: dict, env_info:dict, folder_path:list) -> None:
         super().__init__(dfs=dfs, labels=labels, env_info=env_info, folder_path=folder_path)
 
+        self.task_name = "go_to_position"
+
         keys_set = set()
         for group_dfs in dfs.values():
             for df in group_dfs:
@@ -22,6 +24,9 @@ class GoToPositionPlots(BaseTaskPlots, Registerable):
                 )
                 keys_set.update(
                     key for key in df.columns if key.startswith("trajectory_efficiency")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_position_distance")
                 )
 
         self.labels_to_plot = list(keys_set)

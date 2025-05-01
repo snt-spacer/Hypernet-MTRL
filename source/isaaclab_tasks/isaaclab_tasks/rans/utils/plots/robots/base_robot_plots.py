@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 
 class AutoRegister:
     def __init_subclass__(cls, **kwargs):
@@ -33,7 +34,7 @@ class BaseRobotPlots(AutoRegister):
         self._dfs = dfs
         self._labels = labels
         self._env_info = env_info
-        self._folder_path = folder_path
+        self._save_plots_folder_path = folder_path
 
     def plot(self):
         raise NotImplementedError("Subclasses should implement this method.")
@@ -66,5 +67,5 @@ class BaseRobotPlots(AutoRegister):
         ax.set_ylabel(key_to_plot)
         ax.grid(True)
         plt.tight_layout()
-        plt.savefig(f"/workspace/isaaclab/source/{key_name}.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{key_name}.svg")
         plt.close()

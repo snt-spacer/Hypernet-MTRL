@@ -25,7 +25,7 @@ from isaaclab_assets.robots.leatherback import LEATHERBACK_CFG  # isort: skip
 class LeatherbackRobotCfg(RobotCoreCfg):
     """Core configuration for a RANS task."""
 
-    robot_name: str = "leatherback"
+    robot_name: str = "Leatherback"
 
     robot_cfg: ArticulationCfg = LEATHERBACK_CFG.replace(prim_path="/World/envs/env_.*/Robot")
     marker_height = 0.5

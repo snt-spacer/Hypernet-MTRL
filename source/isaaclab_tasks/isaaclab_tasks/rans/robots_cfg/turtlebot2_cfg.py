@@ -32,8 +32,8 @@ class TurtleBot2RobotCfg(RobotCoreCfg):
         "right_wheel",
     ]
 
-    rew_action_rate_scale = -0.12
-    rew_joint_accel_scale = -2.5e-6
+    rew_action_rate_scale = 0 #-0.12
+    rew_joint_accel_scale = 0 #-2.5e-6
 
     wheel_radius = 0.038  # m
     offset_wheel_space_radius = 0.12

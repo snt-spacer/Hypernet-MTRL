@@ -70,6 +70,6 @@ class BaseTaskPlots(AutoRegister):
         ax.set_xticklabels(label_names, rotation=20, ha='right')
         ax.grid(True)
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{key_name}.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.svg")
         plt.savefig(save_path)
         plt.close()

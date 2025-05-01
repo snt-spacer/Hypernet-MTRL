@@ -50,21 +50,36 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
         print("[INFO][METRICS][TASK] Final position delta")
 
         masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
-
         final_position_delta = masked_distances[torch.arange(0, masked_distances.shape[0], device=masked_distances.device), self.last_true_index]
+        self.metrics["final_position_distance.m"] = final_position_delta
 
-        self.metrics["final_position_distance_x.m"] = final_position_delta[:, 0]
-        self.metrics["final_position_distance_y.m"] = final_position_delta[:, 1]
-        self.metrics["final_position_distance_z.m"] = final_position_delta[:, 2]
+    @BaseTaskMetrics.register
+    def final_position_heading_error(self):
+        """ Difference between the target position and the final heading of the robot. """
+        print("[INFO][METRICS][TASK] Final position heading error")
+
+        masked_sin = self.trajectories['sin_heading_to_target_error'] * self.trajectories_masks
+        final_sin = masked_sin[torch.arange(0, masked_sin.shape[0], device=masked_sin.device), self.last_true_index]
+
+        masked_cos = self.trajectories['cos_heading_to_target_error'] * self.trajectories_masks
+        final_cos = masked_cos[torch.arange(0, masked_cos.shape[0], device=masked_cos.device), self.last_true_index]
+
+        angle_error = torch.arctan2(final_sin, final_cos)
+        self.metrics["final_position_heading_error.rad"] = angle_error
 
     @BaseTaskMetrics.register
     def final_orientation_error(self):
+        """ Difference between the target heading and the final heading of the robot. """
         print("[INFO][METRICS][TASK] Final orientation error")
-        breakpoint()
-        sin = self.trajectories['sin_heading_to_target_error'] * self.trajectories_masks
-        cos = self.trajectories['cos_heading_to_target_error'] * self.trajectories_masks
-        angle_error = torch.arctan2(sin, cos)
-        self.metrics["final_orientation_error.rad"] = angle_error[:]
+
+        masked_sin = self.trajectories['cos_target_heading_error'] * self.trajectories_masks
+        final_sin = masked_sin[torch.arange(0, masked_sin.shape[0], device=masked_sin.device), self.last_true_index]
+
+        masked_cos = self.trajectories['sin_target_heading_error'] * self.trajectories_masks
+        final_cos = masked_cos[torch.arange(0, masked_cos.shape[0], device=masked_cos.device), self.last_true_index]
+
+        angle_error = torch.arctan2(final_sin, final_cos)
+        self.metrics["final_orientation_error.rad"] = angle_error
 
     @BaseTaskMetrics.register
     def convergence_time(self):

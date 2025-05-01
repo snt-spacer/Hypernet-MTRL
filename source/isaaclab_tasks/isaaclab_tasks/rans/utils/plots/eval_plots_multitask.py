@@ -10,15 +10,15 @@ import yaml
 
 def main():
     list_of_folders = [
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask/2025-04-29_06-20-01_rsl-rl_ppo_GoToPosition-GoToPose_Turtlebot2_r-0_seed-42",
+        # ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-04-27_14-07-26_rsl-rl_ppo_GoToPosition-GoToPose_Turtlebot2_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-04-27_14-07-26_rsl-rl_ppo_GoToPosition-GoToPose_Turtlebot2_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-04-29_07-43-32_rsl-rl_ppo_GoToPosition-GoToPose_Leatherback_r-0_seed-42",
         ],
     ]
 
-    save_plots_folder_path = "/workspace/isaaclab/source/plots/test_plots" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/plots/leatherback_multitask_Gotoposition-gotopose" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 
@@ -26,14 +26,14 @@ def main():
     labels = {}
     for group_idx, group in enumerate(list_of_folders):
         tasks_names = group[0].split("/")[-1].split("_")[4].split("-")
-        for task_name in tasks_names:
+        for task_idx, task_name in enumerate(tasks_names):
             robot_name = group[0].split("/")[-1].split("_")[5]
             gorup_key = f"{task_name}_group-{group_idx}"
             dfs[gorup_key] = []
             labels[gorup_key] = []
             for folder_path in group:
                 try:
-                    experiment_name = glob.glob(os.path.join(folder_path, "metrics", "*_metrics.csv"))[0]
+                    experiment_name = glob.glob(os.path.join(folder_path, "metrics", "*_metrics.csv"))[task_idx]
                     metrics_file_path = os.path.join(folder_path, "metrics", experiment_name)
                     df = pd.read_csv(metrics_file_path)
                     dfs[gorup_key].append(df)
@@ -45,15 +45,33 @@ def main():
                 except Exception as e:
                     print(f"Error reading file in {experiment_name}: {e}")
                     exit(0)
+    
+    task_dfs = {}
+    # breakpoint()
+    for task in tasks_names:
+        # Select all DataFrames whose key starts with the task name
+        task_dfs[task] = [dfs[key] for key in dfs if key.startswith(task)]
 
-    task_plots_factory = TaskPlotsFactory.create(
-        task_name, 
-        dfs=dfs,
-        labels=labels,
-        env_info=env_info,
-        folder_path=save_plots_folder_path,
-    )
-    task_plots_factory.plot()
+    for task_name in task_dfs:
+        # Collect the per-group DataFrames and labels
+        task_group_keys = [key for key in dfs if key.startswith(task_name)]
+        
+        task_group_dfs = {
+            key: dfs[key] for key in task_group_keys
+        }
+        task_group_labels = {
+            key: labels[key] for key in task_group_keys
+        }
+
+        print(f"Taksk name: {task_name}, task_group_dfs: {task_group_dfs.keys()}, task_group_labels: {task_group_labels.keys()}")
+        task_plots_factory = TaskPlotsFactory.create(
+            task_name,
+            dfs=task_group_dfs,
+            labels=task_group_labels,
+            env_info=env_info,
+            folder_path=save_plots_folder_path,
+        )
+        task_plots_factory.plot()
     
     robot_plots_factory = RobotPlotsFactory.create(
         robot_name, 

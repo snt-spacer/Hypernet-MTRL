@@ -5,6 +5,8 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
     def __init__(self, dfs: dict, labels: dict, env_info:dict, folder_path: list) -> None:
         super().__init__(dfs=dfs, labels=labels, env_info=env_info, folder_path=folder_path)
 
+        self.task_name = "go_to_pose"
+
         keys_set = set()
         for group_dfs in dfs.values():
             for df in group_dfs:
@@ -15,15 +17,6 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
                     key for key in df.columns if key.startswith("time_to_reach_position_threshold")
                 )
                 keys_set.update(
-                    key for key in df.columns if key.startswith("final_position_x")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("final_position_y")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("final_orientation")
-                )
-                keys_set.update(
                     key for key in df.columns if key.startswith("num_steps_position_overshoot")
                 )
                 keys_set.update(
@@ -32,6 +25,16 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
                 keys_set.update(
                     key for key in df.columns if key.startswith("trajectory_efficiency")
                 )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_position_distance")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_position_heading_error")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_orientation_error")
+                )
+
 
         self.labels_to_plot = list(keys_set)
 
