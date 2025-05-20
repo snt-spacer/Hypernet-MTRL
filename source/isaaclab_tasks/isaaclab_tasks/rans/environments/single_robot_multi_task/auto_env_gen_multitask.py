@@ -19,6 +19,8 @@ from isaaclab.utils import configclass
 
 from isaaclab_tasks.rans import ROBOT_CFG_FACTORY, ROBOT_FACTORY, TASK_CFG_FACTORY, TASK_FACTORY
 
+import torch.nn.functional as F
+
 
 @configclass
 class MultiTaskEnvCfg(DirectRLEnvCfg):
@@ -121,7 +123,7 @@ class MultiTaskEnv(DirectRLEnv):
             task_api.register_rigid_objects()
 
         self.set_debug_vis(self.cfg.debug_vis)
-        self.observation_buffer = torch.zeros((self.num_envs, self.cfg.observation_space), device=self.device)
+        self.observation_buffer = torch.zeros((self.num_envs, self.cfg.observation_space), device=self.device, dtype=torch.float32)
 
     @property
     def eval_data_keys(self) -> list[str]:
@@ -220,12 +222,27 @@ class MultiTaskEnv(DirectRLEnv):
     def _get_observations(self) -> dict:
         tasks_obs = [task_api.get_observations() for task_api in self.tasks_apis]
 
+        padded_tensors = []
+        for i, t in enumerate(tasks_obs):
+            pad_width = self.cfg.observation_space - t.shape[1]
+            padded = F.pad(t, (0, pad_width))
+            padded[:, -1] = i + 1  # Task uid
+            padded_tensors.append(padded)
+
+        result = torch.cat(padded_tensors, dim=0)
+
+        return {"policy": result}
+
         for i, task_obs in enumerate(tasks_obs):
             self.observation_buffer[self.tasks_env_ids[i], :task_obs.shape[-1]] = task_obs
-            self.observation_buffer[self.tasks_env_ids[i], -1] = i + 1  # Task uid
+            # self.observation_buffer[self.tasks_env_ids[i], -1] = i + 1  # Task uid
 
+        # print(self.tasks_apis[0].get_observations()[:5])
+        # breakpoint()
         observations = {"policy": self.observation_buffer}
         return observations
+
+        return {"policy": self.tasks_apis[0].get_observations()}
 
     def _get_rewards(self) -> torch.Tensor:
         task_rewards = [task_api.compute_rewards() for task_api in self.tasks_apis]
