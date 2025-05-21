@@ -10,15 +10,63 @@ import yaml
 
 def main():
     list_of_folders = [
-        # [
-        #     "/workspace/isaaclab/logs/rsl_rl/multitask/2025-04-29_06-20-01_rsl-rl_ppo_GoToPosition-GoToPose_Turtlebot2_r-0_seed-42",
-        # ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-04-29_07-43-32_rsl-rl_ppo_GoToPosition-GoToPose_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/Single/2025-05-21_06-18-20_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/Single/2025-05-21_06-25-59_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-20_15-34-23_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-20_17-42-15_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-20_17-45-42_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-20_17-39-10_rsl-rl_ppo_GoToPosition-GoToPose_Turtlebot2_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-20_17-48-31_rsl-rl_ppo_GoToPosition-GoToPose_Turtlebot2_r-0_seed-42",
         ],
     ]
 
-    save_plots_folder_path = "/workspace/isaaclab/source/plots/leatherback_multitask_Gotoposition-gotopose" # Specify the folder path where you want to save the plots
+    runs_names = [
+        "Single-GoToPosition",
+        "Single-GoToPose",
+        "Multitask-Single-Obs",
+        "Multitask-Multi-newObs",
+        "Multitask-Multi-newObs-Tid",
+        "Multitask(Pose,Posi)-Multi-newObs",
+        "Multitask(Pose,Posi)-Multi-newObs-Tid",
+    ]
+
+    plot_cfg = {
+        "title": "",
+        "box_colors": [
+            # "Grey",
+            "Brown",
+            # "Orange",
+            # "Purple",
+            # "Pink",
+            "Green",
+            "Blue",
+        ],
+        "runs_names": [
+            "Single-GoToPose",
+            "Single-GoToPosition",
+            "Multitask-Single-Obs",
+            "Multitask-Multi-newObs",
+            "Multitask-Multi-newObs-Tid",
+            "Multitask(Pose,Posi)-Multi-newObs",
+            "Multitask(Pose,Posi)-Multi-newObs-Tid",
+        ],
+        "zoom_in": True,
+    }
+
+    save_plots_folder_path = "/workspace/isaaclab/source/plots/new_obs_buffer" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 
@@ -28,7 +76,7 @@ def main():
         tasks_names = group[0].split("/")[-1].split("_")[4].split("-")
         for task_idx, task_name in enumerate(tasks_names):
             robot_name = group[0].split("/")[-1].split("_")[5]
-            gorup_key = f"{task_name}_group-{group_idx}"
+            gorup_key = f"{task_name}_group-{group_idx}_{runs_names[group_idx]}"
             dfs[gorup_key] = []
             labels[gorup_key] = []
             for folder_path in group:
@@ -70,6 +118,7 @@ def main():
             labels=task_group_labels,
             env_info=env_info,
             folder_path=save_plots_folder_path,
+            plot_cfg=plot_cfg,
         )
         task_plots_factory.plot()
     
@@ -79,6 +128,7 @@ def main():
         labels=labels,
         env_info=env_info,
         folder_path=folder_path,
+        plot_cfg=plot_cfg,
     )
     robot_plots_factory.plot()
 

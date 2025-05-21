@@ -2,8 +2,8 @@ from . import BaseTaskPlots, Registerable
 import torch
 
 class GoToPosePlots(BaseTaskPlots, Registerable):
-    def __init__(self, dfs: dict, labels: dict, env_info:dict, folder_path: list) -> None:
-        super().__init__(dfs=dfs, labels=labels, env_info=env_info, folder_path=folder_path)
+    def __init__(self, dfs: dict, labels: dict, env_info:dict, folder_path:list, plot_cfg:dict) -> None:
+        super().__init__(dfs=dfs, labels=labels, env_info=env_info, folder_path=folder_path, plot_cfg=plot_cfg)
 
         self.task_name = "go_to_pose"
 
@@ -28,12 +28,12 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
                 keys_set.update(
                     key for key in df.columns if key.startswith("final_position_distance")
                 )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("final_position_heading_error")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("final_orientation_error")
-                )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("final_position_heading_error")
+                # )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("final_orientation_error")
+                # )
 
 
         self.labels_to_plot = list(keys_set)

@@ -30,11 +30,12 @@ class AutoRegister:
 
 
 class BaseRobotPlots(AutoRegister):
-    def __init__(self, dfs: dict, labels: dict, env_info: dict, folder_path:dict) -> None:
+    def __init__(self, dfs: dict, labels: dict, env_info: dict, folder_path:dict, plot_cfg:dict) -> None:
         self._dfs = dfs
         self._labels = labels
         self._env_info = env_info
         self._save_plots_folder_path = folder_path
+        self._plot_cfg = plot_cfg
 
     def plot(self):
         raise NotImplementedError("Subclasses should implement this method.")
@@ -63,8 +64,10 @@ class BaseRobotPlots(AutoRegister):
             widths=0.6,
         )
 
-        ax.set_title(f"Boxplots of {key_to_plot}")
-        ax.set_ylabel(key_to_plot)
+        y_label, units = key_to_plot.split(".")
+        y_label = y_label.replace("_", " ").capitalize()
+        ax.set_title(f"{y_label}")
+        ax.set_ylabel(f"{y_label} ({units})")
         ax.grid(True)
         plt.tight_layout()
         save_path = os.path.join(self._save_plots_folder_path, f"{key_name}.svg")

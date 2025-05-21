@@ -233,16 +233,14 @@ class MultiTaskEnv(DirectRLEnv):
 
         return {"policy": result}
 
-        for i, task_obs in enumerate(tasks_obs):
-            self.observation_buffer[self.tasks_env_ids[i], :task_obs.shape[-1]] = task_obs
-            # self.observation_buffer[self.tasks_env_ids[i], -1] = i + 1  # Task uid
+        # for i, task_obs in enumerate(tasks_obs):
+        #     self.observation_buffer[self.tasks_env_ids[i], :task_obs.shape[-1]] = task_obs
+        #     self.observation_buffer[self.tasks_env_ids[i], -1] = i + 1  # Task uid
 
-        # print(self.tasks_apis[0].get_observations()[:5])
-        # breakpoint()
-        observations = {"policy": self.observation_buffer}
-        return observations
+        # observations = {"policy": self.observation_buffer}
+        # return observations
 
-        return {"policy": self.tasks_apis[0].get_observations()}
+        # return {"policy": self.tasks_apis[0].get_observations()}
 
     def _get_rewards(self) -> torch.Tensor:
         task_rewards = [task_api.compute_rewards() for task_api in self.tasks_apis]

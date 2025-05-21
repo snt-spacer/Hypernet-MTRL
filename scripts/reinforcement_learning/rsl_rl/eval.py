@@ -33,7 +33,7 @@ parser.add_argument("--real-time", action="store_true", default=False, help="Run
 parser.add_argument(
     "--runs_per_env",
     type=int,
-    default=4,
+    default=5,
     help="The number of runs to be performed for each environment.",
 )
 parser.add_argument(

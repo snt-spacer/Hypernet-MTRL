@@ -30,11 +30,12 @@ class AutoRegister:
 
 
 class BaseTaskPlots(AutoRegister):
-    def __init__(self, dfs: dict, labels: dict, env_info: dict, folder_path: list) -> None:
+    def __init__(self, dfs: dict, labels: dict, env_info: dict, folder_path: list, plot_cfg:dict) -> None:
         self._dfs = dfs
         self._labels = labels
         self._env_info = env_info
         self._save_plots_folder_path = folder_path
+        self._plot_cfg = plot_cfg
 
     def plot(self):
         raise NotImplementedError("Subclasses should implement this method.")
@@ -52,20 +53,33 @@ class BaseTaskPlots(AutoRegister):
             # Concatenate all values of the key across the group's dataframes
             group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
             data_to_plot.append(group_values)
-            label_names.append(group_key)
+            label_names.append(group_key.split("_")[-1])
 
-        ax.boxplot(
+        box = ax.boxplot(
             data_to_plot,
             labels=label_names,
             patch_artist=True,
             boxprops=dict(facecolor='skyblue'),
             medianprops=dict(color='black'),
             flierprops=dict(marker='o', markerfacecolor='red', markersize=5),
+            # showfliers=False,
             widths=0.6,
         )
 
-        ax.set_title(f"Boxplots of {key_to_plot}")
-        ax.set_ylabel(key_to_plot)
+        if self._plot_cfg["zoom_in"]:
+            all_values = pd.concat(data_to_plot)
+            ax.set_ylim(top=all_values.quantile(0.95) )
+
+        # Set the color of the boxes
+        for patch, color in zip(box['boxes'], self._plot_cfg["box_colors"]):
+            patch.set_facecolor(color)
+
+        # breakpoint()
+
+        y_label, units = key_to_plot.split(".")
+        y_label = y_label.replace("_", " ").capitalize()
+        ax.set_title(f"{y_label}")
+        ax.set_ylabel(f"{y_label} ({units})")
         ax.set_xticks(range(1, len(label_names) + 1))
         ax.set_xticklabels(label_names, rotation=20, ha='right')
         ax.grid(True)
