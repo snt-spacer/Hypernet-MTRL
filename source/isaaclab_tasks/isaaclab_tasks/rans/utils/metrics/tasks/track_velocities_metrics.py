@@ -13,9 +13,9 @@ class TrackVelocitiesMetrics(BaseTaskMetrics, Registerable):
         masled_ang_vel_error = self.trajectories['error_angular_velocity'] * self.trajectories_masks
 
         len_trajec = torch.sum(self.trajectories_masks, dim=1)
-        avg_lin_vel_error = torch.sum(torch.abs(masked_lin_vel_error), dim=1) / len_trajec
-        avg_lat_vel_error = torch.sum(torch.abs(masked_lat_vel_error), dim=1) / len_trajec
-        avg_ang_vel_error = torch.sum(torch.abs(masled_ang_vel_error), dim=1) / len_trajec
+        avg_lin_vel_error = torch.sum(masked_lin_vel_error, dim=1) / len_trajec
+        avg_lat_vel_error = torch.sum(masked_lat_vel_error, dim=1) / len_trajec
+        avg_ang_vel_error = torch.sum(masled_ang_vel_error, dim=1) / len_trajec
 
         self.metrics["linear_velocity_error.m/s"] = avg_lin_vel_error
         self.metrics["lateral_velocity_error.m/s"] = avg_lat_vel_error
