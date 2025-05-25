@@ -5,6 +5,8 @@ class TrackVelocitiesPlots(BaseTaskPlots, Registerable):
     def __init__(self, dfs: dict, labels: dict, env_info:dict, folder_path:list, plot_cfg:dict) -> None:
         super().__init__(dfs=dfs, labels=labels, env_info=env_info, folder_path=folder_path, plot_cfg=plot_cfg)
 
+        self.task_name = "track_velocities"
+
         keys_set = set()
         for group_dfs in dfs.values():
             for df in group_dfs:

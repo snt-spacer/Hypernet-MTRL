@@ -49,9 +49,23 @@ class BaseTaskPlots(AutoRegister):
         data_to_plot = []
         label_names = []
 
+        
+        colors_indx = []
         for group_key, group_dfs in self._dfs.items():
             # Concatenate all values of the key across the group's dataframes
-            group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
+            # for group_idx, df in enumerate(group_dfs):
+            #     print("#" * 20)
+            #     print(f"Group {group_idx}: {df.columns}")
+
+            try:
+                group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
+            except KeyError as e:
+                print(f"KeyError: {e}. The key '{key_to_plot}' does not exist in the DataFrames.")
+                print(self.__class__.__name__)
+                return
+            
+            colors_indx.append(self._plot_cfg['runs_names'].index(group_key.split("_")[-1]))
+            
             data_to_plot.append(group_values)
             label_names.append(group_key.split("_")[-1])
 
@@ -71,10 +85,9 @@ class BaseTaskPlots(AutoRegister):
             ax.set_ylim(top=all_values.quantile(0.95) )
 
         # Set the color of the boxes
-        for patch, color in zip(box['boxes'], self._plot_cfg["box_colors"]):
+        colors = [self._plot_cfg["box_colors"][index] for index in colors_indx]
+        for patch, color in zip(box['boxes'], colors):
             patch.set_facecolor(color)
-
-        # breakpoint()
 
         y_label, units = key_to_plot.split(".")
         y_label = y_label.replace("_", " ").capitalize()

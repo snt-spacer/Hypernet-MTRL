@@ -70,5 +70,6 @@ class BaseRobotPlots(AutoRegister):
         ax.set_ylabel(f"{y_label} ({units})")
         ax.grid(True)
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{key_name}.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.robot_name}_{key_name}.svg")
+        plt.savefig(save_path)
         plt.close()
