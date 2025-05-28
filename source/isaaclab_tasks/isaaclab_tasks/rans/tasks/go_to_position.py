@@ -43,7 +43,7 @@ class GoToPositionTask(TaskCore):
             task_id: The id of the task.
             env_ids: The ids of the environments used by this task."""
 
-        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, num_tasks=num_tasks)
+        super().__init__(scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation, num_tasks=num_tasks)
 
         # Task and reward parameters
         self._task_cfg = task_cfg
@@ -60,6 +60,14 @@ class GoToPositionTask(TaskCore):
         """
         Returns the keys of the data used for evaluation.
 
+        target_position: The position of the target in the world frame.
+        position_distance: The distance between the robot and the target position.
+        cos_heading_to_target_error: The cosine of the angle between the robot's heading and the target position.
+        sin_heading_to_target_error: The sine of the angle between the robot's heading and the target position.
+        half_init_lin_vel_x: Whether the robot's linear velocity along the x-axis is less than half of the initial linear velocity.
+        half_init_lin_vel_y: Whether the robot's linear velocity along the y-axis is less than half of the initial linear velocity.
+        half_init_ang_vel: Whether the robot's angular velocity is less than half of the initial angular velocity.
+
         Returns:
             list[str]: The keys of the data used for evaluation."""
         
@@ -68,6 +76,12 @@ class GoToPositionTask(TaskCore):
             "position_distance", 
             "cos_heading_to_target_error", 
             "sin_heading_to_target_error",
+            "initial_lin_vel_x",
+            "initial_lin_vel_y",
+            "initial_ang_vel",
+            "half_init_lin_vel_x",
+            "half_init_lin_vel_y",
+            "half_init_ang_vel",
         ]
     
     @property
@@ -83,6 +97,12 @@ class GoToPositionTask(TaskCore):
             "position_distance": [".distance.m"],
             "cos_heading_to_target_error": [".cos(heading).u"],
             "sin_heading_to_target_error": [".sin(heading).u"],
+            "initial_lin_vel_x": [".initial_lin_vel_x.m/s"],
+            "initial_lin_vel_y": [".initial_lin_vel_y.m/s"],
+            "initial_ang_vel": [".initial_ang_vel.rad/s"],
+            "half_init_lin_vel_x": [".half_init_lin_vel_x.u"],
+            "half_init_lin_vel_y": [".half_init_lin_vel_y.u"],
+            "half_init_ang_vel": [".half_init_ang_vel.u"],
         }
     
     @property
@@ -97,6 +117,12 @@ class GoToPositionTask(TaskCore):
             "position_distance": self._task_data[:, 0],
             "cos_heading_to_target_error": self._task_data[:, 1],
             "sin_heading_to_target_error": self._task_data[:, 2],
+            "initial_lin_vel_x": self.initial_velocity[:, 0],
+            "initial_lin_vel_y": self.initial_velocity[:, 1],
+            "initial_ang_vel": self.initial_velocity[:, 5],
+            "half_init_lin_vel_x": self._half_init_lin_vel_x,
+            "half_init_lin_vel_y": self._half_init_lin_vel_y,
+            "half_init_ang_vel": self._half_init_ang_vel,
         }
 
     def initialize_buffers(self, env_ids: torch.Tensor | None = None) -> None:
@@ -112,6 +138,10 @@ class GoToPositionTask(TaskCore):
         self._previous_position_dist = torch.zeros((self._num_envs,), device=self._device, dtype=torch.float32)
         self._target_positions = torch.zeros((self._num_envs, 2), device=self._device, dtype=torch.float32)
         self._markers_pos = torch.zeros((self._num_envs, 3), device=self._device, dtype=torch.float32)
+        self.initial_velocity = torch.zeros((self._num_envs, 6), device=self._device, dtype=torch.float32)
+        self._half_init_lin_vel_x = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
+        self._half_init_lin_vel_y = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
+        self._half_init_ang_vel = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
 
     def create_logs(self) -> None:
         """
@@ -171,6 +201,11 @@ class GoToPositionTask(TaskCore):
         for randomizer in self.randomizers:
             randomizer.observations(observations=self._task_data)
 
+        # Check if it reached half of the initial linear and angular velocity
+        self._half_init_lin_vel_x = torch.abs(self.initial_velocity[:, 0] / 2) >= torch.abs(self._robot.root_com_vel_w[self._env_ids, 0])
+        self._half_init_lin_vel_y = torch.abs(self.initial_velocity[:, 1] / 2) >= torch.abs(self._robot.root_com_vel_w[self._env_ids, 1])
+        self._half_init_ang_vel = torch.abs(self.initial_velocity[:, 5] / 2) >= torch.abs(self._robot.root_com_vel_w[self._env_ids, -1])
+
         # Concatenate the task observations with the robot observations
         return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
 
@@ -217,7 +252,7 @@ class GoToPositionTask(TaskCore):
         self.scalar_logger.log("task_state", "GoToPosition/EMA/position_distance", self._position_dist)
         self.scalar_logger.log("task_state", "GoToPosition/EMA/boundary_distance", boundary_dist)
         self.scalar_logger.log("task_state", "GoToPosition/AVG/normed_linear_velocity", linear_velocity)
-        self.scalar_logger.log("task_state", "GoToPosition/AVG/absolute_angular_velocity", linear_velocity)
+        self.scalar_logger.log("task_state", "GoToPosition/AVG/absolute_angular_velocity", angular_velocity)
         self.scalar_logger.log("task_state", "GoToPosition/AVG/target_heading_error", target_heading_error)
 
         # position reward
@@ -245,6 +280,8 @@ class GoToPositionTask(TaskCore):
         linear_velocity_rew[
             linear_velocity_rew > (self._task_cfg.linear_velocity_max_value - self._task_cfg.linear_velocity_min_value)
         ] = (self._task_cfg.linear_velocity_max_value - self._task_cfg.linear_velocity_min_value)
+        # proximity_scale = torch.exp(-self._position_dist / 0.1)
+        # linear_velocity_rew = -proximity_scale * linear_velocity
         # angular velocity reward
         angular_velocity_rew = angular_velocity - self._task_cfg.angular_velocity_min_value
         angular_velocity_rew[angular_velocity_rew < 0] = 0
@@ -414,7 +451,7 @@ class GoToPositionTask(TaskCore):
         initial_pose[:, 6] = torch.sin(theta * 0.5)
 
         # Randomizes the velocity of the platform
-        initial_velocity = torch.zeros((num_resets, 6), device=self._device, dtype=torch.float32)
+        self.initial_velocity[env_ids] = torch.zeros((num_resets, 6), device=self._device, dtype=torch.float32)
 
         # Linear velocity
         velocity_norm = (
@@ -422,19 +459,19 @@ class GoToPositionTask(TaskCore):
             + self._task_cfg.spawn_min_lin_vel
         )
         theta = torch.rand((num_resets,), device=self._device) * 2 * math.pi
-        initial_velocity[:, 0] = velocity_norm * torch.cos(theta)
-        initial_velocity[:, 1] = velocity_norm * torch.sin(theta)
+        self.initial_velocity[env_ids, 0] = velocity_norm * torch.cos(theta)
+        self.initial_velocity[env_ids, 1] = velocity_norm * torch.sin(theta)
 
         # Angular velocity of the platform
         angular_velocity = (
             self._gen_actions[env_ids, 3] * (self._task_cfg.spawn_max_ang_vel - self._task_cfg.spawn_min_ang_vel)
             + self._task_cfg.spawn_min_ang_vel
         )
-        initial_velocity[:, 5] = angular_velocity
+        self.initial_velocity[env_ids, 5] = angular_velocity
 
         # Apply to articulation
         self._robot.set_pose(initial_pose, self._env_ids[env_ids])
-        self._robot.set_velocity(initial_velocity, self._env_ids[env_ids])
+        self._robot.set_velocity(self.initial_velocity[env_ids], self._env_ids[env_ids])
 
     def create_task_visualization(self) -> None:
         """Adds the visual marker to the scene.
