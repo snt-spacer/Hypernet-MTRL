@@ -25,8 +25,8 @@ import torch.nn.functional as F
 @configclass
 class MultiTaskEnvCfg(DirectRLEnvCfg):
     # env
-    decimation = 6
-    episode_length_s = 20.0
+    decimation = 12
+    episode_length_s = 30.0
 
     robot_name = "Leatherback"
     tasks_names = ["GoToPosition"]
@@ -163,11 +163,11 @@ class MultiTaskEnv(DirectRLEnv):
             if self.tasks_cfgs[-1].gen_space > max_gen_space:
                 max_gen_space = self.tasks_cfgs[-1].gen_space
 
+        self.num_tasks = len(self.tasks_cfgs)
         cfg.action_space = self.robot_cfg.action_space + max_action_space
-        cfg.observation_space = self.robot_cfg.observation_space + max_observation_space + 1 # +1 for task uid
+        cfg.observation_space = self.robot_cfg.observation_space + max_observation_space + 4#TODO: remove this and put: self.num_tasks # One hot for task uid
         cfg.state_space = self.robot_cfg.state_space + max_state_space
         cfg.gen_space = self.robot_cfg.gen_space + max_gen_space
-        self.num_tasks = len(self.tasks_cfgs)
         return cfg
 
     def _setup_scene(self):
@@ -226,7 +226,7 @@ class MultiTaskEnv(DirectRLEnv):
         for i, t in enumerate(tasks_obs):
             pad_width = self.cfg.observation_space - t.shape[1]
             padded = F.pad(t, (0, pad_width))
-            padded[:, -1] = i + 1  # Task uid
+            padded[:, -4:] = F.one_hot(torch.tensor([i + 1], device=self.device), num_classes=4).squeeze(0) # Task uid TODO: remove the hardcoded 4 and use self.num_tasks
             padded_tensors.append(padded)
 
         result = torch.cat(padded_tensors, dim=0)
