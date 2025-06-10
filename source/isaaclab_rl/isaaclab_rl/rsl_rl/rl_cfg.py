@@ -75,6 +75,9 @@ class RslRlPpoActorCriticMemoryCfg:
     activation: str = MISSING
     """The activation function for the actor and critic networks."""
 
+    clip_actions: bool = False
+    """Whether to clip the actions. Default is False."""
+    
     clip_actions_range: list[float] = [-1.0, 1.0]
     """The range for clipping the actions. Default is [-1, 1]."""
 

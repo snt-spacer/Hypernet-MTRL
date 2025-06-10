@@ -26,10 +26,11 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         actor_hidden_dims=[32, 32],
         critic_hidden_dims=[32, 32],
         activation="elu",
+        clip_actions=True,
         clip_actions_range=[-1, 1],
         use_embeddings=True,
         embeddings_size=32,
-        generator_size=(256, 256),
+        generator_size=(512, 256, 256, 128),
         num_memory_obs=4,
     )
     algorithm = RslRlPpoAlgorithmCfg(
