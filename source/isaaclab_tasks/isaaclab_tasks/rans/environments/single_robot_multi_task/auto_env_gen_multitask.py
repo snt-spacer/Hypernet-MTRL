@@ -165,7 +165,7 @@ class MultiTaskEnv(DirectRLEnv):
 
         self.num_tasks = len(self.tasks_cfgs)
         cfg.action_space = self.robot_cfg.action_space + max_action_space
-        cfg.observation_space = self.robot_cfg.observation_space + max_observation_space + 4#TODO: remove this and put: self.num_tasks # One hot for task uid
+        cfg.observation_space = self.robot_cfg.observation_space + max_observation_space + self.num_tasks#TODO: remove this and put: self.num_tasks # One hot for task uid
         cfg.state_space = self.robot_cfg.state_space + max_state_space
         cfg.gen_space = self.robot_cfg.gen_space + max_gen_space
         return cfg
@@ -191,7 +191,7 @@ class MultiTaskEnv(DirectRLEnv):
                 task_name,
                 scene=self.scene,
                 task_cfg=self.tasks_cfgs[i],
-                task_uid=i + 1,
+                task_uid=i,
                 num_envs=len(self.tasks_env_ids[i]),
                 device=self.device,
                 num_tasks=self.num_tasks,
@@ -222,11 +222,13 @@ class MultiTaskEnv(DirectRLEnv):
     def _get_observations(self) -> dict:
         tasks_obs = [task_api.get_observations() for task_api in self.tasks_apis]
 
+        # breakpoint()
+
         padded_tensors = []
         for i, t in enumerate(tasks_obs):
             pad_width = self.cfg.observation_space - t.shape[1]
             padded = F.pad(t, (0, pad_width))
-            padded[:, -4:] = F.one_hot(torch.tensor([i + 1], device=self.device), num_classes=4).squeeze(0) # Task uid TODO: remove the hardcoded 4 and use self.num_tasks
+            padded[:, -self.num_tasks:] = F.one_hot(torch.tensor([i], device=self.device), num_classes=self.num_tasks).squeeze(0) # Task uid TODO: remove the hardcoded 4 and use self.num_tasks
             padded_tensors.append(padded)
 
         result = torch.cat(padded_tensors, dim=0)
@@ -294,7 +296,7 @@ class MultiTaskEnv(DirectRLEnv):
         self.extras["log"].update(robot_extras)
 
         # Reset
-        self.observation_buffer[env_ids, :] = 0.0
+        # self.observation_buffer[env_ids, :] = 0.0
         super()._reset_idx(env_ids)
         self.robot_api.reset(env_ids)
         for i, task_api in enumerate(self.tasks_apis):

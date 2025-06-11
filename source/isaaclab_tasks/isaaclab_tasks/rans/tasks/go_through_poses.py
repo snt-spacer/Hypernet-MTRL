@@ -30,6 +30,7 @@ class GoThroughPosesTask(TaskCore):
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
         decimation: int = 1,
+        num_tasks: int = 1,
     ) -> None:
         """
         Initializes the GoThroughPoses task.
@@ -43,7 +44,7 @@ class GoThroughPosesTask(TaskCore):
             env_ids: The ids of the environments used by this task."""
 
         super().__init__(
-            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
+            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation, num_tasks=num_tasks
         )
 
         # Task and reward parameters
@@ -54,7 +55,7 @@ class GoThroughPosesTask(TaskCore):
         self._dim_gen_act = self._task_cfg.gen_space
 
         # Buffers
-        self.initialize_buffers()
+        self.initialize_buffers(env_ids=env_ids)
 
     @property
     def eval_data_keys(self) -> list[str]:
@@ -130,24 +131,24 @@ class GoThroughPosesTask(TaskCore):
         sin_target_heading_to_subsequent_goals_error = torch.stack(sin_target_heading_to_subsequent_goals_error, dim=-1)
 
         reshaped_subsequent_goals_distance = subsequent_goals_distance.view(
-            subsequent_goals_distance.shape[0], self._task_cfg.max_num_goals - 1, -1
+            subsequent_goals_distance.shape[0], self._task_cfg.num_subsequent_goals - 1, -1
         ).permute(0, 2, 1).reshape(subsequent_goals_distance.shape)
         reshaped_cos_heading_to_subsequent_goals_error = cos_heading_to_subsequent_goals_error.view(
-            cos_heading_to_subsequent_goals_error.shape[0], self._task_cfg.max_num_goals - 1, -1
+            cos_heading_to_subsequent_goals_error.shape[0], self._task_cfg.num_subsequent_goals - 1, -1
         ).permute(0, 2, 1).reshape(cos_heading_to_subsequent_goals_error.shape)
         reshaped_sin_heading_to_subsequent_goals_error = sin_heading_to_subsequent_goals_error.view(
-            sin_heading_to_subsequent_goals_error.shape[0], self._task_cfg.max_num_goals - 1, -1
+            sin_heading_to_subsequent_goals_error.shape[0], self._task_cfg.num_subsequent_goals - 1, -1
         ).permute(0, 2, 1).reshape(sin_heading_to_subsequent_goals_error.shape)
         reshaped_cos_target_heading_to_subsequent_goals_error = cos_target_heading_to_subsequent_goals_error.view(
-            cos_target_heading_to_subsequent_goals_error.shape[0], self._task_cfg.max_num_goals - 1, -1
+            cos_target_heading_to_subsequent_goals_error.shape[0], self._task_cfg.num_subsequent_goals - 1, -1
         ).permute(0, 2, 1).reshape(cos_target_heading_to_subsequent_goals_error.shape)
         reshaped_sin_target_heading_to_subsequent_goals_error = sin_target_heading_to_subsequent_goals_error.view(
-            sin_target_heading_to_subsequent_goals_error.shape[0], self._task_cfg.max_num_goals - 1, -1
+            sin_target_heading_to_subsequent_goals_error.shape[0], self._task_cfg.num_subsequent_goals - 1, -1
         ).permute(0, 2, 1).reshape(sin_target_heading_to_subsequent_goals_error.shape)
         
         return {
             "target_positions": self._target_positions,
-            "target_heading": self._target_heading,
+            "target_headings": self._target_heading,
             "target_index": self._target_index,
             "num_goals": self._num_goals,
             "trajectory_completed": self._trajectory_completed,
@@ -188,6 +189,7 @@ class GoThroughPosesTask(TaskCore):
         self._trajectory_completed = torch.zeros((self._num_envs,), device=self._device, dtype=torch.bool)
         self._num_goals = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
         self._ALL_INDICES = torch.arange(self._num_envs, dtype=torch.long, device=self._device)
+        self.initial_velocity = torch.zeros((self._num_envs, 6), device=self._device, dtype=torch.float32)
 
     def create_logs(self) -> None:
         """
@@ -195,16 +197,16 @@ class GoThroughPosesTask(TaskCore):
 
         super().create_logs()
 
-        self.scalar_logger.add_log("task_state", "AVG/normed_linear_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "AVG/absolute_angular_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "AVG/position_distance", "mean")
-        self.scalar_logger.add_log("task_state", "AVG/boundary_distance", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/linear_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/angular_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/boundary", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/heading", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/progress", "mean")
-        self.scalar_logger.add_log("task_reward", "SUM/num_goals", "sum")
+        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/normed_linear_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/absolute_angular_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/position_distance", "mean")
+        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/boundary_distance", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/linear_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/angular_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/boundary", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/heading", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/progress", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPoses/SUM/num_goals", "sum")
 
     def get_observations(self) -> torch.Tensor:
         """
@@ -264,6 +266,7 @@ class GoThroughPosesTask(TaskCore):
         )
 
         # Store in buffer
+        # breakpoint()
         self._task_data[:, 0:2] = self._robot.root_com_lin_vel_b[self._env_ids, :2]
         self._task_data[:, 2] = self._robot.root_com_ang_vel_w[self._env_ids, -1]
         self._task_data[:, 3] = position_dist
@@ -322,7 +325,7 @@ class GoThroughPosesTask(TaskCore):
             randomizer.observations(observations=self._task_data)
 
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations()), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -363,10 +366,10 @@ class GoThroughPosesTask(TaskCore):
         progress_rew = self._previous_position_dist - self._position_dist
 
         # Update logs
-        self.scalar_logger.log("task_state", "AVG/position_distance", self._position_dist)
-        self.scalar_logger.log("task_state", "AVG/boundary_distance", boundary_dist)
-        self.scalar_logger.log("task_state", "AVG/normed_linear_velocity", linear_velocity)
-        self.scalar_logger.log("task_state", "AVG/absolute_angular_velocity", angular_velocity)
+        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/position_distance", self._position_dist)
+        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/boundary_distance", boundary_dist)
+        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/normed_linear_velocity", linear_velocity)
+        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/absolute_angular_velocity", angular_velocity)
 
         # heading reward (encourages the robot to face the target)
         heading_rew = torch.exp(-heading_dist / self._task_cfg.position_heading_exponential_reward_coeff)
@@ -408,12 +411,12 @@ class GoThroughPosesTask(TaskCore):
         self._previous_position_dist[reached_ids] = 0
 
         # Update logs
-        self.scalar_logger.log("task_reward", "AVG/linear_velocity", linear_velocity_rew)
-        self.scalar_logger.log("task_reward", "AVG/angular_velocity", angular_velocity_rew)
-        self.scalar_logger.log("task_reward", "AVG/boundary", boundary_rew)
-        self.scalar_logger.log("task_reward", "AVG/heading", heading_rew)
-        self.scalar_logger.log("task_reward", "AVG/progress", progress_rew)
-        self.scalar_logger.log("task_reward", "SUM/num_goals", goal_reached)
+        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/linear_velocity", linear_velocity_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/angular_velocity", angular_velocity_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/boundary", boundary_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/heading", heading_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/progress", progress_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPoses/SUM/num_goals", goal_reached)
 
         # Return the reward by combining the different components and adding the robot rewards
         return (
@@ -425,7 +428,7 @@ class GoThroughPosesTask(TaskCore):
             + boundary_rew * self._task_cfg.boundary_weight
             + self._task_cfg.time_penalty
             + self._task_cfg.reached_bonus * goal_reached
-        ) + self._robot.compute_rewards()
+        ) + self._robot.compute_rewards(env_ids=self._env_ids)  # type: ignore[return-value]
 
     def reset(
         self,
@@ -663,7 +666,7 @@ class GoThroughPosesTask(TaskCore):
         initial_pose[:, 6] = torch.sin(theta * 0.5)
 
         # Randomizes the velocity of the platform
-        initial_velocity = torch.zeros((num_resets, 6), device=self._device, dtype=torch.float32)
+        self.initial_velocity[env_ids] = torch.zeros((num_resets, 6), device=self._device, dtype=torch.float32)
 
         # Linear velocity
         theta = self._rng.sample_uniform_torch(0, 2 * math.pi, 1, ids=env_ids)
@@ -671,19 +674,19 @@ class GoThroughPosesTask(TaskCore):
             self._gen_actions[env_ids, 9] * (self._task_cfg.spawn_max_lin_vel - self._task_cfg.spawn_min_lin_vel)
             + self._task_cfg.spawn_min_lin_vel
         )
-        initial_velocity[:, 0] = velocity_norm * torch.cos(theta)
-        initial_velocity[:, 1] = velocity_norm * torch.sin(theta)
+        self.initial_velocity[env_ids, 0] = velocity_norm * torch.cos(theta)
+        self.initial_velocity[env_ids, 1] = velocity_norm * torch.sin(theta)
 
         # Angular velocity of the platform
         angular_velocity = (
             self._gen_actions[env_ids, 10] * (self._task_cfg.spawn_max_ang_vel - self._task_cfg.spawn_min_ang_vel)
             + self._task_cfg.spawn_min_ang_vel
         )
-        initial_velocity[:, 5] = angular_velocity
+        self.initial_velocity[env_ids, 5] = angular_velocity
 
         # Apply to articulation
-        self._robot.set_pose(initial_pose, env_ids)
-        self._robot.set_velocity(initial_velocity, env_ids)
+        self._robot.set_pose(initial_pose, self._env_ids[env_ids])
+        self._robot.set_velocity(self.initial_velocity[env_ids], self._env_ids[env_ids])
 
     def create_task_visualization(self) -> None:
         """Adds the visual marker to the scene.

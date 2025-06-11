@@ -211,6 +211,7 @@ class GoToPoseTask(TaskCore):
         # position error
         self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
         self._position_dist = torch.norm(self._position_error, dim=-1)
+        # breakpoint()
         # heading error (to the target heading)
         self._heading_error = torch.arctan2(
             torch.sin(self._target_headings - self._robot.heading_w[self._env_ids]),

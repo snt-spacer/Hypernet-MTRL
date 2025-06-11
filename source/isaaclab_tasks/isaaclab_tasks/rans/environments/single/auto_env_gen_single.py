@@ -24,13 +24,13 @@ from isaaclab_tasks.rans import ROBOT_CFG_FACTORY, ROBOT_FACTORY, TASK_CFG_FACTO
 class SingleEnvCfg(DirectRLEnvCfg):
     # env
     decimation = 6
-    episode_length_s = 20.0
+    episode_length_s = 50.0
 
     robot_name = "Leatherback"
     task_name = "GoToPosition"
 
     # scene
-    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=7.5, replicate_physics=True)
+    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=3.5, replicate_physics=True)
 
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1.0 / 60.0, render_interval=decimation)

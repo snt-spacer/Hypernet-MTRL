@@ -28,6 +28,24 @@ class GoToPositionPlots(BaseTaskPlots, Registerable):
                 keys_set.update(
                     key for key in df.columns if key.startswith("final_position_distance")
                 )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("time_to_half_initial_linear_velocity_x")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("time_to_half_initial_linear_velocity_y")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("time_to_half_initial_angular_velocity")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_linear_velocity_error_x")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_linear_velocity_error_y")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_angular_velocity_error")
+                )
 
         self.labels_to_plot = list(keys_set)
 

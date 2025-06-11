@@ -28,12 +28,12 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
                 keys_set.update(
                     key for key in df.columns if key.startswith("final_position_distance")
                 )
-                # keys_set.update(
-                #     key for key in df.columns if key.startswith("final_position_heading_error")
-                # )
-                # keys_set.update(
-                #     key for key in df.columns if key.startswith("final_orientation_error")
-                # )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_position_heading_error")
+                )
+                keys_set.update(
+                    key for key in df.columns if key.startswith("final_orientation_error")
+                )
 
 
         self.labels_to_plot = list(keys_set)

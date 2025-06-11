@@ -98,10 +98,15 @@ RUN echo "export ISAACLAB_PATH=${ISAACLAB_PATH}" >> ${HOME}/.bashrc && \
     echo "export TZ=$(date +%Z)" >> ${HOME}/.bashrc
 
 RUN ${ISAACLAB_PATH}/_isaac_sim/python.sh -m pip install --upgrade pip
+
 RUN git clone https://github.com/AntoineRichard/skrl.git /root/skrl && \
     ${ISAACLAB_PATH}/_isaac_sim/python.sh -m pip install --editable /root/skrl
-RUN git clone -b test_new_policy https://github.com/ricard-inho/rsl_rl.git /root/rsl_rl && \
+
+RUN git clone https://github.com/ricard-inho/rsl_rl.git /root/rsl_rl && \
     ${ISAACLAB_PATH}/_isaac_sim/python.sh -m pip install --editable /root/rsl_rl
+
+# RUN git clone -b test_new_policy https://github.com/ricard-inho/rsl_rl.git /root/rsl_rl && \
+#     ${ISAACLAB_PATH}/_isaac_sim/python.sh -m pip install --editable /root/rsl_rl # This is for the new policy net gen
 
 # make working directory as the Isaac Lab directory
 # this is the default directory when the container is run

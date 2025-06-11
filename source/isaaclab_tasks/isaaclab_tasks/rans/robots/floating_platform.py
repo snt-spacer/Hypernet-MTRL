@@ -2,7 +2,7 @@
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
-
+import numpy as np
 import torch
 from gymnasium import spaces, vector
 
@@ -25,9 +25,10 @@ class FloatingPlatformRobot(RobotCore):
         robot_uid: int = 0,
         num_envs: int = 1,
         decimation: int = 6,
+        num_tasks: int = 1,
         device: str = "cuda",
     ):
-        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, device=device)
+        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, num_tasks=num_tasks, device=device)
         self._robot_cfg = robot_cfg
         # Available for use robot_cfg.is_reaction_wheel,robot_cfg.split_thrust,robot_cfg.rew_reaction_wheel_scale
         self._dim_robot_obs = self._robot_cfg.observation_space
@@ -106,10 +107,10 @@ class FloatingPlatformRobot(RobotCore):
         self.scalar_logger.add_log("robot_reward", "AVG/action_rate", "mean")
         self.scalar_logger.add_log("robot_reward", "AVG/joint_acceleration", "mean")
 
-    def get_observations(self) -> torch.Tensor:
-        return self._unaltered_actions
+    def get_observations(self, env_ids: torch.Tensor) -> torch.Tensor:
+        return self._unaltered_actions[env_ids]
 
-    def compute_rewards(self):
+    def compute_rewards(self, env_ids: torch.Tensor):
         # TODO: DT should be factored in?
 
         action_rate = torch.sum(torch.abs(self._unaltered_actions - self._previous_unaltered_actions), dim=1)
@@ -122,8 +123,8 @@ class FloatingPlatformRobot(RobotCore):
         self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", joint_accelerations)
 
         return (
-            action_rate * self._robot_cfg.rew_action_rate_scale
-            + joint_accelerations * self._robot_cfg.rew_joint_accel_scale
+            action_rate[env_ids] * self._robot_cfg.rew_action_rate_scale
+            + joint_accelerations[env_ids] * self._robot_cfg.rew_joint_accel_scale
         )
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
@@ -179,7 +180,7 @@ class FloatingPlatformRobot(RobotCore):
             randomizer.actions(dt=self.scene.physics_dt, actions=actions)
 
         self._previous_actions = self._actions.clone()
-        self._actions = actions
+        self._actions = (actions > 0.5).float()
 
         # Calculate the number of active thrusters (those with a value of 1)
         n_active_thrusters = torch.sum(actions[:, : self._robot_cfg.num_thrusters], dim=1, keepdim=True)
@@ -239,10 +240,15 @@ class FloatingPlatformRobot(RobotCore):
         self._robot.write_joint_state_to_sim(position, velocity, env_ids=env_ids)
 
     def configure_gym_env_spaces(self):
-        single_action_space = spaces.MultiDiscrete([2] * self._robot_cfg.num_thrusters)
+        # single_action_space = spaces.MultiDiscrete([2] * self._robot_cfg.num_thrusters)
+        # action_space = vector.utils.batch_space(single_action_space, self._num_envs)
+
+        # return single_action_space, action_space
+        single_action_space = spaces.Box(low=0.0, high=1.0, shape=(self._robot_cfg.num_thrusters,), dtype=np.float32)
         action_space = vector.utils.batch_space(single_action_space, self._num_envs)
 
         return single_action_space, action_space
+
 
     def activateSensors(self, sensor_type: str, filter: list):
         if sensor_type == "contacts":

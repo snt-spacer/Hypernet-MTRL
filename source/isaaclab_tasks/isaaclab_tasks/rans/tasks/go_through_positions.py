@@ -30,6 +30,7 @@ class GoThroughPositionsTask(TaskCore):
         device: str = "cuda",
         env_ids: torch.Tensor | None = None,
         decimation: int = 1,
+        num_tasks: int = 1,
     ) -> None:
         """
         Initializes the GoThroughPositions task.
@@ -44,7 +45,7 @@ class GoThroughPositionsTask(TaskCore):
         """
 
         super().__init__(
-            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation
+            scene=scene, task_uid=task_uid, num_envs=num_envs, device=device, env_ids=env_ids, decimation=decimation, num_tasks=num_tasks
         )
 
         # Task and reward parameters
@@ -172,16 +173,16 @@ class GoThroughPositionsTask(TaskCore):
 
         super().create_logs()
 
-        self.scalar_logger.add_log("task_state", "AVG/normed_linear_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "AVG/absolute_angular_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "AVG/position_distance", "mean")
-        self.scalar_logger.add_log("task_state", "AVG/boundary_distance", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/linear_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/angular_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/boundary", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/heading", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/progress", "mean")
-        self.scalar_logger.add_log("task_reward", "SUM/num_goals", "sum")
+        self.scalar_logger.add_log("task_state", "GoThroughPositions/AVG/normed_linear_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "GoThroughPositions/AVG/absolute_angular_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "GoThroughPositions/AVG/position_distance", "mean")
+        self.scalar_logger.add_log("task_state", "GoThroughPositions/AVG/boundary_distance", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPositions/AVG/linear_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPositions/AVG/angular_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPositions/AVG/boundary", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPositions/AVG/heading", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPositions/AVG/progress", "mean")
+        self.scalar_logger.add_log("task_reward", "GoThroughPositions/SUM/num_goals", "sum")
 
     def get_observations(self) -> torch.Tensor:
         """
@@ -269,7 +270,7 @@ class GoThroughPositionsTask(TaskCore):
             randomizer.observations(observations=self._task_data)
 
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations()), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -303,10 +304,10 @@ class GoThroughPositionsTask(TaskCore):
         progress_rew = self._previous_position_dist - self._position_dist
 
         # Update logs
-        self.scalar_logger.log("task_state", "AVG/position_distance", self._position_dist)
-        self.scalar_logger.log("task_state", "AVG/boundary_distance", boundary_dist)
-        self.scalar_logger.log("task_state", "AVG/normed_linear_velocity", linear_velocity)
-        self.scalar_logger.log("task_state", "AVG/absolute_angular_velocity", angular_velocity)
+        self.scalar_logger.log("task_state", "GoThroughPositions/AVG/position_distance", self._position_dist)
+        self.scalar_logger.log("task_state", "GoThroughPositions/AVG/boundary_distance", boundary_dist)
+        self.scalar_logger.log("task_state", "GoThroughPositions/AVG/normed_linear_velocity", linear_velocity)
+        self.scalar_logger.log("task_state", "GoThroughPositions/AVG/absolute_angular_velocity", angular_velocity)
 
         # heading reward (encourages the robot to face the target)
         heading_rew = torch.exp(-heading_dist / self._task_cfg.position_heading_exponential_reward_coeff)
@@ -343,12 +344,12 @@ class GoThroughPositionsTask(TaskCore):
         self._previous_position_dist[reached_ids] = 0
 
         # Update logs
-        self.scalar_logger.log("task_reward", "AVG/linear_velocity", linear_velocity_rew)
-        self.scalar_logger.log("task_reward", "AVG/angular_velocity", angular_velocity_rew)
-        self.scalar_logger.log("task_reward", "AVG/boundary", boundary_rew)
-        self.scalar_logger.log("task_reward", "AVG/heading", heading_rew)
-        self.scalar_logger.log("task_reward", "AVG/progress", progress_rew)
-        self.scalar_logger.log("task_reward", "SUM/num_goals", goal_reached)
+        self.scalar_logger.log("task_reward", "GoThroughPositions/AVG/linear_velocity", linear_velocity_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPositions/AVG/angular_velocity", angular_velocity_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPositions/AVG/boundary", boundary_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPositions/AVG/heading", heading_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPositions/AVG/progress", progress_rew)
+        self.scalar_logger.log("task_reward", "GoThroughPositions/SUM/num_goals", goal_reached)
 
         # Return the reward by combining the different components and adding the robot rewards
         return (
@@ -359,7 +360,7 @@ class GoThroughPositionsTask(TaskCore):
             + boundary_rew * self._task_cfg.boundary_weight
             + self._task_cfg.time_penalty
             + self._task_cfg.reached_bonus * goal_reached
-        ) + self._robot.compute_rewards()
+        ) + self._robot.compute_rewards(env_ids=self._env_ids)
 
     def reset(
         self,

@@ -33,8 +33,8 @@ class FloatingPlatformRobotCfg(RobotCoreCfg):
 
     thrusters_dof_name = [f"thruster_{i}" for i in range(1, num_thrusters + 1)]
     root_id_name = "Cylinder"
-    rew_action_rate_scale = -0.12 / 8
-    rew_joint_accel_scale = -2.5e-6
+    rew_action_rate_scale = 0.0 #-0.12 / 8
+    rew_joint_accel_scale = 0.0 #-2.5e-6
 
     max_thrust = 1.0
     """Maximum thrust of the thrusters in Newtons"""

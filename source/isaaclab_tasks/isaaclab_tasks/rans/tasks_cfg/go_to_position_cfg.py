@@ -44,7 +44,7 @@ class GoToPositionCfg(TaskCoreCfg):
     position_tolerance: float = 0.01
     """Tolerance for the position of the robot. Defaults to 1cm."""
     maximum_robot_distance: float = 15.0
-    """Maximal distance between the robot and the target pose. Defaults to 10 m."""
+    """Maximal distance between the robot and the target pose. Defaults to 15 m."""
     reset_after_n_steps_in_tolerance: int = 100
     """Reset the environment after n steps in tolerance. Defaults to 100 steps."""
 

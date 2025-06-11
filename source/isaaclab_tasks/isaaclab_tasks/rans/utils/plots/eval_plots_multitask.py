@@ -11,102 +11,88 @@ import yaml
 def main():
     list_of_folders = [
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_13-24-37_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_13-35-01_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_13-45-23_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_13-55-42_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_14-06-08_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_14-16-29_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_12-08-03_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_12-30-15_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_12-52-10_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-3",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_13-14-26_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_13-36-31_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-5",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_13-58-32_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_14-20-47_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-7",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_14-42-56_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-8",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_15-04-58_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-9",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_15-27-00_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-10",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_16-26-02_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_16-33-36_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_16-41-17_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_16-48-49_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_16-56-25_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_17-03-57_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_15-49-05_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_16-11-05_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_16-33-14_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-3",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_16-55-20_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_17-17-23_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-5",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_17-39-11_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_18-01-08_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-7",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_18-22-57_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-8",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_18-44-47_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-9",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_19-06-25_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-10",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_18-07-40_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_18-15-24_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_18-23-03_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_18-30-48_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_18-38-26_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-22_18-46-07_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_19-28-25_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_19-51-51_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_20-15-34_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-3",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_20-39-08_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_21-02-41_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-5",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_21-26-18_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_21-49-42_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-7",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_22-13-20_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-8",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_22-37-05_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-9",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_23-00-56_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-10",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_06-20-58_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_06-28-34_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_06-36-14_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_06-43-56_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_06-51-40_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_06-59-26_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-6",
-        ],
-
-
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_16-54-58_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_17-14-06_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_17-33-08_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_17-52-07_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_18-11-06_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_18-30-08_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities_Turtlebot2_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_23-24-42_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_23-50-03_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_00-15-53_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-3",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_00-41-41_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_01-07-34_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-5",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_01-33-19_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_01-58-53_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-7",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_02-24-30_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-8",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_02-50-32_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-9",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_03-16-29_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-10",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_12-32-12_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_12-46-39_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_13-01-04_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_13-15-33_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_13-29-46_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_13-44-18_rsl-rl_ppo_GoToPosition_Turtlebot2_r-0_seed-6",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_13-58-47_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_14-13-30_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_14-28-20_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_14-43-07_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_14-57-39_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_15-12-26_rsl-rl_ppo_GoToPose_Turtlebot2_r-0_seed-6",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_15-27-11_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_15-41-51_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_15-56-28_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_16-10-58_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_16-25-34_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-23_16-40-15_rsl-rl_ppo_TrackVelocities_Turtlebot2_r-0_seed-6",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_03-42-31_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_04-18-05_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_04-54-38_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-3",
+            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_05-30-44_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-4",
         ],
     ]
 
     plot_cfg = {
         "title": "",
         "box_colors": [
-            '#FFB3BA',  # Light Pink
-            '#FFDFBA',  # Light Orange
-            # '#FFFFBA',  # Light Yellow
-            # '#BAFFC9',  # Light Green
-            '#BAE1FF',  # Light Blue
-            '#D0BAFF',   # Light Purple
+            # '#FFB3BA',  # Light Pink
+            # '#FFDFBA',  # Light Orange
+            # # '#FFFFBA',  # Light Yellow
+            # # '#BAFFC9',  # Light Green
+            # '#BAE1FF',  # Light Blue
+            # '#D0BAFF',   # Light Purple
 
             "#FF3D50", 
             "#FFA034", 
             "#2FA5FF", 
-            "#7434FF",  
+            "#7434FF",
+            "#4FFF75",
         ],
         "runs_names": [
-            "MTRL (Pose, Position, Vel) 32",
-            "MTRL (Position) 32",
-            "MTRL (Pose) 32",
-            "MTRL (Vel) 32",
-            "MTRL (Pose, Position, Vel) 128",
-            "MTRL (Position) 128",
-            "MTRL (Pose) 128",
-            "MTRL (Vel) 128",
+            "Detumble",
+            "Docking",
+            "Track Velocities",
+            "Rendezvous",
+            "MTRL",
         ],
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/plots/multitask_nn-128" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/plots/mtlrl_256" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 
@@ -132,7 +118,7 @@ def main():
                             if task_name in f.split("/")[-1]
                         )
                     except StopIteration:
-                        print(f"Error reading file in {experiment_name}: {e}")
+                        print(f"Error reading file in {experiment_name} in {folder_path}")
                         exit(0)
 
                     # experiment_name = glob.glob(os.path.join(folder_path, "metrics", "*_metrics.csv"))[task_idx]

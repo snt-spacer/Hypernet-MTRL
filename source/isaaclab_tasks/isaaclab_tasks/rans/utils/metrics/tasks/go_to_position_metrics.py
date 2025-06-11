@@ -79,17 +79,71 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
         efficiency = shortest_path / total_distance
         self.metrics["trajectory_efficiency.u"] = efficiency
 
+    # @BaseTaskMetrics.register
+    # def jerckiness(self):
+    #     print("[INFO][METRICS][TASK] Jerkiness")
+    #     last_n_steps = 20
+    #     masked_pos_dist = self.trajectories['position_distance'] * self.trajectories_masks
+    #     last_pos = torch.stack([row[start_idx - last_n_steps: start_idx] for row, start_idx in zip(masked_pos_dist, self.last_true_index)])
+
+    #     vel = last_pos[:, 1:] - last_pos[:, :-1]
+    #     acc = vel[:, 1:] - vel[:, :-1]
+    #     jerk = torch.mean(acc[:, 1:] - acc[:, :-1], dim=1)
+
+    #     self.metrics[f"mean_last_{last_n_steps}_steps_jerk.u"] = jerk
+
+
     @BaseTaskMetrics.register
-    def jerckiness(self):
-        print("[INFO][METRICS][ROBOT] Jerkiness")
-        last_n_steps = 20
-        masked_pos_dist = self.trajectories['position_distance'] * self.trajectories_masks
-        last_pos = torch.stack([row[start_idx - last_n_steps: start_idx] for row, start_idx in zip(masked_pos_dist, self.last_true_index)])
+    def time_to_half_init_velocity(self):
+        print("[INFO][METRICS][TASK] Time to half initial velocity")
+        if "MultiTask" in self.env.unwrapped.__class__.__name__:
+            init_vel = self.env.unwrapped.tasks_apis[0]._task_cfg.spawn_max_lin_vel
+        else:
+            init_vel = self.env.unwrapped.task_api._task_cfg.spawn_max_lin_vel
 
-        vel = last_pos[:, 1:] - last_pos[:, :-1]
-        acc = vel[:, 1:] - vel[:, :-1]
-        jerk = torch.mean(acc[:, 1:] - acc[:, :-1], dim=1)
+        len_trajec = self.trajectories['half_init_lin_vel_x'].shape[1]
 
-        self.metrics[f"mean_last_{last_n_steps}_steps_jerk.u"] = jerk
+        masked_half_init_vel_x = self.trajectories['half_init_lin_vel_x'] * self.trajectories_masks
+        half_init_vel_x_idx = torch.argmax(masked_half_init_vel_x.int(), dim=1)
+        all_false = ~torch.any(masked_half_init_vel_x.int(), dim=1) # argmax returns 0 if all values are false
+        half_init_vel_x_idx[all_false] = len_trajec
+
+        masked_half_init_vel_y = self.trajectories['half_init_lin_vel_y'] * self.trajectories_masks
+        half_init_vel_y_idx = torch.argmax(masked_half_init_vel_y.int(), dim=1)
+        all_false = ~torch.any(masked_half_init_vel_y.int(), dim=1)
+        half_init_vel_y_idx[all_false] = len_trajec
+
+        masked_half_init_ang_vel = self.trajectories['half_init_ang_vel'] * self.trajectories_masks
+        half_init_ang_vel_idx = torch.argmax(masked_half_init_ang_vel.int(), dim=1)
+        all_false = ~torch.any(masked_half_init_ang_vel.int(), dim=1)
+        half_init_ang_vel_idx[all_false] = len_trajec
+
+        time_s_to_reach_half_init_vel_x = half_init_vel_x_idx * self.step_dt
+        time_s_to_reach_half_init_vel_y = half_init_vel_y_idx * self.step_dt
+        time_s_to_reach_half_init_ang_vel = half_init_ang_vel_idx * self.step_dt
+
+        self.metrics["time_to_half_initial_linear_velocity_x.s"] = time_s_to_reach_half_init_vel_x
+        self.metrics["time_to_half_initial_linear_velocity_y.s"] = time_s_to_reach_half_init_vel_y
+        self.metrics["time_to_half_initial_angular_velocity.s"] = time_s_to_reach_half_init_ang_vel
         
     
+    @BaseTaskMetrics.register
+    def final_velocity_error(self):
+        print("[INFO][METRICS][TASK] Final velocity error")
+
+        masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
+        final_position_delta = masked_distances[torch.arange(0, masked_distances.shape[0], device=masked_distances.device), self.last_true_index]
+        self.metrics["final_position_distance.m"] = final_position_delta
+
+        masked_lin_vel_x = self.trajectories['linear_velocity'][..., 0] * self.trajectories_masks
+        masked_lin_vel_y = self.trajectories['linear_velocity'][..., 1] * self.trajectories_masks
+        masked_ang_vel = self.trajectories['angular_velocity'][..., -1] * self.trajectories_masks
+
+        final_lin_vel_x = masked_lin_vel_x[torch.arange(0, masked_lin_vel_x.shape[0], device=masked_lin_vel_x.device), self.last_true_index]
+        final_lin_vel_y = masked_lin_vel_y[torch.arange(0, masked_lin_vel_y.shape[0], device=masked_lin_vel_y.device), self.last_true_index]
+        final_ang_vel = masked_ang_vel[torch.arange(0, masked_ang_vel.shape[0], device=masked_ang_vel.device), self.last_true_index]
+
+        # The final velocities are also the error in this case, as we want the robot to stop
+        self.metrics["final_linear_velocity_error_x.m/s"] = final_lin_vel_x
+        self.metrics["final_linear_velocity_error_y.m/s"] = final_lin_vel_y
+        self.metrics["final_angular_velocity_error.rad/s"] = final_ang_vel

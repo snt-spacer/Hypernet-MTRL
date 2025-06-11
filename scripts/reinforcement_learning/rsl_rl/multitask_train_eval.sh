@@ -1,20 +1,18 @@
 #!/bin/bash
 
 # --- Configuration ---
-OUTPUT_DIR_NAME="multitask_train_eval_info"
+OUTPUT_DIR_NAME="multitask_train_eval_FP_deep_nets"
 BASE_OUTPUT_DIR="/workspace/isaaclab/source/${OUTPUT_DIR_NAME}"
 mkdir -p "$BASE_OUTPUT_DIR"
 MODEL_TRACKER_FILE="${BASE_OUTPUT_DIR}/trained_models_tracker.log"
 
 # Define your robots and tasks
-robots=(Turtlebot2)
-BASE_TASKS=(GoToPosition GoToPose TrackVelocities)
+robots=(FloatingPlatform)
+BASE_TASKS=(GoToPosition GoToPose TrackVelocities GoThroughPoses)
 TRAINING_TASK_CONFIGS=("${BASE_TASKS[@]}" "ALL_COMBINED_TASKS")
-num_envs=4096
+num_envs=4096 # Base number of environments
 
-# Convert the tasks array into a comma-separated string for Python arguments
-# IFS=, EVAL_TASKS_NAMES="${tasks[*]}" # Note: IFS is automatically reset for subsequent commands.
-# NUM_TASKS=${#tasks[@]}
+total_start_time=$(date +%s)
 
 # --- Main Loop: Training and Evaluation for each robot and seed ---
 for robot in "${robots[@]}"
@@ -25,17 +23,27 @@ do
         if [ "$task_config" == "ALL_COMBINED_TASKS" ]; then
             tasks=("${BASE_TASKS[@]}")
             TRAINING_DESCRIPTION="all_tasks"
+            # For combined task training, use the base num_envs
+            TRAINING_NUM_ENVS="${num_envs}"
         else
             tasks=("$task_config")
             TRAINING_DESCRIPTION="$task_config"
+            # For single task training, divide num_envs by the total number of base tasks
+            # This implicitly assumes a single task is one of the BASE_TASKS
+            TRAINING_NUM_ENVS=$((num_envs / ${#BASE_TASKS[@]}))
+            if [ "$TRAINING_NUM_ENVS" -eq 0 ]; then
+                TRAINING_NUM_ENVS=1 # Ensure at least 1 environment to avoid errors
+            fi
         fi
 
         # Convert the tasks array into a comma-separated string for Python arguments
-        IFS=, EVAL_TASKS_NAMES="${tasks[*]}"  # Note: IFS is automatically reset for subsequent commands.
+        IFS=, EVAL_TASKS_NAMES="${tasks[*]}" # Note: IFS is automatically reset for subsequent commands.
         NUM_TASKS=${#tasks[@]}
 
-        for seed in {1..6}
+        for seed in {1..2}
         do
+            run_start_time=$(date +%s)
+
             # Generate a unique timestamp for the current training run's log file
             TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
             CLEAN_TASKS_NAMES=$(echo "$EVAL_TASKS_NAMES" | tr ',' '-')
@@ -44,12 +52,13 @@ do
             echo "--------------------------------------------------------"
             echo "Starting run for Robot: $robot, Seed: $seed, Tasks: $EVAL_TASKS_NAMES"
             echo "Training logs will be written to: $TRAINING_LOG_FILE"
+            echo "Training with num_envs: ${TRAINING_NUM_ENVS}"
 
             # --- Training Phase Execution ---
             ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
                 --task=Isaac-RANS-MultiTask-v0 \
                 --seed="${seed}" \
-                --num_envs="${num_envs}" \
+                --num_envs="${TRAINING_NUM_ENVS}" \
                 --headless \
                 env.robot_name="${robot}" \
                 env.tasks_names="[${EVAL_TASKS_NAMES}]" > "$TRAINING_LOG_FILE" 2>&1
@@ -57,6 +66,9 @@ do
             # Check if the training command executed successfully
             if [ $? -eq 0 ]; then
                 echo "Training completed successfully for Robot: $robot, Seed: $seed, Tasks: $CLEAN_TASKS_NAMES."
+                run_end_time=$(date +%s)
+                run_duration=$((run_end_time - run_start_time))
+                echo "Run duration: $(($run_duration / 60)) minutes and $(($run_duration % 60)) seconds."
             else
                 echo "Training failed for Robot: $robot, Seed: $seed, Tasks: $CLEAN_TASKS_NAMES. Check logs in $TRAINING_LOG_FILE for details."
                 echo "--------------------------------------------------------"
@@ -71,9 +83,9 @@ do
             # --- Error Handling for Path Extractions ---
             if [ -z "$LOG_BASE_DIR" ] || [ -z "$MODEL_RELATIVE_PATH" ] || [ -z "$TOTAL_STEPS_STR" ]; then
                 echo "Error: One or more critical pieces of information (LOG_BASE_DIR, MODEL_RELATIVE_PATH, TOTAL_STEPS_STR) could not be extracted from $TRAINING_LOG_FILE."
-                echo "  LOG_BASE_DIR: '$LOG_BASE_DIR'"
-                echo "  MODEL_RELATIVE_PATH: '$MODEL_RELATIVE_PATH'"
-                echo "  TOTAL_STEPS_STR: '$TOTAL_STEPS_STR'"
+                echo "    LOG_BASE_DIR: '$LOG_BASE_DIR'"
+                echo "    MODEL_RELATIVE_PATH: '$MODEL_RELATIVE_PATH'"
+                echo "    TOTAL_STEPS_STR: '$TOTAL_STEPS_STR'"
                 echo "Skipping evaluation for Robot: $robot, Seed: $seed, Tasks: $CLEAN_TASKS_NAMES. and continuing to the next run."
                 echo "--------------------------------------------------------"
                 continue
@@ -90,7 +102,14 @@ do
             echo "Model path added to: $MODEL_TRACKER_FILE"
 
             # --- Evaluation Phase Execution ---
-            EVAL_NUM_ENVS=$((num_envs * NUM_TASKS))
+            # Determine EVAL_NUM_ENVS based on whether it's a single task or combined tasks
+            if [ "$task_config" == "ALL_COMBINED_TASKS" ]; then
+                EVAL_NUM_ENVS=$((num_envs * NUM_TASKS)) # Multiply num_envs by NUM_TASKS for multi-task evaluation
+            else
+                EVAL_NUM_ENVS="${num_envs}" # Use base num_envs for single task evaluation
+            fi
+            echo "Evaluation with num_envs: ${EVAL_NUM_ENVS}"
+
             # Iterate through each task for individual evaluation
             for i in "${!tasks[@]}"; do
                 CURRENT_TASK="${tasks[i]}"
@@ -103,8 +122,8 @@ do
                 # Convert temp_tasks_array to a comma-separated string
                 IFS=, EVAL_ORDERED_TASKS_NAMES="${temp_tasks_array[*]}"
                 echo "Starting evaluation for model: $FINAL_MODEL_CHECKPOINT_PATH"
-                echo "  Evaluation Task: ${CURRENT_TASK}"
-                echo "  Evaluation Task Order Passed: [${EVAL_ORDERED_TASKS_NAMES}]"
+                echo "    Evaluation Task: ${CURRENT_TASK}"
+                echo "    Evaluation Task Order Passed: [${EVAL_ORDERED_TASKS_NAMES}]"
                 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/eval.py \
                     --task=Isaac-RANS-MultiTask-v0 \
                     --headless \
@@ -128,4 +147,11 @@ do
     done
 done
 
+total_end_time=$(date +%s)
+total_duration=$((total_end_time - total_start_time))
+total_hours=$(($total_duration / 3600))
+total_minutes=$((($total_duration % 3600) / 60))
+total_seconds=$(($total_duration % 60))
+
 echo "All training and evaluation runs completed."
+echo "Total execution time: $total_hours hours, $total_minutes minutes, and $total_seconds seconds."
