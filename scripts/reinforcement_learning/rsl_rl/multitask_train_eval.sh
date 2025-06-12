@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- Configuration ---
-OUTPUT_DIR_NAME="multitask_train_eval_FP_deep_nets"
+OUTPUT_DIR_NAME="multitask_train_eval_FP_deep_nets_4x128"
 BASE_OUTPUT_DIR="/workspace/isaaclab/source/${OUTPUT_DIR_NAME}"
 mkdir -p "$BASE_OUTPUT_DIR"
 MODEL_TRACKER_FILE="${BASE_OUTPUT_DIR}/trained_models_tracker.log"

@@ -10,59 +10,68 @@ import yaml
 
 def main():
     list_of_folders = [
+        # 32
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_12-08-03_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_12-30-15_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_12-52-10_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_13-14-26_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_13-36-31_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_13-58-32_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-6",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_14-20-47_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-7",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_14-42-56_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-8",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_15-04-58_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-9",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_15-27-00_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-10",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_09-23-20_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_09-44-40_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-2",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_15-49-05_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_16-11-05_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_16-33-14_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_16-55-20_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_17-17-23_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_17-39-11_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-6",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_18-01-08_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-7",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_18-22-57_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-8",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_18-44-47_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-9",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_19-06-25_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-10",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_10-06-00_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_10-27-12_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_19-28-25_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_19-51-51_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_20-15-34_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_20-39-08_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_21-02-41_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_21-26-18_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-6",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_21-49-42_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-7",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_22-13-20_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-8",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_22-37-05_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-9",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_23-00-56_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-10",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_10-48-29_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_11-10-33_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-2",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_23-24-42_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-27_23-50-03_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_00-15-53_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_00-41-41_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-4",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_01-07-34_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-5",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_01-33-19_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-6",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_01-58-53_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-7",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_02-24-30_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-8",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_02-50-32_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-9",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_03-16-29_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-10",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_11-32-22_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_11-59-24_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_03-42-31_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_04-18-05_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_04-54-38_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-3",
-            "/workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_05-30-44_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_12-26-10_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_13-16-26_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2",
+        ],
+        # 64
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_14-16-44_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_14-32-02_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_14-47-23_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_15-02-44_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_15-18-14_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_15-34-23_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_15-50-25_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_16-10-22_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_16-30-37_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_17-09-28_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2",
+        ],
+          # 128  
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_14-19-20_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_14-50-50_rsl-rl_ppo_GoToPosition_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_15-22-26_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_15-53-51_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_16-25-11_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_16-57-36_rsl-rl_ppo_TrackVelocities_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_17-30-19_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_18-10-32_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_18-50-46_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_20-04-55_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2",
         ],
     ]
 
@@ -77,22 +86,44 @@ def main():
             # '#D0BAFF',   # Light Purple
 
             "#FF3D50", 
-            "#FFA034", 
-            "#2FA5FF", 
-            "#7434FF",
-            "#4FFF75",
+            "#FF3D50", 
+            "#FF3D50", 
+            "#FF3D50",
+            "#FFA034",
+
+            "#2FA1FF", 
+            "#2FA1FF",  
+            "#2FA1FF",  
+            "#2FA1FF", 
+            "#A734FF",
+
+            "#FFFF3D", 
+            "#FFFF3D", 
+            "#FFFF3D", 
+            "#FFFF3D",
+            "#4DFF3D", 
         ],
         "runs_names": [
-            "Detumble",
-            "Docking",
-            "Track Velocities",
-            "Rendezvous",
-            "MTRL",
+            "Detumble 32",
+            "Docking 32",
+            "Track Velocities 32",
+            "Rendezvous 32",
+            "MTRL 32",
+            "Detumble 64",
+            "Docking 64",
+            "Track Velocities 64",
+            "Rendezvous 64",
+            "MTRL 64",
+            "Detumble 128",
+            "Docking 128",
+            "Track Velocities 128",
+            "Rendezvous 128",
+            "MTRL 128",
         ],
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/plots/mtlrl_256" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/plots/mtlrl_deep_nets" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 

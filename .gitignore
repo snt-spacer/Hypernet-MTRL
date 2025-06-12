@@ -64,3 +64,6 @@ _build
 
 # Notebooks
 # **/*.ipynb
+
+multitask*/
+plots/mtlrl_deep_nets/*.svg
