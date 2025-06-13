@@ -26,7 +26,7 @@ import torch.nn.functional as F
 class MultiTaskEnvCfg(DirectRLEnvCfg):
     # env
     decimation = 12
-    episode_length_s = 30.0
+    episode_length_s = 60.0
 
     robot_name = "Leatherback"
     tasks_names = ["GoToPosition"]
