@@ -1,21 +1,35 @@
 #!/bin/bash
 
 # --- Configuration ---
-OUTPUT_DIR_NAME="multitask_eval_FP"
+OUTPUT_DIR_NAME="multitask_eval_FP_deep_nets_4x64_4x32_4x128"
 BASE_OUTPUT_DIR="/workspace/isaaclab/source/${OUTPUT_DIR_NAME}"
 mkdir -p "$BASE_OUTPUT_DIR"
 EVALUATION_LOG_FILE="${BASE_OUTPUT_DIR}/evaluation_run_$(date +"%Y-%m-%d_%H-%M-%S").log"
 
 # Define your robot and tasks
 robot="FloatingPlatform"
-BASE_TASKS=(GoToPosition GoToPose TrackVelocities GoThroughPoses)
+BASE_TASKS=(GoToPose GoToPosition TrackVelocities GoThroughPoses)
 num_envs=4096 # Base number of environments, adjust if needed
 
 MODEL_PATHS=(
-    /workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_03-42-31_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1/model_1999.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_04-18-05_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2/model_1999.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_04-54-38_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-3/model_1999.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask/2025-05-28_05-30-44_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-4/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_17-09-28_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_16-30-37_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_14-47-23_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_15-02-44_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_15-50-25_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64/2025-06-11_16-10-22_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_12-26-10_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_13-16-26_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_11-32-22_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_11-59-24_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_10-06-00_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x32/2025-06-11_10-27-12_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_18-50-46_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_20-04-55_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_17-30-19_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-1/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_18-10-32_rsl-rl_ppo_GoThroughPoses_FloatingPlatform_r-0_seed-2/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_15-22-26_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-1/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x128/2025-06-11_15-53-51_rsl-rl_ppo_GoToPose_FloatingPlatform_r-0_seed-2/model_2999.pt
 )
 
 # Check if model paths are provided

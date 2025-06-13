@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- Configuration ---
-OUTPUT_DIR_NAME="multitask_train_eval_FP_deep_nets_4x128"
+OUTPUT_DIR_NAME="multitask_train_eval_FP_deep_nets_4x64_10xseeds"
 BASE_OUTPUT_DIR="/workspace/isaaclab/source/${OUTPUT_DIR_NAME}"
 mkdir -p "$BASE_OUTPUT_DIR"
 MODEL_TRACKER_FILE="${BASE_OUTPUT_DIR}/trained_models_tracker.log"
@@ -40,7 +40,7 @@ do
         IFS=, EVAL_TASKS_NAMES="${tasks[*]}" # Note: IFS is automatically reset for subsequent commands.
         NUM_TASKS=${#tasks[@]}
 
-        for seed in {1..2}
+        for seed in {1..10}
         do
             run_start_time=$(date +%s)
 

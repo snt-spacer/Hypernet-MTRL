@@ -100,3 +100,45 @@ class BaseTaskPlots(AutoRegister):
         save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.svg")
         plt.savefig(save_path)
         plt.close()
+
+    def dotplot(self, key_to_plot: str):
+        key_name, units = key_to_plot.split(".")
+
+        fig, ax = plt.subplots(figsize=(14, 6))
+
+        data_to_plot = []
+        label_names = []
+
+        colors_indx = []
+        for group_key, group_dfs in self._dfs.items():
+            try:
+                group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
+            except KeyError as e:
+                print(f"KeyError: {e}. The key '{key_to_plot}' does not exist in the DataFrames.")
+                print(self.__class__.__name__)
+                return
+            
+            colors_indx.append(self._plot_cfg['runs_names'].index(group_key.split("_")[-1]))
+            
+            data_to_plot.append(group_values)
+            label_names.append(group_key.split("_")[-1])
+
+        # Create a dot plot
+        for i, (values, label) in enumerate(zip(data_to_plot, label_names)):
+            ax.plot([i + 1] * len(values), values, 'o', color=self._plot_cfg["box_colors"][colors_indx[i]], markersize=5)
+
+        if self._plot_cfg["zoom_in"]:
+            all_values = pd.concat(data_to_plot)
+            ax.set_ylim(top=all_values.quantile(0.95) )
+
+        y_label, units = key_to_plot.split(".")
+        y_label = y_label.replace("_", " ").capitalize()
+        ax.set_title(f"{y_label}")
+        ax.set_ylabel(f"{y_label} ({units})")
+        ax.set_xticks(range(1, len(label_names) + 1))
+        ax.set_xticklabels(label_names, rotation=20, ha='right')
+        ax.grid(True)
+        plt.tight_layout()
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.svg")
+        plt.savefig(save_path)
+        plt.close()

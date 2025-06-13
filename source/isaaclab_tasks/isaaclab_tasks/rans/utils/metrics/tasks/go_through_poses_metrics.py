@@ -4,7 +4,28 @@ import torch
 class GoThroughPosesMetrics(BaseTaskMetrics, Registerable):
     def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str) -> None:
         super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
-    
+
+    @BaseTaskMetrics.register
+    def success_rate_weighted_by_path_length(self):
+        print("[INFO][METRICS][TASK] Success rate weighted by path length")
+        shortest_path_lenght = self.trajectory_shortest_distance(self.trajectories['target_positions'])
+        robot_distance_traveled = self.robot_distance_traveled(self.trajectories['position'][..., :2] * self.trajectories_masks.unsqueeze(-1))
+        trajectory_completed = (self.trajectories['trajectory_completed'] * self.trajectories_masks).sum(dim=1)
+
+        self.metrics["spl.u"] = trajectory_completed * (shortest_path_lenght / torch.max(robot_distance_traveled, shortest_path_lenght))
+
+    @BaseTaskMetrics.register
+    def orientation_error_following_path(self):
+        print("[INFO][METRICS][TASK] Orientation error following path")
+        masked_sin = self.trajectories['sin_target_heading_error'] * self.trajectories_masks
+        masked_cos = self.trajectories['cos_target_heading_error'] * self.trajectories_masks
+
+        avg_sin = torch.sum(masked_sin, dim=1) / torch.sum(self.trajectories_masks, dim=1)
+        avg_cos = torch.sum(masked_cos, dim=1) / torch.sum(self.trajectories_masks, dim=1)
+
+        angle_error = torch.arctan2(avg_sin, avg_cos)
+        self.metrics["orientation_error_following_path.rad"] = angle_error
+
     @BaseTaskMetrics.register
     def avg_time_to_reach_goal(self):
         print("[INFO][METRICS][TASK] Time to reach goal")

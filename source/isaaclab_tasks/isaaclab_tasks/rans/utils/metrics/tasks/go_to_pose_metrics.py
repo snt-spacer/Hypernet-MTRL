@@ -5,36 +5,8 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
     def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str) -> None:
         super().__init__(env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
 
-    def get_reached_idx(self) -> torch.Tensor:
-        # Position threshold
-        if "MultiTask" in self.env.unwrapped.__class__.__name__:
-            pos_threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.position_tolerance
-        else:
-            pos_threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
-        masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
-        pos_reached_threshold = masked_distances <= pos_threshold
-
-        # Heading threshold
-        if "MultiTask" in self.env.unwrapped.__class__.__name__:
-            heading_threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.heading_tolerance
-        else:
-            heading_threshold = self.env.unwrapped.task_api._task_cfg.heading_tolerance
-        heading_error = torch.arctan2(
-            torch.sin(self.trajectories['target_headings'] - self.trajectories['heading']),
-            torch.cos(self.trajectories['target_headings'] - self.trajectories['heading']),
-        ) * self.trajectories_masks
-        heading_reached_threshold = torch.abs(heading_error) <= heading_threshold
-
-        # Combine position and heading thresholds
-        reached_threshold = pos_reached_threshold & heading_reached_threshold
-
-        # First index where the threshold is reached
-        len_trajec = self.trajectories['position_distance'].shape[1] # argmax returns 0 if all values are false
-        reached_idx = torch.argmax(reached_threshold.int(), dim=1)
-        all_false = ~torch.any(reached_threshold, dim=1)
-        reached_idx[all_false] = len_trajec
-
-        return reached_idx
+        self.pos_threshold = 0
+        self.heading_threshold = 0
     
     @BaseTaskMetrics.register
     def time_to_reach_position_threshold(self):
@@ -141,3 +113,11 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
     #     jerk = torch.mean(acc[:, 1:] - acc[:, :-1], dim=1)
 
     #     self.metrics[f"mean_last_{last_n_steps}_steps_jerk.u"] = jerk
+
+    @BaseTaskMetrics.register
+    def success_rate(self):
+        """ Success rate of the task, defined as the percentage of episodes where the robot reached the target position and heading. """
+        print("[INFO][METRICS][TASK] Success rate")
+        _, under_threshold = self.get_reached_idx_and_stay_under_threshold()
+        self.metrics["success_rate.u"] = under_threshold.sum() / under_threshold.shape[0]
+

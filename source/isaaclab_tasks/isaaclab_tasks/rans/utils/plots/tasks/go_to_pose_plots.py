@@ -7,6 +7,7 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
 
         self.task_name = "go_to_pose"
 
+        # Box plots
         keys_set = set()
         for group_dfs in dfs.values():
             for df in group_dfs:
@@ -34,10 +35,20 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
                 keys_set.update(
                     key for key in df.columns if key.startswith("final_orientation_error")
                 )
+        self.labels_box_plot = list(keys_set)
 
-
-        self.labels_to_plot = list(keys_set)
+        # Dot plots
+        keys_set = set()
+        for group_dfs in dfs.values():
+            for df in group_dfs:
+                keys_set.update(
+                    key for key in df.columns if key.startswith("success_rate")
+                )
+        self.labels_dots = list(keys_set)
 
     def plot(self):
-        for label_to_plot in self.labels_to_plot:
+        for label_to_plot in self.labels_box_plot:
             self.boxplot(label_to_plot)
+
+        for label_to_plot in self.labels_dots:
+            self.dotplot(label_to_plot)
