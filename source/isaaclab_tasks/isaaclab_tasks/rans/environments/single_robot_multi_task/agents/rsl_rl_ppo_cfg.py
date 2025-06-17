@@ -13,18 +13,18 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
     max_iterations = 4000
     save_interval = 200
-    experiment_name = "multitask_deep_net_4x64m128_10xseeds"
+    experiment_name = "multitask_deep_net_4x64_10xseeds"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "multitask_deep_net_4x64m128_10xseeds",
+        "project": "multitask_deep_net_4x64_10xseeds",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
-        actor_hidden_dims=[64, 64, 128, 64, 64],
-        critic_hidden_dims=[64, 64, 128, 64, 64],
+        actor_hidden_dims=[64, 64, 64, 64],
+        critic_hidden_dims=[64, 64, 64, 64],
         activation="elu",
         clip_actions=True,
         clip_actions_range=[0, 1],

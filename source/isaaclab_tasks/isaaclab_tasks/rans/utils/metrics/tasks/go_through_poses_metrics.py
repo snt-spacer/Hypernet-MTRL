@@ -93,4 +93,4 @@ class GoThroughPosesMetrics(BaseTaskMetrics, Registerable):
         steps_per_goal_time[valid_goals_mask] *= self.step_dt
 
         for i in range(num_goals):
-            self.metrics["time_to_reach_goal_num_{i}.s"] = steps_per_goal_time[:, i]
+            self.metrics[f"time_to_reach_goal_num_{i}.s"] = steps_per_goal_time[:, i]

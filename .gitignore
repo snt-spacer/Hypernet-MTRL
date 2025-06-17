@@ -66,4 +66,5 @@ _build
 # **/*.ipynb
 
 multitask*/
-plots/mtlrl_deep_nets/*.svg
+*.svg
+*.zip
