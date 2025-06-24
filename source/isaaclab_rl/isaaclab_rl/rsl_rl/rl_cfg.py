@@ -92,6 +92,10 @@ class RslRlPpoActorCriticMemoryCfg:
 
     num_memory_obs: int = MISSING
     """The size of the memory observation input."""
+
+    network_type: str = "pure" #pure, hybrid
+    """The type of network to use."""
+
 @configclass
 class RslRlPpoAlgorithmCfg:
     """Configuration for the PPO algorithm."""

@@ -11,12 +11,12 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticMemory
 @configclass
 class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 2000000
-    save_interval = 10000
-    experiment_name = "multitask_memory"
+    max_iterations = 3000
+    save_interval = 100
+    experiment_name = "multitask_memory_test"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "multitask_memory",
+        "project": "multitask_memory_test",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
@@ -30,8 +30,9 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         clip_actions_range=[-1, 1],
         use_embeddings=True,
         embeddings_size=32,
-        generator_size=(512, 256, 256, 128),
+        generator_size=(64, 64),
         num_memory_obs=4,
+        network_type="hybrid", #pure, hybrid
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,
@@ -40,8 +41,8 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         entropy_coef=0.005,
         num_learning_epochs=5,
         num_mini_batches=4,
-        learning_rate=1.0e-3,
-        schedule="fixed",
+        learning_rate=1.0e-5,
+        schedule="adaptive", # fixed, adaptive
         gamma=0.99,
         lam=0.95,
         desired_kl=0.01,
