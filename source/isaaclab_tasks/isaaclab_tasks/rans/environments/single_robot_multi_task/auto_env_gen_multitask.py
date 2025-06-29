@@ -127,15 +127,24 @@ class MultiTaskEnv(DirectRLEnv):
 
     @property
     def eval_data_keys(self) -> list[str]:
-        task_data_keys = self.tasks_apis[0].eval_data_keys
+        # Collect eval_data_keys from all tasks and robot
+        all_task_data_keys = []
+        for task_api in self.tasks_apis:
+            all_task_data_keys.extend(task_api.eval_data_keys)
         robot_data_keys = self.robot_api.eval_data_keys
-        return task_data_keys + robot_data_keys
+        return all_task_data_keys + robot_data_keys
     
     @property
     def eval_data(self) -> dict:
-        task_eval_data = self.tasks_apis[0].eval_data
+        # Collect eval_data from all tasks and robot
+        all_task_eval_data = {}
+        for i, task_api in enumerate(self.tasks_apis):
+            task_eval_data = task_api.eval_data
+            # Prefix task data with task index to avoid key conflicts
+            for key, value in task_eval_data.items():
+                all_task_eval_data[f"task_{i}_{key}"] = value
         robot_eval_data = self.robot_api.eval_data
-        return {**task_eval_data, **robot_eval_data}
+        return {**all_task_eval_data, **robot_eval_data}
     
     def _configure_gym_env_spaces(self):
         """Configure the action and observation spaces for the Gym environment."""

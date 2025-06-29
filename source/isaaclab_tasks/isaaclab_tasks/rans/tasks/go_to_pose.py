@@ -96,7 +96,7 @@ class GoToPoseTask(TaskCore):
         return {
             "target_positions": self._target_positions,
             "target_headings": self._target_headings,
-            "position_distance": self._task_data[:, 0],
+            "position_distance": self._position_dist,
             "cos_heading_to_target_error": self._task_data[:, 1],
             "sin_heading_to_target_error": self._task_data[:, 2],
             "cos_target_heading_error": self._task_data[:, 3],

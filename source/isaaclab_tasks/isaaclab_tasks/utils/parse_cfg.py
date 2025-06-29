@@ -96,7 +96,9 @@ def load_cfg_from_registry(task_name: str, entry_point_key: str) -> dict | objec
     return cfg
 
 def load_cfg_from_checkpoint(checkpoint_path: str, task_name: str, entry_point_key: str) -> dict | object:
-    config_file_path = "/".join(checkpoint_path.split("/")[:-1]) + "/params/agent.yaml"
+    # config_file_path = "/".join(checkpoint_path.split("/")[:-1]) + "/params/agent.yaml"
+    checkpoint_dir = os.path.dirname(checkpoint_path)
+    config_file_path = os.path.join(checkpoint_dir, "params", "agent.yaml")
 
     if os.path.exists(config_file_path):
         print(f"[INFO]: Loading configuration from: {config_file_path}")

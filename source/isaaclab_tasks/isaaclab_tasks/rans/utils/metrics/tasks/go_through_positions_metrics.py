@@ -2,12 +2,12 @@ from . import BaseTaskMetrics, Registerable
 import torch
 
 class GoThroughPositionsMetrics(BaseTaskMetrics, Registerable):
-    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str) -> None:
-        super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
+    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str, task_index: int = 0) -> None:
+        super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name, task_index=task_index)
 
     def populate_env_info(self):
         if "MultiTask" in self.env.unwrapped.__class__.__name__:
-            self.env_info["max_num_goals"] = self.env.unwrapped.tasks_apis[0]._task_cfg.max_num_goals
+            self.env_info["max_num_goals"] = self.env.unwrapped.tasks_apis[self.task_index]._task_cfg.max_num_goals
         else:
             self.env_info["max_num_goals"] = self.env.unwrapped.task_api._task_cfg.max_num_goals
     

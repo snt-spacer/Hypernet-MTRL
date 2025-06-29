@@ -8,9 +8,10 @@ EVALUATION_LOG_FILE="${BASE_OUTPUT_DIR}/evaluation_run_$(date +"%Y-%m-%d_%H-%M-%
 
 # Define your robot and tasks
 robot="FloatingPlatform"
-BASE_TASKS=(GoToPose GoToPosition TrackVelocities GoThroughPoses)
-num_envs=1 # Base number of environments, adjust if needed
+BASE_TASKS=(GoToPosition GoToPose TrackVelocities GoThroughPoses)
+num_envs=4096 # Base number of environments, adjust if needed
 algorithm="ppo-memory" #ppo, ppo-memory, ppo-beta
+runs_per_env=1
 
 MODEL_PATHS=(
     /workspace/isaaclab/logs/rsl_rl/multitask_memory_4tasks/2025-06-24_11-15-15_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-42/model_2999.pt
@@ -26,6 +27,16 @@ total_start_time=$(date +%s)
 echo "Starting Evaluation Script..." | tee -a "$EVALUATION_LOG_FILE"
 echo "Log file: $EVALUATION_LOG_FILE" | tee -a "$EVALUATION_LOG_FILE"
 echo "Found ${#MODEL_PATHS[@]} models to evaluate." | tee -a "$EVALUATION_LOG_FILE"
+
+# Determine the number of tasks for calculating EVAL_NUM_ENVS
+NUM_TASKS=${#BASE_TASKS[@]}
+EVAL_NUM_ENVS=$((num_envs * NUM_TASKS))
+
+# Convert BASE_TASKS array to a comma-separated string
+IFS=, EVAL_TASKS_NAMES="${BASE_TASKS[*]}"
+
+echo "Evaluating all tasks simultaneously: [${EVAL_TASKS_NAMES}]" | tee -a "$EVALUATION_LOG_FILE"
+echo "Total environments: ${EVAL_NUM_ENVS} (${num_envs} per task × ${NUM_TASKS} tasks)" | tee -a "$EVALUATION_LOG_FILE"
 
 # --- Main Loop: Evaluation for each model path ---
 for model_path in "${MODEL_PATHS[@]}"
@@ -43,47 +54,25 @@ do
 
     echo "--------------------------------------------------------" | tee -a "$EVALUATION_LOG_FILE"
     echo "Starting evaluation for Model: $model_path" | tee -a "$EVALUATION_LOG_FILE"
+    echo "Evaluating all tasks simultaneously: [${EVAL_TASKS_NAMES}]" | tee -a "$EVALUATION_LOG_FILE"
 
-    # Determine the number of tasks for calculating EVAL_NUM_ENVS
-    NUM_TASKS=${#BASE_TASKS[@]}
-    EVAL_NUM_ENVS=$((num_envs * NUM_TASKS))
+    # Execute the evaluation script for all tasks at once
+    ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/eval.py \
+        --task=Isaac-RANS-MultiTask-v0 \
+        --headless \
+        --num_envs="${EVAL_NUM_ENVS}" \
+        --checkpoint="${model_path}" \
+        --algorithm="${algorithm}" \
+        --runs_per_env="${runs_per_env}" \
+        env.robot_name="${robot}" \
+        env.tasks_names="[${EVAL_TASKS_NAMES}]" #>> "$EVALUATION_LOG_FILE" 2>&1
 
-    # --- Evaluation Phase Execution ---
-    # Iterate through each base task to evaluate the model on it
-    for CURRENT_TASK in "${BASE_TASKS[@]}"; do
-        temp_tasks_array=("$CURRENT_TASK") # Start with the current task
-
-        # Add the other tasks to the array, ensuring the CURRENT_TASK is first
-        for task_name in "${BASE_TASKS[@]}"; do
-            if [[ "$task_name" != "$CURRENT_TASK" ]]; then
-                temp_tasks_array+=("$task_name")
-            fi
-        done
-
-        # Convert temp_tasks_array to a comma-separated string
-        IFS=, EVAL_ORDERED_TASKS_NAMES="${temp_tasks_array[*]}"
-
-        echo "  Evaluating Task: ${CURRENT_TASK}" | tee -a "$EVALUATION_LOG_FILE"
-        echo "  Evaluation Task Order Passed: [${EVAL_ORDERED_TASKS_NAMES}]" | tee -a "$EVALUATION_LOG_FILE"
-
-        # Execute the evaluation script
-        ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/eval.py \
-            --task=Isaac-RANS-MultiTask-v0 \
-            --headless \
-            --num_envs="${EVAL_NUM_ENVS}" \
-            --checkpoint="${model_path}" \
-            --algorithm="${algorithm}" \
-            env.robot_name="${robot}" \
-            env.tasks_names="[${EVAL_ORDERED_TASKS_NAMES}]" #>> "$EVALUATION_LOG_FILE" 2>&1
-
-        # Check if the evaluation command executed successfully
-        if [ $? -eq 0 ]; then
-            echo "  Evaluation completed successfully for Task: ${CURRENT_TASK}." | tee -a "$EVALUATION_LOG_FILE"
-        else
-            echo "  Evaluation failed for Task: ${CURRENT_TASK}. Check logs in $EVALUATION_LOG_FILE for details." | tee -a "$EVALUATION_LOG_FILE"
-        fi
-        echo "  ---" | tee -a "$EVALUATION_LOG_FILE"
-    done
+    # Check if the evaluation command executed successfully
+    if [ $? -eq 0 ]; then
+        echo "Evaluation completed successfully for all tasks." | tee -a "$EVALUATION_LOG_FILE"
+    else
+        echo "Evaluation failed. Check logs in $EVALUATION_LOG_FILE for details." | tee -a "$EVALUATION_LOG_FILE"
+    fi
 
     run_end_time=$(date +%s)
     run_duration=$((run_end_time - run_start_time))

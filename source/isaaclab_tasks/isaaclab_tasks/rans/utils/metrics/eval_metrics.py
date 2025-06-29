@@ -8,13 +8,14 @@ import datetime
 import yaml
 
 class EvalMetrics:
-    def __init__(self, env, robot_name: str, task_name: str, folder_path: str, device: str = "cuda", num_runs_per_env: int = 1):
+    def __init__(self, env, robot_name: str, task_name: str, folder_path: str, device: str = "cuda", num_runs_per_env: int = 1, task_index: int = 0):
         self._env = env
         self.device = device
         self.num_runs_per_env = num_runs_per_env
         self.task_name = task_name
         self.robot_name = robot_name
         self.save_path = folder_path
+        self.task_index = task_index
 
         self.task_metrics_factory = TaskMetricsFactory.create(
             task_name, 
@@ -22,7 +23,8 @@ class EvalMetrics:
             folder_path=folder_path, 
             physics_dt=self._env.env.unwrapped.scene.physics_dt, 
             step_dt=self._env.env.unwrapped.robot_api._step_dt,
-            task_name=self.task_name
+            task_name=self.task_name,
+            task_index=self.task_index
             
         )
         self.robot_metrics_factory = RobotMetricsFactory.create(
@@ -47,10 +49,12 @@ class EvalMetrics:
     def save_env_info(self) -> None:
         """Saves the env info into a yaml file"""
         env_info = self.task_metrics_factory.env_info | self.robot_metrics_factory.env_info
-        env_info["timestamp"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        env_info["timestamp"] = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         env_info["num_runs_per_env"] = self.num_runs_per_env
 
         save_path = os.path.join(self.save_path, "metrics", "env_info.yaml")
+        # Ensure the metrics directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, 'w') as f:
             yaml.dump(env_info, f)
 
@@ -64,7 +68,7 @@ class EvalMetrics:
         trajectory_lengths, extracted_trajectories = self.env_trajectory_extraction(truncated_data, dones_tensor)
         trajectories, trajectories_mask = self.pad_trajectories(trajectory_lengths, extracted_trajectories)
 
-        breakpoint()
+        # breakpoint()
         
         print("[INFO] Evaluating metrics...")
         self.task_metrics_factory.generate_metrics(
@@ -79,16 +83,23 @@ class EvalMetrics:
         self.robot_metrics_factory.populate_env_info()
         
         if "MultiTask" in self._env.unwrapped.__class__.__name__:
-            # Swap all task names for only the evaluated one
-            name_list = self.save_path.split("/")[-1].split("_")
-            name_list[4] = self.task_name
-            name = "_".join(name_list)
-            save_path = os.path.join(self.save_path, "metrics", name)
+            # For multitask, use a simpler naming pattern without task lists
+            # Extract the base model name from the save_path
+            base_model_name = os.path.basename(self.save_path)
+            base_model_list = base_model_name.split("_")
+            base_model_list[4] = self.task_name
+            name = "_".join(base_model_list)
+            filename = f"{name}_metrics.csv"
+            save_path = os.path.join(self.save_path, "metrics", filename)
         else:
             name = self.save_path.split("/")[-1]
-            save_path = os.path.join(self.save_path, "metrics", name)
+            save_path = os.path.join(self.save_path, "metrics", f"{name}_metrics.csv")
+        
+        # Ensure the metrics directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
         df = self.convert_metrics_to_pd()
-        df.to_csv(f"{save_path}_metrics.csv", index=False)
+        df.to_csv(save_path, index=False)
 
         self.save_env_info()
 

@@ -37,6 +37,12 @@ parser.add_argument(
     help="The RL algorithm used for training the skrl agent.",
 )
 parser.add_argument(
+    "--runs_per_env",
+    type=int,
+    default=1,
+    help="The number of runs to be performed for each environment.",
+)
+parser.add_argument(
     "--overload-experiment-cfg", 
     action="store_true", 
     default=True, help="Overload experiment config. If set to True, it will load the cfg of the model that was used for training."
@@ -63,6 +69,7 @@ import gymnasium as gym
 import os
 import time
 import torch
+import copy
 
 from rsl_rl.runners import OnPolicyRunner
 
@@ -119,6 +126,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     log_dir = os.path.dirname(resume_path)
 
+    env_cfg.seed = agent_cfg.seed
+    env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device
+
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
 
@@ -171,7 +181,14 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # agent stepping
             actions = policy(obs)
             # env stepping
-            obs, _, _, _ = env.step(actions)
+            obs, _, dones, _ = env.step(actions)
+            # breakpoint()
+            new_data = copy.deepcopy(env.env.unwrapped.eval_data)
+            print(new_data['position'][0])
+            # breakpoint()
+            if torch.any(dones[0] == 1):
+                print(f"pos dist: {new_data['position_distance'][torch.where(dones[0] == 1)]} at {torch.where(dones[0] == 1)}")
+                breakpoint()
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video

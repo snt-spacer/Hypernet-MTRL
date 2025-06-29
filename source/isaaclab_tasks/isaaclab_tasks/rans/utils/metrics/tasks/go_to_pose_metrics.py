@@ -2,8 +2,8 @@ from . import BaseTaskMetrics, Registerable
 import torch
 
 class GoToPoseMetrics(BaseTaskMetrics, Registerable):
-    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str) -> None:
-        super().__init__(env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
+    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str, task_index: int = 0) -> None:
+        super().__init__(env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name, task_index=task_index)
 
         self.pos_threshold = 0
         self.heading_threshold = 0
@@ -62,7 +62,7 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
     def position_overshoot(self):
         print("[INFO][METRICS][TASK] Position overshoot")
         if "MultiTask" in self.env.unwrapped.__class__.__name__:
-            threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.position_tolerance
+            threshold = self.env.unwrapped.tasks_apis[self.task_index]._task_cfg.position_tolerance
         else:
             threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
         masked_distances = self.trajectories['position_distance'] * self.trajectories_masks

@@ -2,29 +2,59 @@ from . import BaseTaskMetrics, Registerable
 import torch
 
 class GoThroughPosesMetrics(BaseTaskMetrics, Registerable):
-    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str) -> None:
-        super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name)
+    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name: str, task_index: int = 0) -> None:
+        super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name, task_index=task_index)
 
     @BaseTaskMetrics.register
     def success_rate_weighted_by_path_length(self):
         print("[INFO][METRICS][TASK] Success rate weighted by path length")
-        shortest_path_lenght = self.trajectory_shortest_distance(self.trajectories['target_positions'])
-        robot_distance_traveled = self.robot_distance_traveled(self.trajectories['position'][..., :2] * self.trajectories_masks.unsqueeze(-1))
-        trajectory_completed = (self.trajectories['trajectory_completed'] * self.trajectories_masks).sum(dim=1)
+        
+        # Check if required data is available
+        if 'target_positions' not in self.trajectories:
+            print("[WARNING] target_positions not found in trajectories, skipping success_rate_weighted_by_path_length")
+            return
+            
+        if 'position' not in self.trajectories:
+            print("[WARNING] position not found in trajectories, skipping success_rate_weighted_by_path_length")
+            return
+            
+        if 'trajectory_completed' not in self.trajectories:
+            print("[WARNING] trajectory_completed not found in trajectories, skipping success_rate_weighted_by_path_length")
+            return
+        
+        try:
+            shortest_path_lenght = self.trajectory_shortest_distance(self.trajectories['target_positions'])
+            robot_distance_traveled = self.robot_distance_traveled(self.trajectories['position'][..., :2] * self.trajectories_masks.unsqueeze(-1))
+            trajectory_completed = (self.trajectories['trajectory_completed'] * self.trajectories_masks).sum(dim=1)
 
-        self.metrics["spl.u"] = trajectory_completed * (shortest_path_lenght / torch.max(robot_distance_traveled, shortest_path_lenght))
+            self.metrics["spl.u"] = trajectory_completed * (shortest_path_lenght / torch.max(robot_distance_traveled, shortest_path_lenght))
+        except Exception as e:
+            print(f"[WARNING] Error in success_rate_weighted_by_path_length: {e}")
+            # Set a default value
+            self.metrics["spl.u"] = torch.zeros(self.trajectories_masks.shape[0], device=self.trajectories_masks.device)
 
     @BaseTaskMetrics.register
     def orientation_error_following_path(self):
         print("[INFO][METRICS][TASK] Orientation error following path")
-        masked_sin = self.trajectories['sin_target_heading_error'] * self.trajectories_masks
-        masked_cos = self.trajectories['cos_target_heading_error'] * self.trajectories_masks
+        
+        # Check if required data is available
+        if 'sin_target_heading_error' not in self.trajectories or 'cos_target_heading_error' not in self.trajectories:
+            print("[WARNING] sin_target_heading_error or cos_target_heading_error not found in trajectories, skipping orientation_error_following_path")
+            return
+        
+        try:
+            masked_sin = self.trajectories['sin_target_heading_error'] * self.trajectories_masks
+            masked_cos = self.trajectories['cos_target_heading_error'] * self.trajectories_masks
 
-        avg_sin = torch.sum(masked_sin, dim=1) / torch.sum(self.trajectories_masks, dim=1)
-        avg_cos = torch.sum(masked_cos, dim=1) / torch.sum(self.trajectories_masks, dim=1)
+            avg_sin = torch.sum(masked_sin, dim=1) / torch.sum(self.trajectories_masks, dim=1)
+            avg_cos = torch.sum(masked_cos, dim=1) / torch.sum(self.trajectories_masks, dim=1)
 
-        angle_error = torch.arctan2(avg_sin, avg_cos)
-        self.metrics["orientation_error_following_path.rad"] = angle_error
+            angle_error = torch.arctan2(avg_sin, avg_cos)
+            self.metrics["orientation_error_following_path.rad"] = angle_error
+        except Exception as e:
+            print(f"[WARNING] Error in orientation_error_following_path: {e}")
+            # Set a default value
+            self.metrics["orientation_error_following_path.rad"] = torch.zeros(self.trajectories_masks.shape[0], device=self.trajectories_masks.device)
 
     @BaseTaskMetrics.register
     def avg_time_to_reach_goal(self):

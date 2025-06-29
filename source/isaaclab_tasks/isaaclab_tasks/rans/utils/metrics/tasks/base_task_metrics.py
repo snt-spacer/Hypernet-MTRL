@@ -28,12 +28,13 @@ class AutoRegister:
 
 
 class BaseTaskMetrics(AutoRegister):
-    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name:str) -> None:
+    def __init__(self, env, folder_path: str, physics_dt: float, step_dt: float, task_name:str, task_index: int = 0) -> None:
         self.env = env
         self.folder_path = folder_path
         self.physics_dt = physics_dt
         self.step_dt = step_dt
         self.task_name = task_name
+        self.task_index = task_index
 
         self.metrics = {}
         self.env_info = {}
@@ -100,7 +101,7 @@ class BaseTaskMetrics(AutoRegister):
     def get_reached_idx(self) -> torch.Tensor:
         # Position threshold
         if "MultiTask" in self.env.unwrapped.__class__.__name__:
-            self.pos_threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.position_tolerance
+            self.pos_threshold = self.env.unwrapped.tasks_apis[self.task_index]._task_cfg.position_tolerance
         else:
             self.pos_threshold = self.env.unwrapped.task_api._task_cfg.position_tolerance
         masked_distances = self.trajectories['position_distance'] * self.trajectories_masks
@@ -108,7 +109,7 @@ class BaseTaskMetrics(AutoRegister):
 
         # Heading threshold
         if "MultiTask" in self.env.unwrapped.__class__.__name__:
-            heading_threshold = self.env.unwrapped.tasks_apis[0]._task_cfg.heading_tolerance
+            heading_threshold = self.env.unwrapped.tasks_apis[self.task_index]._task_cfg.heading_tolerance
         else:
             heading_threshold = self.env.unwrapped.task_api._task_cfg.heading_tolerance
         heading_error = torch.arctan2(
@@ -146,14 +147,32 @@ class BaseTaskMetrics(AutoRegister):
     def trajectory_shortest_distance(self, target_positions) -> torch.Tensor:
         """Calculate the shortest (euclidian) path length of the trajectory based on target positions."""
 
+        # Handle different tensor shapes
         if len(target_positions.shape) < 4:
             target_positions = target_positions.unsqueeze(2)
 
         total_distance = torch.zeros(target_positions.shape[0], device=target_positions.device)
+        
+        # Check if we have enough goals to calculate distances
+        if target_positions.shape[2] <= 1:
+            # If only one goal, return the initial distance
+            if 'position_distance' in self.trajectories:
+                return self.trajectories['position_distance'][:, 0]
+            else:
+                return total_distance
+        
         for current_goal in range(target_positions.shape[2] - 1):
             if current_goal == 0:
-                total_distance += self.trajectories['position_distance'][:, 0][current_goal + 1]
+                # For the first goal, use the initial position distance if available
+                if 'position_distance' in self.trajectories and self.trajectories['position_distance'].shape[1] > current_goal:
+                    total_distance += self.trajectories['position_distance'][:, current_goal]
+                else:
+                    # Calculate distance from start to first goal
+                    x_diff = target_positions[:, 0, current_goal + 1, 0] - target_positions[:, 0, current_goal, 0]
+                    y_diff = target_positions[:, 0, current_goal + 1, 1] - target_positions[:, 0, current_goal, 1]
+                    total_distance += torch.sqrt(x_diff**2 + y_diff**2)
             else:
+                # Calculate distance between consecutive goals
                 x_diff = target_positions[:, 0, current_goal + 1, 0] - target_positions[:, 0, current_goal, 0]
                 y_diff = target_positions[:, 0, current_goal + 1, 1] - target_positions[:, 0, current_goal, 1]
                 total_distance += torch.sqrt(x_diff**2 + y_diff**2)
