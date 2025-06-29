@@ -18,8 +18,8 @@ gym.register(
         "skrl_ppo-discrete_cfg_entry_point": f"{agents.__name__}:skrl_ppo-discrete_cfg.yaml",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
         "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:SingleRobotMultiTaskPPORunnerCfg",
-        "rsl_rl_ppo_beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_beta_cfg:SingleRobotMultiTaskPPORunnerCfg",
-        "rsl_rl_ppo_memory_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_memory_cfg:SingleRobotMultiTaskPPORunnerCfg",
+        "rsl_rl_ppo-beta_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo-beta_cfg:SingleRobotMultiTaskPPORunnerCfg",
+        "rsl_rl_ppo-memory_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo-memory_cfg:SingleRobotMultiTaskPPORunnerCfg",
     },
 )
 

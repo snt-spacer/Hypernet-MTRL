@@ -33,7 +33,7 @@ parser.add_argument("--real-time", action="store_true", default=False, help="Run
 parser.add_argument(
     "--runs_per_env",
     type=int,
-    default=5,
+    default=1,
     help="The number of runs to be performed for each environment.",
 )
 parser.add_argument(
@@ -97,7 +97,7 @@ from isaaclab_tasks.rans.utils import EvalMetrics
 
 # config shortcuts
 algorithm = args_cli.algorithm.lower()
-agent_cfg_entry_point = "skrl_cfg_entry_point" if algorithm in ["ppo"] else f"skrl_{algorithm}_cfg_entry_point"
+agent_cfg_entry_point = "rsl_rl_cfg_entry_point" if algorithm in ["ppo"] else f"rsl_rl_{algorithm}_cfg_entry_point"
 
 
 @hydra_task_config(args_cli.task, agent_cfg_entry_point)
@@ -127,6 +127,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     log_dir = os.path.dirname(resume_path)
 
+    env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs
+    env_cfg.seed = agent_cfg.seed
+    env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device
+
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
 
@@ -154,7 +158,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         print(f"[INFO] Evaluation only one task: {env.env.get_wrapper_attr('tasks_apis')[0].__class__.__name__}")
         task_name = env.env.get_wrapper_attr('tasks_apis')[0].__class__.__name__[:-4] # remove "Task" suffix
         num_tasks = len(env.env.get_wrapper_attr('tasks_apis'))
-        task_chunk = env_cfg.scene.num_envs // num_tasks
+        task_chunk = len(torch.chunk(env.env.env.scene.env_origins, num_tasks)[0])
+        # task_chunk = env_cfg.scene.num_envs // num_tasks
     
     else:
         robot_name = env.env.get_wrapper_attr('robot_api')._robot_cfg.robot_name
@@ -217,6 +222,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
             if "MultiTask" in args_cli.task:
                 data["dones"].append(dones[:task_chunk])
+
+                if torch.any(dones[:task_chunk] == 1):
+                    print(f"pos dist: {new_data['position_distance'][torch.where(dones[:task_chunk] == 1)]} at {torch.where(dones[:task_chunk] == 1)}")
+                    breakpoint()
 
                 # Check if the number of runs per env is reached
                 if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, task_chunk), dim=0) >= args_cli.runs_per_env).item():

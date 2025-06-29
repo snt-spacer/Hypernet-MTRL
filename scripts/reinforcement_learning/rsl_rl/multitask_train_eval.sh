@@ -9,8 +9,11 @@ MODEL_TRACKER_FILE="${BASE_OUTPUT_DIR}/trained_models_tracker.log"
 # Define your robots and tasks
 robots=(FloatingPlatform)
 BASE_TASKS=(GoToPosition GoToPose TrackVelocities GoThroughPoses)
-TRAINING_TASK_CONFIGS=("${BASE_TASKS[@]}" "ALL_COMBINED_TASKS")
-num_envs=4096 # Base number of environments
+# TRAINING_TASK_CONFIGS=("${BASE_TASKS[@]}" "ALL_COMBINED_TASKS")
+TRAINING_TASK_CONFIGS=("ALL_COMBINED_TASKS")
+num_envs=4 # Base number of environments
+algorithm="ppo-memory" #ppo, ppo-memory, ppo-beta
+runs_per_env=1
 
 total_start_time=$(date +%s)
 
@@ -60,6 +63,8 @@ do
                 --seed="${seed}" \
                 --num_envs="${TRAINING_NUM_ENVS}" \
                 --headless \
+                --algorithm="${algorithm}" \
+                --runs_per_env="${runs_per_env}" \
                 env.robot_name="${robot}" \
                 env.tasks_names="[${EVAL_TASKS_NAMES}]" > "$TRAINING_LOG_FILE" 2>&1
 
@@ -129,6 +134,7 @@ do
                     --headless \
                     --num_envs="${EVAL_NUM_ENVS}" \
                     --checkpoint="${FINAL_MODEL_CHECKPOINT_PATH}" \
+                    --algorithm="${algorithm}" \
                     env.robot_name="${robot}" \
                     env.tasks_names="[${EVAL_ORDERED_TASKS_NAMES}]" >> "$TRAINING_LOG_FILE" 2>&1 # '>>' to append to the log
 

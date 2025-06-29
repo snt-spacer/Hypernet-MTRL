@@ -63,6 +63,8 @@ class EvalMetrics:
         truncated_data, dones_tensor = self.cutoff_indices_per_env()
         trajectory_lengths, extracted_trajectories = self.env_trajectory_extraction(truncated_data, dones_tensor)
         trajectories, trajectories_mask = self.pad_trajectories(trajectory_lengths, extracted_trajectories)
+
+        breakpoint()
         
         print("[INFO] Evaluating metrics...")
         self.task_metrics_factory.generate_metrics(
