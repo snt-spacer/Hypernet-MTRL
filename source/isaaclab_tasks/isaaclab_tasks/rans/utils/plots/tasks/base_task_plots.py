@@ -76,7 +76,7 @@ class BaseTaskPlots(AutoRegister):
             boxprops=dict(facecolor='skyblue'),
             medianprops=dict(color='black'),
             flierprops=dict(marker='o', markerfacecolor='red', markersize=5),
-            # showfliers=False,
+            showfliers=False,
             widths=0.6,
         )
 

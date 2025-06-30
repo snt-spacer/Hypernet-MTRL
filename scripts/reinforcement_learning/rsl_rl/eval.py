@@ -287,7 +287,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                     if torch.any(task_dones == 1):
                         completed_indices = torch.where(task_dones == 1)[0]
                         task_completion_counts[i][completed_indices] += 1
-                        print(f"Task {i} ({task_names[i]}): Completed environments {completed_indices} (total completions: {task_completion_counts[i][completed_indices]})")
+                        # print(f"Task {i} ({task_names[i]}): Completed environments {completed_indices} (total completions: {task_completion_counts[i][completed_indices]})")
                 
                 # Check if all tasks have completed their required runs
                 all_tasks_completed = True
@@ -297,7 +297,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                         break
                 
                 if all_tasks_completed:
-                    print(f"[INFO] All tasks completed {args_cli.runs_per_env} runs per environment.")
+                    # print(f"[INFO] All tasks completed {args_cli.runs_per_env} runs per environment.")
                     break
                     
             else:
@@ -310,7 +310,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
                 # Check if the number of runs per env is reached
                 if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
-                    print(f"[INFO] Collected {args_cli.runs_per_env} runs per env.")
+                    # print(f"[INFO] Collected {args_cli.runs_per_env} runs per env.")
                     break
 
         if args_cli.video:
@@ -331,7 +331,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     if "MultiTask" in args_cli.task:
         # Calculate metrics for each task
         for i, (task_name, eval_metrics) in enumerate(zip(task_names, eval_metrics_list)):
-            print(f"[INFO] Calculating metrics for task {i}: {task_name}")
+            # print(f"[INFO] Calculating metrics for task {i}: {task_name}")
             task_data_processed = {k: torch.stack(v, dim=0) for k, v in tasks_data[i].items()}
             eval_metrics.calculate_metrics(data=task_data_processed)
         

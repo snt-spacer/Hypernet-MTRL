@@ -13,8 +13,29 @@ num_envs=4096 # Base number of environments, adjust if needed
 algorithm="ppo-memory" #ppo, ppo-memory, ppo-beta
 runs_per_env=1
 
+# MODEL_PATHS=(
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-29_19-31-21_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-29_20-57-10_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-29_22-18-33_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-3/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-29_23-40-03_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-4/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-30_01-01-29_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-5/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-30_02-23-58_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-6/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-30_03-45-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-7/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-30_05-07-19_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-8/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-30_06-28-35_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-9/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-30_07-51-48_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-10/model_3999.pt
+# )
 MODEL_PATHS=(
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_4tasks/2025-06-24_11-15-15_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-42/model_2999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_08-51-11_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_10-01-56_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-2/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_11-11-50_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-3/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_12-22-08_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-4/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_13-33-22_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-5/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_14-43-28_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-6/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_15-54-41_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-7/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_17-05-14_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-8/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_18-16-00_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-9/model_3999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_deep_net_4x64_10xseeds/2025-06-16_19-27-00_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-10/model_3999.pt
 )
 
 # Check if model paths are provided
@@ -65,7 +86,7 @@ do
         --algorithm="${algorithm}" \
         --runs_per_env="${runs_per_env}" \
         env.robot_name="${robot}" \
-        env.tasks_names="[${EVAL_TASKS_NAMES}]" #>> "$EVALUATION_LOG_FILE" 2>&1
+        env.tasks_names="[${EVAL_TASKS_NAMES}]" >> "$EVALUATION_LOG_FILE" 2>&1
 
     # Check if the evaluation command executed successfully
     if [ $? -eq 0 ]; then
