@@ -356,7 +356,7 @@ class RaceGatesTask(TaskCore):
             randomizer.observations(observations=self._task_data)
 
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations()), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -455,7 +455,7 @@ class RaceGatesTask(TaskCore):
             + self._task_cfg.time_penalty
             + self._task_cfg.reached_bonus * goal_reached
             + self._task_cfg.reverse_penalty * goal_reverse
-        ) + self._robot.compute_rewards()
+        ) + self._robot.compute_rewards(env_ids=self._env_ids)
 
     def reset(
         self,
