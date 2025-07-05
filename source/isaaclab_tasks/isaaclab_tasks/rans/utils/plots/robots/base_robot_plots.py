@@ -30,8 +30,9 @@ class AutoRegister:
 
 
 class BaseRobotPlots(AutoRegister):
-    def __init__(self, dfs: dict, labels: dict, env_info: dict, folder_path:dict, plot_cfg:dict) -> None:
+    def __init__(self, dfs: dict, trajectories_dfs: dict, labels: dict, env_info: dict, folder_path: dict, plot_cfg: dict) -> None:
         self._dfs = dfs
+        self._trajectories_dfs = trajectories_dfs
         self._labels = labels
         self._env_info = env_info
         self._save_plots_folder_path = folder_path

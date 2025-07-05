@@ -47,7 +47,7 @@ from .tasks_cfg import (  # noqa: F401, F403
     PushBlockCfg,
     GoToPositionWithObstaclesCfg,
     RaceGatesCfg,
-    StabilizationCfg,
+    RendezvousCfg,
     TASK_CFG_FACTORY,
 )
 
@@ -67,7 +67,7 @@ from .tasks import (  # noqa: F401, F403
     PushBlockTask,
     GoToPositionWithObstaclesTask,
     RaceGatesTask,
-    StabilizationTask,
+    RendezvousTask,
     TASK_FACTORY,
 )
 

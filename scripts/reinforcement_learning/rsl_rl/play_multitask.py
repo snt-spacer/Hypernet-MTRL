@@ -183,12 +183,12 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # env stepping
             obs, _, dones, _ = env.step(actions)
             # breakpoint()
-            new_data = copy.deepcopy(env.env.unwrapped.eval_data)
-            print(new_data['position'][0])
+            # new_data = copy.deepcopy(env.env.unwrapped.eval_data)
+            # print(new_data['position'][0])
             # breakpoint()
-            if torch.any(dones[0] == 1):
-                print(f"pos dist: {new_data['position_distance'][torch.where(dones[0] == 1)]} at {torch.where(dones[0] == 1)}")
-                breakpoint()
+            # if torch.any(dones[0] == 1):
+            #     print(f"pos dist: {new_data['position_distance'][torch.where(dones[0] == 1)]} at {torch.where(dones[0] == 1)}")
+            #     breakpoint()
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video

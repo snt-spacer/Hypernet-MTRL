@@ -113,8 +113,8 @@ class BaseTaskMetrics(AutoRegister):
         else:
             heading_threshold = self.env.unwrapped.task_api._task_cfg.heading_tolerance
         heading_error = torch.arctan2(
-            torch.sin(self.trajectories['target_headings'] - self.trajectories['heading']),
-            torch.cos(self.trajectories['target_headings'] - self.trajectories['heading']),
+            torch.sin(self.trajectories['target_heading'] - self.trajectories['heading']),
+            torch.cos(self.trajectories['target_heading'] - self.trajectories['heading']),
         ) * self.trajectories_masks
         heading_reached_threshold = torch.abs(heading_error) <= heading_threshold
 

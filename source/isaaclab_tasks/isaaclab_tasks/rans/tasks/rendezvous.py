@@ -9,22 +9,32 @@ import torch
 from isaaclab.markers import BICOLOR_DIAMOND_CFG, PIN_ARROW_CFG, VisualizationMarkers
 from isaaclab.scene import InteractiveScene
 
-from isaaclab_tasks.rans import GoThroughPosesCfg
+from isaaclab_tasks.rans import RendezvousCfg
 
 from .task_core import TaskCore
 
 EPS = 1e-6  # small constant to avoid divisions by 0 and log(0)
 
 
-class GoThroughPosesTask(TaskCore):
+class RendezvousTask(TaskCore):
     """
-    Implements the GoThroughPosition task. The robot has to reach a target position.
+    Implements the Rendezvous task for space ship rendezvous simulation.
+    
+    This task creates a half-circle trajectory where the robot must navigate through a series of waypoints
+    that form a rendezvous path. Each waypoint's orientation points toward a central rendezvous point,
+    simulating a space ship approaching a target for docking or rendezvous.
+    
+    Key features:
+    - Goals follow a half-circle arc from left to right
+    - Each goal's orientation points toward the center (rendezvous point)
+    - Environment actions control trajectory radius and spread
+    - Supports variable number of waypoints along the trajectory
     """
 
     def __init__(
         self,
         scene: InteractiveScene | None = None,
-        task_cfg: GoThroughPosesCfg = GoThroughPosesCfg(),
+        task_cfg: RendezvousCfg = RendezvousCfg(),
         task_uid: int = 0,
         num_envs: int = 1,
         device: str = "cuda",
@@ -33,7 +43,7 @@ class GoThroughPosesTask(TaskCore):
         num_tasks: int = 1,
     ) -> None:
         """
-        Initializes the GoThroughPoses task.
+        Initializes the Rendezvous task.
 
         Args:
             task_cfg: The configuration of the task.
@@ -197,16 +207,16 @@ class GoThroughPosesTask(TaskCore):
 
         super().create_logs()
 
-        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/normed_linear_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/absolute_angular_velocity", "mean")
-        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/position_distance", "mean")
-        self.scalar_logger.add_log("task_state", "GoThroughPoses/AVG/boundary_distance", "mean")
-        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/linear_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/angular_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/boundary", "mean")
-        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/heading", "mean")
-        self.scalar_logger.add_log("task_reward", "GoThroughPoses/AVG/progress", "mean")
-        self.scalar_logger.add_log("task_reward", "GoThroughPoses/SUM/num_goals", "sum")
+        self.scalar_logger.add_log("task_state", "Rendezvous/AVG/normed_linear_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "Rendezvous/AVG/absolute_angular_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "Rendezvous/AVG/position_distance", "mean")
+        self.scalar_logger.add_log("task_state", "Rendezvous/AVG/boundary_distance", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/linear_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/angular_velocity", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/boundary", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/heading", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/progress", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/SUM/num_goals", "sum")
 
     def get_observations(self) -> torch.Tensor:
         """
@@ -366,10 +376,10 @@ class GoThroughPosesTask(TaskCore):
         progress_rew = self._previous_position_dist - self._position_dist
 
         # Update logs
-        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/position_distance", self._position_dist)
-        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/boundary_distance", boundary_dist)
-        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/normed_linear_velocity", linear_velocity)
-        self.scalar_logger.log("task_state", "GoThroughPoses/AVG/absolute_angular_velocity", angular_velocity)
+        self.scalar_logger.log("task_state", "Rendezvous/AVG/position_distance", self._position_dist)
+        self.scalar_logger.log("task_state", "Rendezvous/AVG/boundary_distance", boundary_dist)
+        self.scalar_logger.log("task_state", "Rendezvous/AVG/normed_linear_velocity", linear_velocity)
+        self.scalar_logger.log("task_state", "Rendezvous/AVG/absolute_angular_velocity", angular_velocity)
 
         # heading reward (encourages the robot to face the target)
         heading_rew = torch.exp(-heading_dist / self._task_cfg.position_heading_exponential_reward_coeff)
@@ -411,12 +421,12 @@ class GoThroughPosesTask(TaskCore):
         self._previous_position_dist[reached_ids] = 0
 
         # Update logs
-        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/linear_velocity", linear_velocity_rew)
-        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/angular_velocity", angular_velocity_rew)
-        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/boundary", boundary_rew)
-        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/heading", heading_rew)
-        self.scalar_logger.log("task_reward", "GoThroughPoses/AVG/progress", progress_rew)
-        self.scalar_logger.log("task_reward", "GoThroughPoses/SUM/num_goals", goal_reached)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/linear_velocity", linear_velocity_rew)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/angular_velocity", angular_velocity_rew)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/boundary", boundary_rew)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/heading", heading_rew)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/progress", progress_rew)
+        self.scalar_logger.log("task_reward", "Rendezvous/SUM/num_goals", goal_reached)
 
         # Return the reward by combining the different components and adding the robot rewards
         return (
@@ -520,98 +530,117 @@ class GoThroughPosesTask(TaskCore):
 
     def set_goals(self, env_ids: torch.Tensor):
         """
-        Generates a random sequence of oriented goals for the task.
-        These goals are generated in a way allowing to precisely control the difficulty of the task through the
-        environment action. This is done by randomizing ranges within which they can be generated. More information
-        below:
-
-        - The first goal is picked randomly in a square centered on the origin. Its orientation is picked randomly. This
-            goal is the starting point of the trajectory and it cannot be changed through the environment action. We
-            recommend setting that square to be 0. This way, the trajectory will always start at the origin.
-        - The next goals are picked randomly in a cone originating from the previous goal.
-            - For the heading, the environment action selects the range within which the goal will be picked for
-                the whole trajectory. The new heading is picked randomly in a cone aligned with the direction to the
-                previous goal. It uses the parameters `minimal_heading_distance` and `maximal_heading_distance`,
-                and env_action[0], env_action[1] to set the range. The formula is the following:
-                delta_heading = (U[env_action[0],env_action[1]] * (maximal_heading_distance - minimal_heading_distance) + minimal_heading_distance) * rand_sign()
-            - For the position, we want to randomize at a given distance from the previous goal, and within a cone aligned
-                with the direction to the previous goal. The environment action selects both the distance and the spread of
-                the cone. The formula is the following:
-                radius = U[env_action[2],env_action[3]] * (maximal_goal_radius - minimal_goal_radius) + minimal_spawn_radius
-                spawn_angle_delta = (U[env_action[4],env_action[5]] * (maximal_cone_spread - minimal_cone_spread) + minimal_cone_spread) * rand_sign()
-                position_x = radius * cos(spawn_angle_delta + previous_goal_heading) + previous_goal_x
-                position_y = radius * sin(spawn_angle_delta + previous_goal_heading) + previous_goal_y
+        Generates a sequence of oriented goals for the space ship rendezvous task.
+        The goals follow a half-circle trajectory and their orientations point to a rendezvous point in space.
+        
+        The trajectory is designed to simulate a space ship rendezvous scenario:
+        - Goals are placed along a half-circle arc
+        - Each goal's orientation points toward a central rendezvous point
+        - The trajectory starts from one side of the circle and ends at the opposite side
+        - Environment actions control the radius and spread of the trajectory
 
         Args:
             env_ids (torch.Tensor): The ids of the environments.
-            step (int, optional): The current step. Defaults to 0.
 
         Returns:
-            Tuple[torch.Tensor, torch.Tensor]: The target positions and orientations."""
+            None
+        """
 
-        # Select how many random goals we want to generate.
+        # Select how many goals we want to generate for the half-circle trajectory
         self._num_goals[env_ids] = self._rng.sample_integer_torch(
             self._task_cfg.min_num_goals, self._task_cfg.max_num_goals, 1, ids=env_ids
         ).to(torch.long)
 
-        # Since we are using tensor operations, we cannot have different number of goals per environment: the
-        # tensor containing the target positions must have the same number of goals for all environments.
-        # Hence, we will duplicate the last goals for the environments that have less goals.
+        # Generate the half-circle trajectory for each environment
         for i in range(self._task_cfg.max_num_goals):
             if i == 0:
-                # Randomize the first goal
-                # The position is picked randomly in a square centered on the origin
-                self._target_positions[env_ids, i] = (
+                # First goal: Start at the left side of the half-circle
+                # Use environment actions to control the radius of the circle
+                circle_radius = (
                     self._rng.sample_uniform_torch(
-                        -self._task_cfg.goal_max_dist_from_origin, self._task_cfg.goal_max_dist_from_origin, 2, env_ids
-                    )
-                    + self._env_origins[env_ids, :2]
-                )
-                # The orientation is picked randomly
-                self._target_heading[env_ids, i] = self._rng.sample_uniform_torch(-math.pi, math.pi, 1, env_ids)
-            else:
-                # If needed, randomize the next goals
-                # The orientation is picked in a cone aligned with the direction to the previous goal
-                self._target_heading[env_ids, i] = self._target_heading[env_ids, i - 1] + (
-                    self._rng.sample_uniform_torch(
-                        self._gen_actions[env_ids, 0], self._gen_actions[env_ids, 1], 1, env_ids
-                    )
-                    * (self._task_cfg.goal_max_heading_dist - self._task_cfg.goal_min_heading_dist)
-                    + self._task_cfg.goal_min_heading_dist
-                ) * self._rng.sample_sign_torch("float", 1, ids=env_ids)
-                # The position is picked randomly in a cone oriented towards the previous goal.
-                # The environment action decides the randomization range of the radius and the spread of the cone.
-                r = (
-                    self._rng.sample_uniform_torch(
-                        self._gen_actions[env_ids, 2],
-                        self._gen_actions[env_ids, 3],
-                        1,
-                        env_ids,
+                        self._gen_actions[env_ids, 2], self._gen_actions[env_ids, 3], 1, env_ids
                     )
                     * (self._task_cfg.goal_max_dist - self._task_cfg.goal_min_dist)
                     + self._task_cfg.goal_min_dist
                 )
-                theta = self._target_heading[env_ids, i - 1] + (
-                    self._rng.sample_uniform_torch(
-                        self._gen_actions[env_ids, 4],
-                        self._gen_actions[env_ids, 5],
-                        1,
-                        env_ids,
-                    )
-                    * (self._task_cfg.goal_max_cone_spread - self._task_cfg.goal_min_cone_spread)
-                    + self._task_cfg.goal_min_cone_spread
-                ) * self._rng.sample_sign_torch("float", 1, ids=env_ids)
-
-                self._target_positions[env_ids, i, 0] = r * torch.cos(theta) + self._target_positions[env_ids, i - 1, 0]
-                self._target_positions[env_ids, i, 1] = r * torch.sin(theta) + self._target_positions[env_ids, i - 1, 1]
-
-                # Check if the number of goals is less than the current index
-                # If it is, then set the ith goal to the num_goal - 1
-                self._target_positions[env_ids, i] = torch.where(
-                    self._num_goals[env_ids].repeat_interleave(2).reshape(-1, 2) < i,
-                    self._target_positions[env_ids, self._num_goals[env_ids]],
-                    self._target_positions[env_ids, i],
+                
+                # Start at angle -pi/2 (left side of circle)
+                start_angle = torch.full_like(circle_radius, -math.pi / 2)
+                self._target_positions[env_ids, i, 0] = circle_radius * torch.cos(start_angle) + self._env_origins[env_ids, 0]
+                self._target_positions[env_ids, i, 1] = circle_radius * torch.sin(start_angle) + self._env_origins[env_ids, 1]
+                
+                # Orientation points toward the center (rendezvous point)
+                self._target_heading[env_ids, i] = torch.atan2(
+                    self._env_origins[env_ids, 1] - self._target_positions[env_ids, i, 1],
+                    self._env_origins[env_ids, 0] - self._target_positions[env_ids, i, 0]
                 )
+            else:
+                # Subsequent goals: Place along the half-circle arc
+                # Check if we have enough goals for this environment
+                valid_goals = i < self._num_goals[env_ids]
+                
+                if torch.any(valid_goals):
+                    # Calculate the angle for this goal along the half-circle
+                    # Progress from -pi/2 to pi/2 (left to right)
+                    progress = i / torch.clamp(self._num_goals[env_ids] - 1, min=1)
+                    angle = torch.full_like(progress, -math.pi / 2) + progress * math.pi
+                    
+                    # Use the same circle radius as the first goal
+                    circle_radius = (
+                        self._rng.sample_uniform_torch(
+                            self._gen_actions[env_ids, 2], self._gen_actions[env_ids, 3], 1, env_ids
+                        )
+                        * (self._task_cfg.goal_max_dist - self._task_cfg.goal_min_dist)
+                        + self._task_cfg.goal_min_dist
+                    )
+                    
+                    # Add some randomization to the angle using environment actions
+                    angle_spread = (
+                        self._rng.sample_uniform_torch(
+                            self._gen_actions[env_ids, 4], self._gen_actions[env_ids, 5], 1, env_ids
+                        )
+                        * (self._task_cfg.goal_max_cone_spread - self._task_cfg.goal_min_cone_spread)
+                        + self._task_cfg.goal_min_cone_spread
+                    ) * self._rng.sample_sign_torch("float", 1, ids=env_ids)
+                    
+                    final_angle = angle + angle_spread
+                    
+                    # Calculate position on the circle
+                    self._target_positions[env_ids, i, 0] = torch.where(
+                        valid_goals,
+                        circle_radius * torch.cos(final_angle) + self._env_origins[env_ids, 0],
+                        self._target_positions[env_ids, i, 0]
+                    )
+                    self._target_positions[env_ids, i, 1] = torch.where(
+                        valid_goals,
+                        circle_radius * torch.sin(final_angle) + self._env_origins[env_ids, 1],
+                        self._target_positions[env_ids, i, 1]
+                    )
+                    
+                    # Orientation points toward the center (rendezvous point)
+                    target_heading = torch.atan2(
+                        self._env_origins[env_ids, 1] - self._target_positions[env_ids, i, 1],
+                        self._env_origins[env_ids, 0] - self._target_positions[env_ids, i, 0]
+                    )
+                    
+                    # Add some heading variation using environment actions
+                    heading_variation = (
+                        self._rng.sample_uniform_torch(
+                            self._gen_actions[env_ids, 0], self._gen_actions[env_ids, 1], 1, env_ids
+                        )
+                        * (self._task_cfg.goal_max_heading_dist - self._task_cfg.goal_min_heading_dist)
+                        + self._task_cfg.goal_min_heading_dist
+                    ) * self._rng.sample_sign_torch("float", 1, ids=env_ids)
+                    
+                    self._target_heading[env_ids, i] = torch.where(
+                        valid_goals,
+                        target_heading + heading_variation,
+                        self._target_heading[env_ids, i]
+                    )
+                else:
+                    # If we don't have enough goals, duplicate the last valid goal
+                    self._target_positions[env_ids, i] = self._target_positions[env_ids, self._num_goals[env_ids] - 1]
+                    self._target_heading[env_ids, i] = self._target_heading[env_ids, self._num_goals[env_ids] - 1]
 
     def set_initial_conditions(self, env_ids: torch.Tensor) -> None:
         """
@@ -685,8 +714,9 @@ class GoThroughPosesTask(TaskCore):
         self.initial_velocity[env_ids, 5] = angular_velocity
 
         # Apply to articulation
-        self._robot.set_pose(initial_pose, self._env_ids[env_ids])
-        self._robot.set_velocity(self.initial_velocity[env_ids], self._env_ids[env_ids])
+        if self._env_ids is not None:
+            self._robot.set_pose(initial_pose, self._env_ids[env_ids])
+            self._robot.set_velocity(self.initial_velocity[env_ids], self._env_ids[env_ids])
 
     def create_task_visualization(self) -> None:
         """Adds the visual marker to the scene.

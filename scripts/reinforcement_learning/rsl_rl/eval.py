@@ -72,6 +72,7 @@ import time
 import torch
 import copy
 import pandas as pd
+import wandb  # Add this import at the top with other imports
 
 from rsl_rl.runners import OnPolicyRunner
 
@@ -252,6 +253,19 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
+    # Initialize wandb if requested
+    use_wandb = False #(hasattr(agent_cfg, 'logger') and agent_cfg.logger == 'wandb') or (hasattr(args_cli, 'logger') and args_cli.logger == 'wandb')
+    if use_wandb:
+        wandb_kwargs = getattr(agent_cfg, 'wandb_kwargs', {"project": "isaaclab", "entity": "isaaclab"})
+        wandb.init(
+            project=wandb_kwargs.get("project", "isaaclab"),
+            entity=wandb_kwargs.get("entity", "isaaclab"),
+            name=f"eval_{agent_cfg.experiment_name}",
+            group=agent_cfg.experiment_name,
+            config=vars(args_cli),
+            dir=log_dir,
+            reinit=True,
+        )
     # simulate environment
     while simulation_app.is_running():
         start_time = time.time()
@@ -276,8 +290,13 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                     
                     # Combine task and robot data
                     combined_data = {**task_eval_data, **task_robot_data}
+                    
+                    # if i == 2:
+                    #     print(f"Ang vel err: {combined_data['error_angular_velocity'][0].item()}, Target ang vel: {combined_data['angular_velocity_target'][0].item()} actual: {combined_data['angular_velocity'][0][2].item()}")
+                    
+
                     for k, v in combined_data.items():
-                        tasks_data[i][k].append(v)
+                        tasks_data[i][k].append(v.clone())
                     
                     # Get task-specific dones
                     task_dones = dones[task_start_idx:task_end_idx]
@@ -287,7 +306,18 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                     if torch.any(task_dones == 1):
                         completed_indices = torch.where(task_dones == 1)[0]
                         task_completion_counts[i][completed_indices] += 1
-                        # print(f"Task {i} ({task_names[i]}): Completed environments {completed_indices} (total completions: {task_completion_counts[i][completed_indices]})")
+                        # Log to wandb at episode end for these envs
+                        if use_wandb:
+                            # Log task logs
+                            if hasattr(task_api, 'scalar_logger'):
+                                log_dict = task_api.scalar_logger.compute_extras()
+                                wandb.log({f"task_{i}/" + k: v.item() if hasattr(v, 'item') else v for k, v in log_dict.items()})
+                            # Log robot logs (for this chunk)
+                            robot_logger = getattr(env.env.get_wrapper_attr('robot_api'), 'scalar_logger', None)
+                            if robot_logger is not None:
+                                # Only log for the relevant chunk
+                                robot_log_dict = robot_logger.compute_extras()
+                                wandb.log({f"robot_{i}/" + k: v.item() if hasattr(v, 'item') else v for k, v in robot_log_dict.items()})
                 
                 # Check if all tasks have completed their required runs
                 all_tasks_completed = True
@@ -308,6 +338,19 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
                 data["dones"].append(dones)
 
+                # # Log to wandb at episode end for these envs
+                # if use_wandb and torch.any(dones == 1):
+                #     # Log task logs
+                #     task_logger = getattr(env.env.get_wrapper_attr('task_api'), 'scalar_logger', None)
+                #     if task_logger is not None:
+                #         log_dict = task_logger.compute_extras()
+                #         wandb.log({"task/" + k: v.item() if hasattr(v, 'item') else v for k, v in log_dict.items()})
+                #     # Log robot logs
+                #     robot_logger = getattr(env.env.get_wrapper_attr('robot_api'), 'scalar_logger', None)
+                #     if robot_logger is not None:
+                #         robot_log_dict = robot_logger.compute_extras()
+                #         wandb.log({"robot/" + k: v.item() if hasattr(v, 'item') else v for k, v in robot_log_dict.items()})
+
                 # Check if the number of runs per env is reached
                 if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
                     # print(f"[INFO] Collected {args_cli.runs_per_env} runs per env.")
@@ -327,6 +370,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # close the simulator
     env.close()
 
+
     # Calculate metrics
     if "MultiTask" in args_cli.task:
         # Calculate metrics for each task
@@ -334,11 +378,27 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # print(f"[INFO] Calculating metrics for task {i}: {task_name}")
             task_data_processed = {k: torch.stack(v, dim=0) for k, v in tasks_data[i].items()}
             eval_metrics.calculate_metrics(data=task_data_processed)
-        
+            # Save extracted trajectories
+            eval_metrics.save_extracted_trajectories_to_csv()
+
+            if use_wandb:
+                df = eval_metrics.convert_metrics_to_pd()
+                wandb.log({f"metrics/task_{i}_{task_name}": wandb.Table(dataframe=df)})
     else:
         # Single task metrics calculation
         data = {k: torch.stack(v, dim=0) for k, v in data.items()}
         eval_metrics.calculate_metrics(data=data)
+        # Save extracted trajectories
+        eval_metrics.save_extracted_trajectories_to_csv()
+        # Log processed metrics to wandb after metrics calculation
+        if use_wandb:
+            df = eval_metrics.convert_metrics_to_pd()
+            wandb.log({f"metrics/{task_name}": wandb.Table(dataframe=df)})
+
+    
+
+    if use_wandb:
+        wandb.finish()
 
 
 if __name__ == "__main__":

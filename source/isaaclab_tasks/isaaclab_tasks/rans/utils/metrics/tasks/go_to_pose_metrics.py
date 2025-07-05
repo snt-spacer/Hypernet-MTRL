@@ -93,7 +93,7 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
         total_distance = torch.sum(segment_lengths, dim=1)
 
         # Calculate shortest path
-        masked_targets = self.trajectories['target_positions'] * self.trajectories_masks.unsqueeze(-1)
+        masked_targets = self.trajectories['target_position'] * self.trajectories_masks.unsqueeze(-1)
         start_positions = masked_positions[:, 0]
         final_targets = masked_targets[:, 0]
         shortest_path = torch.linalg.vector_norm(final_targets - start_positions[:, :2], dim=-1)

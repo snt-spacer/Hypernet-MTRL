@@ -64,8 +64,8 @@ class GoToPoseTask(TaskCore):
             list[str]: The keys of the data used for evaluation."""
         
         return [
-            "target_positions", 
-            "target_headings",
+            "target_position", 
+            "target_heading",
             "position_distance", 
             "cos_heading_to_target_error", 
             "sin_heading_to_target_error",
@@ -76,8 +76,8 @@ class GoToPoseTask(TaskCore):
     @property
     def eval_data_specs(self) -> dict[str, list[str]]:
         return {
-            "target_positions": [".x.m", ".y.m"],
-            "target_headings": [".rad"],
+            "target_position": [".x.m", ".y.m"],
+            "target_heading": [".rad"],
             "position_distance": [".distance.m"],
             "cos_heading_to_target_error": [".cos(heading_to_target).u"],
             "sin_heading_to_target_error": [".sin(heading_to_target).u"],
@@ -94,8 +94,8 @@ class GoToPoseTask(TaskCore):
             dict: The data used for evaluation."""
         
         return {
-            "target_positions": self._target_positions,
-            "target_headings": self._target_headings,
+            "target_position": self._target_positions,
+            "target_heading": self._target_headings,
             "position_distance": self._position_dist,
             "cos_heading_to_target_error": self._task_data[:, 1],
             "sin_heading_to_target_error": self._task_data[:, 2],

@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import datetime
 import yaml
+import numpy as np
 
 class EvalMetrics:
     def __init__(self, env, robot_name: str, task_name: str, folder_path: str, device: str = "cuda", num_runs_per_env: int = 1, task_index: int = 0):
@@ -58,17 +59,14 @@ class EvalMetrics:
         with open(save_path, 'w') as f:
             yaml.dump(env_info, f)
 
-
     def calculate_metrics(self, data: dict)->None:
 
         self.data = data
 
         print("[INFO] Processing trajectories...")
         truncated_data, dones_tensor = self.cutoff_indices_per_env()
-        trajectory_lengths, extracted_trajectories = self.env_trajectory_extraction(truncated_data, dones_tensor)
-        trajectories, trajectories_mask = self.pad_trajectories(trajectory_lengths, extracted_trajectories)
-
-        # breakpoint()
+        self.trajectory_lengths, self.extracted_trajectories = self.env_trajectory_extraction(truncated_data, dones_tensor)
+        trajectories, trajectories_mask = self.pad_trajectories(self.trajectory_lengths, self.extracted_trajectories)
         
         print("[INFO] Evaluating metrics...")
         self.task_metrics_factory.generate_metrics(
@@ -103,7 +101,7 @@ class EvalMetrics:
 
         self.save_env_info()
 
-    def cutoff_indices_per_env(self)-> tuple[dict[str, torch.Tensor], torch.Tensor]:
+    def cutoff_indices_per_env(self) -> tuple[dict[str, torch.Tensor], torch.Tensor]:
         """Calculates the cutoff indices for each environment based on the number of runs per environment.
             Args:
                 data (dict): Data tensors for each environment.
@@ -180,6 +178,60 @@ class EvalMetrics:
                 last_end_step = current_end_step # Update for the next trajectory's start
 
         return all_trajectory_lengths, all_extracted_trajectories
+
+    def save_extracted_trajectories_to_csv(self):
+        """Saves the extracted trajectories to a CSV file in the metrics directory, one row per time step per trajectory. Vectorized for speed."""
+        import numpy as np
+        import pandas as pd
+        import os
+
+        save_path = os.path.join(self.save_path, "metrics", f"extracted_trajectories_{self.task_name}.csv")
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        if not hasattr(self, 'extracted_trajectories') or self.extracted_trajectories is None:
+            print("[WARNING] No extracted_trajectories to save.")
+            return
+
+        dim_names = ['x', 'y', 'z']
+        keys = list(self.extracted_trajectories.keys())
+        if not keys:
+            print("[WARNING] extracted_trajectories is empty.")
+            return
+        num_trajectories = len(self.extracted_trajectories[keys[0]])
+        all_dfs = []
+        for traj_idx in range(num_trajectories):
+            # Find the length of this trajectory (use the first key)
+            first_tensor = self.extracted_trajectories[keys[0]][traj_idx]
+            if not (hasattr(first_tensor, 'shape') and hasattr(first_tensor, '__getitem__')):
+                print(f"[WARNING] Trajectory {traj_idx} first key is not array-like, skipping.")
+                continue
+            traj_len = first_tensor.shape[0]
+            data = {
+                'trajectory': np.full(traj_len, traj_idx, dtype=int),
+                'step': np.arange(traj_len, dtype=int)
+            }
+            for key in keys:
+                tensor = self.extracted_trajectories[key][traj_idx]
+                arr = tensor.cpu().numpy() if hasattr(tensor, 'cpu') else np.array(tensor)
+                if arr.ndim == 1:
+                    data[key] = arr
+                elif arr.ndim == 2:
+                    for d in range(arr.shape[1]):
+                        dim_label = dim_names[d] if arr.shape[1] <= 3 else str(d)
+                        data[f"{key}_{dim_label}"] = arr[:, d]
+                else:
+                    # flatten higher dims
+                    flat = arr.reshape(arr.shape[0], -1)
+                    for d in range(flat.shape[1]):
+                        data[f"{key}_{d}"] = flat[:, d]
+            df_traj = pd.DataFrame(data)
+            all_dfs.append(df_traj)
+        if all_dfs:
+            df = pd.concat(all_dfs, ignore_index=True)
+            df.to_csv(save_path, index=False, float_format='%.4f')
+            print(f"[INFO] Saved extracted trajectories to {save_path}")
+        else:
+            print("[WARNING] No valid trajectories to save.")
 
     def pad_trajectories(self, all_trajectory_lengths: list, all_extracted_trajectories:dict[str, list[torch.Tensor]]) -> tuple[dict[str, torch.Tensor], torch.Tensor]:
         """Pads the extracted trajectories to the same length.

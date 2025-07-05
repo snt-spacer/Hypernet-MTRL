@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- Configuration ---
-OUTPUT_DIR_NAME="multitask_train_eval_FP_mem_new_eval"
+OUTPUT_DIR_NAME="multitask_memory_normW"
 BASE_OUTPUT_DIR="/workspace/isaaclab/source/${OUTPUT_DIR_NAME}"
 mkdir -p "$BASE_OUTPUT_DIR"
 MODEL_TRACKER_FILE="${BASE_OUTPUT_DIR}/trained_models_tracker.log"
@@ -11,7 +11,7 @@ robots=(FloatingPlatform)
 BASE_TASKS=(GoToPosition GoToPose TrackVelocities GoThroughPoses)
 num_envs=4096 # Base number of environments
 algorithm="ppo-memory" #ppo, ppo-memory, ppo-beta
-runs_per_env=10
+runs_per_env=1
 
 total_start_time=$(date +%s)
 

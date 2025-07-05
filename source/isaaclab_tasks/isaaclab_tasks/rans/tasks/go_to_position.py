@@ -114,7 +114,7 @@ class GoToPositionTask(TaskCore):
             dict: The data used for evaluation."""
         return {
             "target_position": self._target_positions,
-            "position_distance": self._task_data[:, 0],
+            "position_distance": self._position_dist,
             "cos_heading_to_target_error": self._task_data[:, 1],
             "sin_heading_to_target_error": self._task_data[:, 2],
             "initial_lin_vel_x": self.initial_velocity[:, 0],
