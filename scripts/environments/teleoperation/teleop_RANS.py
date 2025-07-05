@@ -29,7 +29,6 @@ parser.add_argument(
     choices=["PPO", "IPPO", "MAPPO"],
     help="The RL algorithm used for training the skrl agent.",
 )
-
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
 # parse the arguments
@@ -38,7 +37,7 @@ args_cli, hydra_args = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + hydra_args
 
 # launch omniverse app
-app_launcher = AppLauncher(headless=args_cli.headless)
+app_launcher = AppLauncher(args_cli)
 simulation_app = app_launcher.app
 
 """Rest everything follows."""
@@ -47,7 +46,7 @@ simulation_app = app_launcher.app
 import gymnasium as gym
 import torch
 
-from omni.isaac.lab_tasks.utils.hydra import hydra_task_config
+from isaaclab_tasks.utils.hydra import hydra_task_config
 
 from isaaclab.devices import Se3Gamepad, Se3Keyboard, Se3SpaceMouse
 from isaaclab.envs import DirectMARLEnvCfg, DirectRLEnvCfg, ManagerBasedRLEnvCfg
@@ -58,7 +57,7 @@ a = 0.99
 b = 0.90
 
 
-def pre_process_actions(prev_action: torch.Tensor, delta_pose: torch.Tensor, gripper_command: bool) -> torch.Tensor:
+def pre_process_actions(prev_action: torch.Tensor, delta_pose: torch.Tensor, gripper_command: bool, env) -> torch.Tensor:
     """Pre-process actions for the environment."""
     # compute actions based on environment
     if "Reach" in args_cli.task:
@@ -67,15 +66,15 @@ def pre_process_actions(prev_action: torch.Tensor, delta_pose: torch.Tensor, gri
         return delta_pose
     elif args_cli.robot_name == "Jetbot":
         if delta_pose[0][0] > 0:  # forward
-            prev_action = prev_action * 0.9 + torch.tensor([[1, 1]], device=delta_pose.device) * 0.01
+            prev_action = torch.tensor([[1, 1]], device=delta_pose.device) #prev_action * 0.9 + torch.tensor([[1, 1]], device=delta_pose.device) * 0.01
         elif delta_pose[0][0] < 0:  # backward
-            prev_action = prev_action * 0.9 + torch.tensor([[-1, -1]], device=delta_pose.device) * 0.01
+            prev_action = torch.tensor([[-1, -1]], device=delta_pose.device) #prev_action * 0.9 + torch.tensor([[-1, -1]], device=delta_pose.device) * 0.01
         elif delta_pose[0][1] > 0:  # left
-            prev_action = prev_action * 0.9 + torch.tensor([[-1, 1]], device=delta_pose.device) * 0.01
+            prev_action = 0.1 * torch.tensor([[-1, 1]], device=delta_pose.device) #prev_action * 0.9 + torch.tensor([[-1, 1]], device=delta_pose.device) * 0.01
         elif delta_pose[0][1] < 0:  # right
-            prev_action = prev_action * 0.9 + torch.tensor([[1, -1]], device=delta_pose.device) * 0.01
-        if gripper_command:
-            prev_action.fill_(0)
+            prev_action = 0.1 * torch.tensor([[1, -1]], device=delta_pose.device) #prev_action * 0.9 + torch.tensor([[1, -1]], device=delta_pose.device) * 0.01
+        else:
+            prev_action = torch.tensor([[0, 0]], device=delta_pose.device)
         prev_action.clamp_(-1, 1)
         return prev_action
     elif args_cli.robot_name == "Leatherback":
@@ -91,6 +90,9 @@ def pre_process_actions(prev_action: torch.Tensor, delta_pose: torch.Tensor, gri
             prev_action.fill_(0)
         prev_action.clamp_(-1, 1)
         return prev_action
+    elif args_cli.robot_name == "LeoRover":
+        return delta_pose[0, :2].unsqueeze(0)
+        # return torch.tensor([[0.1, 1.0]], device=delta_pose.device)
     else:
         # resolve gripper command
         gripper_vel = torch.zeros(delta_pose.shape[0], 1, device=delta_pose.device)
@@ -116,7 +118,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # create controller
     if args_cli.teleop_device.lower() == "keyboard":
         teleop_interface = Se3Keyboard(
-            pos_sensitivity=0.05 * args_cli.sensitivity, rot_sensitivity=0.05 * args_cli.sensitivity
+            pos_sensitivity=args_cli.sensitivity, rot_sensitivity=args_cli.sensitivity
         )
     elif args_cli.teleop_device.lower() == "spacemouse":
         teleop_interface = Se3SpaceMouse(
@@ -131,7 +133,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # add teleoperation key for env reset
     teleop_interface.add_callback("L", env.reset)
     # print helper for keyboard
-    print(teleop_interface)
+    # print(teleop_interface)
 
     # reset environment
     env.reset()
@@ -147,7 +149,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # convert to torch
             delta_pose = torch.tensor(delta_pose, device=env.unwrapped.device).repeat(env.unwrapped.num_envs, 1)
             # pre-process actions
-            prev_action = pre_process_actions(prev_action, delta_pose, gripper_command)
+            prev_action = pre_process_actions(prev_action, delta_pose, gripper_command, env)
+            # print(prev_action)
             # apply actions
             env.step(prev_action)
 

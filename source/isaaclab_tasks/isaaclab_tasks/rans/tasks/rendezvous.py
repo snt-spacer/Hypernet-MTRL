@@ -530,117 +530,76 @@ class RendezvousTask(TaskCore):
 
     def set_goals(self, env_ids: torch.Tensor):
         """
-        Generates a sequence of oriented goals for the space ship rendezvous task.
-        The goals follow a half-circle trajectory and their orientations point to a rendezvous point in space.
-        
-        The trajectory is designed to simulate a space ship rendezvous scenario:
-        - Goals are placed along a half-circle arc
-        - Each goal's orientation points toward a central rendezvous point
-        - The trajectory starts from one side of the circle and ends at the opposite side
-        - Environment actions control the radius and spread of the trajectory
+        Generates a sequence of goals on a half-circle trajectory.
+        All goals are oriented to point towards a single, randomly chosen focus point in space.
 
         Args:
-            env_ids (torch.Tensor): The ids of the environments.
-
-        Returns:
-            None
+            env_ids (torch.Tensor): The ids of the environments to reset.
         """
+        num_resets = len(env_ids)
 
-        # Select how many goals we want to generate for the half-circle trajectory
+        # 1. Sample trajectory-wide parameters ONCE per environment.
+        # The radius of the half-circle trajectory, centered on the environment origin.
+        circle_radius = (
+            self._rng.sample_uniform_torch(
+                self._gen_actions[env_ids, 2], self._gen_actions[env_ids, 3], (num_resets,), env_ids
+            )
+            * (self._task_cfg.goal_max_dist - self._task_cfg.goal_min_dist)
+            + self._task_cfg.goal_min_dist
+        )
+
+        # Define a single random focus point that all goals will look at.
+        # This point is chosen independently of the circle's center.
+        # Note: You may need to add 'focus_point_distance_range' and 'focus_point_angle_range'
+        # to your task configuration class (RendezvousCfg).
+        focus_point_dist = self._rng.sample_uniform_torch(
+            self._task_cfg.focus_point_distance_range[0], self._task_cfg.focus_point_distance_range[1], (num_resets,), env_ids
+        )
+        focus_point_angle = self._rng.sample_uniform_torch(
+            self._task_cfg.focus_point_angle_range[0], self._task_cfg.focus_point_angle_range[1], (num_resets,), env_ids
+        )
+
+        # focus_point = torch.zeros((num_resets, 2), device=self._device)
+        # focus_point[:, 0] = focus_point_dist * torch.cos(focus_point_angle)
+        # focus_point[:, 1] = focus_point_dist * torch.sin(focus_point_angle)
+        focus_point = torch.zeros((num_resets, 2), device=self._device)
+        # Calculate the focus point relative to the circle's center
+        focus_point[:, 0] = focus_point_dist * torch.cos(focus_point_angle) + self._env_origins[env_ids, 0]
+        focus_point[:, 1] = focus_point_dist * torch.sin(focus_point_angle) + self._env_origins[env_ids, 1]
+
+        # The number of goals to place on the trajectory.
         self._num_goals[env_ids] = self._rng.sample_integer_torch(
-            self._task_cfg.min_num_goals, self._task_cfg.max_num_goals, 1, ids=env_ids
+            self._task_cfg.min_num_goals, self._task_cfg.max_num_goals, (num_resets,), ids=env_ids
         ).to(torch.long)
 
-        # Generate the half-circle trajectory for each environment
-        for i in range(self._task_cfg.max_num_goals):
-            if i == 0:
-                # First goal: Start at the left side of the half-circle
-                # Use environment actions to control the radius of the circle
-                circle_radius = (
-                    self._rng.sample_uniform_torch(
-                        self._gen_actions[env_ids, 2], self._gen_actions[env_ids, 3], 1, env_ids
-                    )
-                    * (self._task_cfg.goal_max_dist - self._task_cfg.goal_min_dist)
-                    + self._task_cfg.goal_min_dist
-                )
-                
-                # Start at angle -pi/2 (left side of circle)
-                start_angle = torch.full_like(circle_radius, -math.pi / 2)
-                self._target_positions[env_ids, i, 0] = circle_radius * torch.cos(start_angle) + self._env_origins[env_ids, 0]
-                self._target_positions[env_ids, i, 1] = circle_radius * torch.sin(start_angle) + self._env_origins[env_ids, 1]
-                
-                # Orientation points toward the center (rendezvous point)
-                self._target_heading[env_ids, i] = torch.atan2(
-                    self._env_origins[env_ids, 1] - self._target_positions[env_ids, i, 1],
-                    self._env_origins[env_ids, 0] - self._target_positions[env_ids, i, 0]
-                )
-            else:
-                # Subsequent goals: Place along the half-circle arc
-                # Check if we have enough goals for this environment
-                valid_goals = i < self._num_goals[env_ids]
-                
-                if torch.any(valid_goals):
-                    # Calculate the angle for this goal along the half-circle
-                    # Progress from -pi/2 to pi/2 (left to right)
-                    progress = i / torch.clamp(self._num_goals[env_ids] - 1, min=1)
-                    angle = torch.full_like(progress, -math.pi / 2) + progress * math.pi
-                    
-                    # Use the same circle radius as the first goal
-                    circle_radius = (
-                        self._rng.sample_uniform_torch(
-                            self._gen_actions[env_ids, 2], self._gen_actions[env_ids, 3], 1, env_ids
-                        )
-                        * (self._task_cfg.goal_max_dist - self._task_cfg.goal_min_dist)
-                        + self._task_cfg.goal_min_dist
-                    )
-                    
-                    # Add some randomization to the angle using environment actions
-                    angle_spread = (
-                        self._rng.sample_uniform_torch(
-                            self._gen_actions[env_ids, 4], self._gen_actions[env_ids, 5], 1, env_ids
-                        )
-                        * (self._task_cfg.goal_max_cone_spread - self._task_cfg.goal_min_cone_spread)
-                        + self._task_cfg.goal_min_cone_spread
-                    ) * self._rng.sample_sign_torch("float", 1, ids=env_ids)
-                    
-                    final_angle = angle + angle_spread
-                    
-                    # Calculate position on the circle
-                    self._target_positions[env_ids, i, 0] = torch.where(
-                        valid_goals,
-                        circle_radius * torch.cos(final_angle) + self._env_origins[env_ids, 0],
-                        self._target_positions[env_ids, i, 0]
-                    )
-                    self._target_positions[env_ids, i, 1] = torch.where(
-                        valid_goals,
-                        circle_radius * torch.sin(final_angle) + self._env_origins[env_ids, 1],
-                        self._target_positions[env_ids, i, 1]
-                    )
-                    
-                    # Orientation points toward the center (rendezvous point)
-                    target_heading = torch.atan2(
-                        self._env_origins[env_ids, 1] - self._target_positions[env_ids, i, 1],
-                        self._env_origins[env_ids, 0] - self._target_positions[env_ids, i, 0]
-                    )
-                    
-                    # Add some heading variation using environment actions
-                    heading_variation = (
-                        self._rng.sample_uniform_torch(
-                            self._gen_actions[env_ids, 0], self._gen_actions[env_ids, 1], 1, env_ids
-                        )
-                        * (self._task_cfg.goal_max_heading_dist - self._task_cfg.goal_min_heading_dist)
-                        + self._task_cfg.goal_min_heading_dist
-                    ) * self._rng.sample_sign_torch("float", 1, ids=env_ids)
-                    
-                    self._target_heading[env_ids, i] = torch.where(
-                        valid_goals,
-                        target_heading + heading_variation,
-                        self._target_heading[env_ids, i]
-                    )
-                else:
-                    # If we don't have enough goals, duplicate the last valid goal
-                    self._target_positions[env_ids, i] = self._target_positions[env_ids, self._num_goals[env_ids] - 1]
-                    self._target_heading[env_ids, i] = self._target_heading[env_ids, self._num_goals[env_ids] - 1]
+        # 2. Vectorized calculation of all goal positions and headings.
+        goal_indices = torch.arange(self._task_cfg.max_num_goals, device=self._device).expand(num_resets, -1)
+        valid_goal_mask = goal_indices < self._num_goals[env_ids].unsqueeze(-1)
+
+        last_goal_idx = torch.clamp(self._num_goals[env_ids] - 1, min=1).unsqueeze(-1)
+        progress = goal_indices / last_goal_idx
+
+        angles = -math.pi / 2 + progress * math.pi
+
+        # Calculate goal positions on the circle.
+        positions_x = circle_radius.unsqueeze(-1) * torch.cos(angles) + self._env_origins[env_ids, 0].unsqueeze(-1)
+        positions_y = circle_radius.unsqueeze(-1) * torch.sin(angles) + self._env_origins[env_ids, 1].unsqueeze(-1)
+        new_positions = torch.stack((positions_x, positions_y), dim=-1)
+
+        # Calculate orientations to point towards the new random `focus_point`.
+        new_headings = torch.atan2(
+            focus_point[:, 1].unsqueeze(-1) - new_positions[..., 1],
+            focus_point[:, 0].unsqueeze(-1) - new_positions[..., 0],
+        )
+
+        # 3. Apply the mask to fill the buffers.
+        # self._target_positions[env_ids] = torch.where(valid_goal_mask.unsqueeze(-1), new_positions, 0.0)
+        # self._target_heading[env_ids] = torch.where(valid_goal_mask, new_headings, 0.0)
+        self._target_positions[env_ids] = torch.where(
+            valid_goal_mask.unsqueeze(-1), new_positions, math.nan
+        )
+        self._target_heading[env_ids] = torch.where(valid_goal_mask, new_headings, 0.0)
+
 
     def set_initial_conditions(self, env_ids: torch.Tensor) -> None:
         """
@@ -812,17 +771,22 @@ class RendezvousTask(TaskCore):
         next_goals_quat[:, 3] = torch.sin(next_heading_goals * 0.5)
 
         # If there are no goals of a given type, we should hide the markers.
-        if current_goals_pos.shape[0] == 0:
+        # Logic for NEXT goals (Red)
+        if next_goals_pos.shape[0] == 0:
             self.next_goal_visualizer.set_visibility(False)
         else:
             self.next_goal_visualizer.set_visibility(True)
             self.next_goal_visualizer.visualize(next_goals_pos, orientations=next_goals_quat)
+
+        # Logic for PASSED goals (Grey)
         if passed_goals_pos.shape[0] == 0:
             self.passed_goals_visualizer.set_visibility(False)
         else:
             self.passed_goals_visualizer.set_visibility(True)
             self.passed_goals_visualizer.visualize(passed_goals_pos, orientations=passed_goals_quat)
-        if next_goals_pos.shape[0] == 0:
+            
+        # Logic for CURRENT goals (Green)
+        if current_goals_pos.shape[0] == 0:
             self.current_goals_visualizer.set_visibility(False)
         else:
             self.current_goals_visualizer.set_visibility(True)

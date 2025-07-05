@@ -73,6 +73,10 @@ class RendezvousCfg(TaskCoreCfg):
     """Minimal number of goals. Defaults to 6."""
     loop: bool = True
     """Whether the goals should loop or not. Defaults to True."""
+    focus_point_distance_range: tuple[float, float] = (1.0, 10.0)
+    """Range of distances for the focus point from the center of the circle. Defaults to (0.5, 1.0) m."""
+    focus_point_angle_range: tuple[float, float] = (0.0, 2 * math.pi)
+    """Range of angles for the focus point around the center of the circle. Defaults to (0.0, 2 * pi) rad."""
 
     # Observation
     num_subsequent_goals: int = 2

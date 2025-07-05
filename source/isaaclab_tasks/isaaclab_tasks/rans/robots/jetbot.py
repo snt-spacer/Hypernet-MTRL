@@ -98,10 +98,10 @@ class JetbotRobot(RobotCore):
         self.scalar_logger.add_log("robot_reward", "AVG/action_rate", "mean")
         self.scalar_logger.add_log("robot_reward", "AVG/joint_acceleration", "mean")
 
-    def get_observations(self) -> torch.Tensor:
-        return self._unaltered_actions
+    def get_observations(self, env_ids: torch.Tensor) -> torch.Tensor:
+        return self._unaltered_actions[env_ids]
 
-    def compute_rewards(self):
+    def compute_rewards(self, env_ids: torch.Tensor):
         # Compute
         action_rate = torch.sum(torch.square(self._unaltered_actions - self._previous_unaltered_actions), dim=1)
         joint_accelerations = torch.sum(torch.square(self.joint_acc), dim=1)
@@ -113,8 +113,8 @@ class JetbotRobot(RobotCore):
         self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", joint_accelerations)
 
         return (
-            action_rate * self._robot_cfg.rew_action_rate_scale
-            + joint_accelerations * self._robot_cfg.rew_joint_accel_scale
+            action_rate[env_ids] * self._robot_cfg.rew_action_rate_scale
+            + joint_accelerations[env_ids] * self._robot_cfg.rew_joint_accel_scale
         )
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
