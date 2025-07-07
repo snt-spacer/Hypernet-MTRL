@@ -220,11 +220,43 @@ def main():
         #     "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW/2025-07-01_10-56-05_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-8",
         #     "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW/2025-07-01_11-25-14_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-9",
         # ],
+        # Norm W hyperparams
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams/2025-07-04_08-16-42_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-42",
+        # ],
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams/2025-07-04_08-56-06_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-0",
+        # ],
+        # Rendezvous
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams/2025-07-04_08-16-42_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-05_23-43-33_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-1",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams/2025-07-04_08-56-06_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-0",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_00-18-06_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-2",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_00-52-28_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-3",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_01-27-02_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-4",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_02-01-19_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-5",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_02-36-21_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-6",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_03-11-05_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-7",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_03-45-39_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-8",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_04-20-24_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-9",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_04-55-06_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-10",
         ],
     ]
 
@@ -263,6 +295,16 @@ def main():
             "#623652", 
         ],
         "runs_names": [
+            "Seed 0",
+            "Seed 1",
+            "Seed 2",
+            "Seed 3",
+            "Seed 4",
+            "Seed 5",
+            "Seed 6",
+            "Seed 7",
+            "Seed 8",
+            "Seed 9",
             "Detumble 32x32",
             "Docking 32x32",
             "Track Velocities 32x32",
@@ -285,7 +327,7 @@ def main():
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/plots/test_trajects/plot" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/plots/test_trajects/plot_rendezvous" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 

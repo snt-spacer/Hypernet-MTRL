@@ -60,9 +60,9 @@ class TrackVelocitiesCfg(TaskCoreCfg):
     lin_vel_exponential_reward_coeff: float = 0.5
     lat_vel_exponential_reward_coeff: float = 0.5
     ang_vel_exponential_reward_coeff: float = 0.5
-    linear_velocity_weight: float = 0.33
-    lateral_velocity_weight: float = 0.33
-    angular_velocity_weight: float = 0.33
+    linear_velocity_weight: float = 1.0
+    lateral_velocity_weight: float = 1.0
+    angular_velocity_weight: float = 1.0
 
     # Visualization
     visualization_linear_velocity_scale: float = 1.0

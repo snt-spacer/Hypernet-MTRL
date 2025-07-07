@@ -13,10 +13,10 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
     max_iterations = 2000
     save_interval = 50
-    experiment_name = "multitask_memory_normW_hyperparams"
+    experiment_name = "multitask_memory_normW_hyperparams_rendezvous"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "multitask_memory_normW_hyperparams",
+        "project": "multitask_memory_normW_hyperparams_rendezvous",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
