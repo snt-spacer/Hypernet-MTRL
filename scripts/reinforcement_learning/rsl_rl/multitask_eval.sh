@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # --- Configuration ---
-OUTPUT_DIR_NAME="multitask_eval_FP_memory_net"
+OUTPUT_DIR_NAME="multitask_eval_rendezvous"
 BASE_OUTPUT_DIR="/workspace/isaaclab/source/${OUTPUT_DIR_NAME}"
 mkdir -p "$BASE_OUTPUT_DIR"
 EVALUATION_LOG_FILE="${BASE_OUTPUT_DIR}/evaluation_run_$(date +"%Y-%m-%d_%H-%M-%S").log"
 
 # Define your robot and tasks
 robot="FloatingPlatform"
-BASE_TASKS=(GoToPosition GoToPose TrackVelocities GoThroughPoses)
-num_envs=4096 # Base number of environments, adjust if needed
+BASE_TASKS=(GoToPosition GoToPose TrackVelocities Rendezvous)
+num_envs=1024 # Base number of environments, adjust if needed
 algorithm="ppo-memory" #ppo, ppo-memory, ppo-beta
-runs_per_env=10
+runs_per_env=1
 
 # MODEL_PATHS=(
 #     /workspace/isaaclab/logs/rsl_rl/multitask_memory_new-eval/2025-06-29_19-31-21_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-1/model_3999.pt
@@ -51,7 +51,16 @@ runs_per_env=10
 # )
 
 MODEL_PATHS=(
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams/2025-07-03_08-30-17_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-GoThroughPoses_FloatingPlatform_r-0_seed-42/model_1600.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-05_23-43-33_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-1/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_00-18-06_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-2/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_00-52-28_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-3/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_01-27-02_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-4/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_02-01-19_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-5/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_02-36-21_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-6/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_03-11-05_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-7/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_03-45-39_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-8/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_04-20-24_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-9/model_1999.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_normW_hyperparams_rendezvous/2025-07-06_04-55-06_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_FloatingPlatform_r-0_seed-10/model_1999.pt
 )
 
 # Check if model paths are provided
