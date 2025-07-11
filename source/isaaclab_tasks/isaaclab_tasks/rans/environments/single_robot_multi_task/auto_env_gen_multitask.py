@@ -29,10 +29,10 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     episode_length_s = 60.0
 
     robot_name = "Leatherback"
-    tasks_names = ["GoToPosition"]
+    tasks_names = ["RaceGates"]
 
     # scene
-    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=7.5, replicate_physics=True)
+    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=0.0, replicate_physics=True)
 
     # Steps per episode
     #spe = 1/hz * decumation * episode_length_s
@@ -78,6 +78,9 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     observation_space = 0
     state_space = 0
     gen_space = 0
+
+    # Multitask racing
+    num_tracks: int = 4
 
 
 class MultiTaskEnv(DirectRLEnv):
@@ -156,13 +159,17 @@ class MultiTaskEnv(DirectRLEnv):
     def edit_cfg(self, cfg: MultiTaskEnvCfg) -> MultiTaskEnvCfg:
         self.robot_cfg = ROBOT_CFG_FACTORY(cfg.robot_name)
 
+        self.num_tasks = cfg.num_tracks
+
         self.tasks_cfgs = []
         max_action_space = 0
         max_observation_space = 0
         max_state_space = 0
         max_gen_space = 0
-        for task_name in cfg.tasks_names:
-            self.tasks_cfgs.append(TASK_CFG_FACTORY(task_name))
+        for task_i in range(self.num_tasks):
+            task_cfg = TASK_CFG_FACTORY("RaceGates")
+            task_cfg.fixed_track_id = task_i + task_cfg.fixed_track_id # if same_track_for_all_envs, then different tracks accross tasks.
+            self.tasks_cfgs.append(task_cfg)
             if self.tasks_cfgs[-1].observation_space > max_observation_space:
                 max_observation_space = self.tasks_cfgs[-1].observation_space
             if self.tasks_cfgs[-1].action_space > max_action_space:
@@ -172,11 +179,11 @@ class MultiTaskEnv(DirectRLEnv):
             if self.tasks_cfgs[-1].gen_space > max_gen_space:
                 max_gen_space = self.tasks_cfgs[-1].gen_space
 
-        self.num_tasks = len(self.tasks_cfgs)
         cfg.action_space = self.robot_cfg.action_space + max_action_space
-        cfg.observation_space = self.robot_cfg.observation_space + max_observation_space + self.num_tasks#TODO: remove this and put: self.num_tasks # One hot for task uid
+        cfg.observation_space = self.robot_cfg.observation_space + max_observation_space + self.num_tasks
         cfg.state_space = self.robot_cfg.state_space + max_state_space
         cfg.gen_space = self.robot_cfg.gen_space + max_gen_space
+
         return cfg
 
     def _setup_scene(self):
@@ -195,9 +202,9 @@ class MultiTaskEnv(DirectRLEnv):
         self.tasks_apis = []
         self.env_ids = torch.arange(self.num_envs, device=self.device, dtype=torch.int32)
         self.tasks_env_ids = torch.chunk(self.env_ids, self.num_tasks)
-        for i, task_name in enumerate(self.cfg.tasks_names):
+        for i in range(self.num_tasks):
             task_api = TASK_FACTORY(
-                task_name,
+                "RaceGates",
                 scene=self.scene,
                 task_cfg=self.tasks_cfgs[i],
                 task_uid=i,
@@ -229,29 +236,22 @@ class MultiTaskEnv(DirectRLEnv):
         self.robot_api.apply_actions()
 
     def _get_observations(self) -> dict:
-        tasks_obs = [task_api.get_observations() for task_api in self.tasks_apis]
-
-        # breakpoint()
-
-        padded_tensors = []
-        for i, t in enumerate(tasks_obs):
-            pad_width = self.cfg.observation_space - t.shape[1]
-            padded = F.pad(t, (0, pad_width))
-            padded[:, -self.num_tasks:] = F.one_hot(torch.tensor([i], device=self.device), num_classes=self.num_tasks).squeeze(0) # Task uid TODO: remove the hardcoded 4 and use self.num_tasks
-            padded_tensors.append(padded)
-
-        result = torch.cat(padded_tensors, dim=0)
-
+        # Each task_api.get_observations() returns a tuple: (general_obs, track_obs)
+        general_obs_list = []
+        track_obs_list = []
+        for task_api in self.tasks_apis:
+            general_obs, track_obs = task_api.get_observations()
+            general_obs_list.append(general_obs)
+            track_obs_list.append(track_obs)
+        
+        # Concatenate along the batch (env) dimension
+        general_obs_cat = torch.cat(general_obs_list, dim=0)
+        track_obs_cat = torch.cat(track_obs_list, dim=0)
+        result = {
+            "general_obs": general_obs_cat,
+            "track_obs": track_obs_cat
+        }
         return {"policy": result}
-
-        # for i, task_obs in enumerate(tasks_obs):
-        #     self.observation_buffer[self.tasks_env_ids[i], :task_obs.shape[-1]] = task_obs
-        #     self.observation_buffer[self.tasks_env_ids[i], -1] = i + 1  # Task uid
-
-        # observations = {"policy": self.observation_buffer}
-        # return observations
-
-        # return {"policy": self.tasks_apis[0].get_observations()}
 
     def _get_rewards(self) -> torch.Tensor:
         task_rewards = [task_api.compute_rewards() for task_api in self.tasks_apis]
@@ -292,9 +292,13 @@ class MultiTaskEnv(DirectRLEnv):
             single_task_shifted_env_ids = env_ids[tasks_env_ids_indx] - start_idx
             shifted_tasks_env_ids.append(single_task_shifted_env_ids)
 
+
             # Reset / Compute tasks logs
-            self.tasks_apis[i].reset_logs(single_task_shifted_env_ids, self.episode_length_buf[start_idx:end_idx])
-            tasks_extras.append(self.tasks_apis[i].compute_logs())
+            if len(single_task_shifted_env_ids) > 0:
+                self.tasks_apis[i].reset_logs(single_task_shifted_env_ids, self.episode_length_buf[start_idx:end_idx])
+                tasks_extras.append(self.tasks_apis[i].compute_logs())
+            else:
+                tasks_extras.append({})
 
         # Logging
         self.robot_api.reset_logs(env_ids, self.episode_length_buf)

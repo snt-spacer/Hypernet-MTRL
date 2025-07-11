@@ -223,6 +223,17 @@ POSE_MARKER_3D_CFG = VisualizationMarkersCfg(
     }
 )
 
+TRACK_CFG = VisualizationMarkersCfg(
+    markers={
+        "track_segment": sim_utils.CylinderCfg(
+            radius=0.02,  # Thin line
+            height=1.0,   # Will be scaled per segment
+            axis="Z",
+            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 1.0, 0.0)),  # Yellow
+        ),
+    }
+)
+"""Configuration for the track/path marker (as a series of cylinder segments)."""
 
 ##
 # Racing markers.

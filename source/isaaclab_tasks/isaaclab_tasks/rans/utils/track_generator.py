@@ -116,7 +116,7 @@ class TrackGenerator:
         x = cell_idxs % self._num_cells
         y = cell_idxs // self._num_cells
         # Add noise to the coordinates so that the problem becomes continuous
-        noise = self._rng.sample_uniform_torch(-0.5, 0.5, (self._max_num_points, 2), ids=ids)
+        noise = self._rng.sample_uniform_torch(-0.3, 0.3, (self._max_num_points, 2), ids=ids)
         # torch.rand((num_envs, self._max_num_points, 2), device=self._device) * self._min_point_distance
         xy = torch.stack([x, y], dim=2) * self._min_point_distance * 2 + noise  # - 0.5
         return xy * self._scale

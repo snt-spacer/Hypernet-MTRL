@@ -19,8 +19,8 @@ class RaceGatesCfg(TaskCoreCfg):
     # Initial conditions
     spawn_min_dist: float = 0.5
     """Minimal distance between the spawn pose and the target pose in m. Defaults to 0.5 m."""
-    spawn_max_dist: float = 5.0
-    """Maximal distance between the spawn pose and the target pose in m. Defaults to 5.0 m."""
+    spawn_max_dist: float = 2.0
+    """Maximal distance between the spawn pose and the target pose in m. Defaults to 2.0 m."""
     spawn_min_cone_spread: float = 0.0
     """When generating an initial position, the robot is spawned in a cone behind (+pi) the target's orientation.
     This parameter defines the minimal angle that cone can have. Defaults to 0.0 rad.
@@ -51,8 +51,9 @@ class RaceGatesCfg(TaskCoreCfg):
     """Minimal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
     spawn_max_ang_vel: float = 0.0
     """Maximal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
-    spawn_at_random_gate: bool = True
-    fixed_track_id: int = 0
+    spawn_at_random_gate: bool = False
+    fixed_track_id: int = 10
+    same_track_for_all_envs: bool = True
 
     # Goal spawn
     max_num_corners: int = 13
@@ -62,6 +63,8 @@ class RaceGatesCfg(TaskCoreCfg):
     track_rejection_angle: float = (12.5 / 180.0) * math.pi
     """Angle in radians to reject tracks that have too sharp corners. Defaults to 12.5 degrees.
     sharp corners can lead to self-intersecting tracks."""
+    min_point_distance: float = 0.1
+    """The minimum distance between the points sampled to create the track. Should be between 0 and 1. Smaller values can create more complex tracks."""
     scale: float = 20.0
     """Scale of the track. Defaults to 20.0."""
     rad: float = 0.2
@@ -71,6 +74,7 @@ class RaceGatesCfg(TaskCoreCfg):
     loop: bool = True
     """Whether the track should loop or not. Defaults to True."""
     gate_width: float = 0.75
+    
 
     # Observation
     num_subsequent_goals: int = 3

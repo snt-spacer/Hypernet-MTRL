@@ -13,10 +13,10 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
     max_iterations = 2000
     save_interval = 50
-    experiment_name = "multitask_memory_normW_hyperparams_rendezvous"
+    experiment_name = "multitask_memory_racing"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "multitask_memory_normW_hyperparams_rendezvous",
+        "project": "multitask_memory_racing",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
@@ -27,11 +27,11 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         critic_hidden_dims=[32, 32],
         activation="elu",
         clip_actions=True,
-        clip_actions_range=[0, 1],
+        clip_actions_range=[-1, 1],
         use_embeddings=True,
         embeddings_size=32,
         generator_size=(32, 32),
-        num_memory_obs=4,
+        num_memory_obs=46, # Two times the number of max_num_corners on the race_gates task (y,x of points)
         network_type="hybrid", #pure, hybrid
     )
     algorithm = RslRlPpoAlgorithmCfg(
