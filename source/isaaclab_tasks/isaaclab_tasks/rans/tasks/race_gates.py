@@ -447,7 +447,7 @@ class RaceGatesTask(TaskCore):
         # if the goal is reached, the target index is updated
         self._target_index = self._target_index + goal_reached
         # Check if the trajectory is completed
-        self._trajectory_completed = self._target_index > self._num_goals
+        self._trajectory_completed = self._target_index > self._num_goals + 1 # +1 so starts and finish on the same gate
         
         # Track lap completion: when trajectory is completed, increment lap counter
         lap_completed = self._trajectory_completed.int()

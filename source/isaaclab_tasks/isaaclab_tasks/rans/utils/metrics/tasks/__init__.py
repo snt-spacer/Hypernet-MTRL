@@ -56,3 +56,4 @@ from .go_to_pose_metrics import GoToPoseMetrics
 from .go_through_poses_metrics import GoThroughPosesMetrics
 from .track_velocities_metrics import TrackVelocitiesMetrics
 from .rendezvous_metrics import RendezvousMetrics
+from .race_gates_metrics import RaceGatesMetrics
