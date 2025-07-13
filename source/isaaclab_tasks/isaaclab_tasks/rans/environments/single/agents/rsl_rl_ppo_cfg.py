@@ -11,12 +11,12 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 350
+    max_iterations = 1000
     save_interval = 50
-    experiment_name = "Single"
+    experiment_name = "multitask_racing_baseline_noTrackInfo"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "Single",
+        "project": "multitask_racing_baseline_noTrackInfo",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
@@ -37,7 +37,7 @@ class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
         num_learning_epochs=5,
         num_mini_batches=4,
         learning_rate=1.0e-3,
-        schedule="adaptive",
+        schedule="adaptive", #adaptive, fixed
         gamma=0.99,
         lam=0.95,
         desired_kl=0.01,
