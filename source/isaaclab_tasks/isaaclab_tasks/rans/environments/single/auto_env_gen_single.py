@@ -27,10 +27,10 @@ class SingleEnvCfg(DirectRLEnvCfg):
     episode_length_s = 50.0
 
     robot_name = "Leatherback"
-    task_name = "GoToPosition"
+    task_name = "RaceGates"
 
     # scene
-    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=3.5, replicate_physics=True)
+    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=40.0, replicate_physics=True)
 
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1.0 / 60.0, render_interval=decimation)
@@ -184,8 +184,13 @@ class SingleEnv(DirectRLEnv):
         self.robot_api.apply_actions()
 
     def _get_observations(self) -> dict:
-        task_obs = self.task_api.get_observations()
-        observations = {"policy": task_obs}
+        general_obs, track_obs = self.task_api.get_observations()
+        observations = {"policy": 
+                            {
+                                "general_obs": general_obs,
+                                "track_obs": track_obs, 
+                            },
+                        }
         return observations
 
     def _get_rewards(self) -> torch.Tensor:

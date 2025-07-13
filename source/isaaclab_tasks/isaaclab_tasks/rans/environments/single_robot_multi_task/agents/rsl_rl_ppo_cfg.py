@@ -11,23 +11,23 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 4000
-    save_interval = 200
-    experiment_name = "multitask_deep_net_4x64_10xseeds"
+    max_iterations = 1000
+    save_interval = 50
+    experiment_name = "multitask_racing_baseline"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "multitask_deep_net_4x64_10xseeds",
+        "project": "multitask_racing_baseline",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
-        actor_hidden_dims=[64, 64, 64, 64],
-        critic_hidden_dims=[64, 64, 64, 64],
+        actor_hidden_dims=[32, 32],
+        critic_hidden_dims=[32, 32],
         activation="elu",
         clip_actions=True,
-        clip_actions_range=[0, 1],
+        clip_actions_range=[-1, 1],
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,

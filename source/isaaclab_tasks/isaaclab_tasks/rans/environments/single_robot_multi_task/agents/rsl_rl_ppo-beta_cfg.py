@@ -11,7 +11,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticBetaCf
 @configclass
 class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 350
+    max_iterations = 3500
     save_interval = 50
     experiment_name = "multitask"
     logger = "wandb"

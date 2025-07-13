@@ -227,6 +227,8 @@ class RaceGatesTask(TaskCore):
         self._trajectory_completed = torch.zeros((self._num_envs,), device=self._device, dtype=torch.bool)
         self._num_goals = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
         self._ALL_INDICES = torch.arange(self._num_envs, dtype=torch.long, device=self._device)
+        self._num_resets_per_env = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
+        self._laps_completed = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
 
     def create_logs(self) -> None:
         """
@@ -239,8 +241,10 @@ class RaceGatesTask(TaskCore):
         self.scalar_logger.add_log("task_state", "AVG/absolute_angular_velocity", "mean")
         self.scalar_logger.add_log("task_state", "AVG/position_distance", "mean")
         self.scalar_logger.add_log("task_state", "AVG/boundary_distance", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/linear_velocity", "mean")
-        self.scalar_logger.add_log("task_reward", "AVG/angular_velocity", "mean")
+        self.scalar_logger.add_log("task_state", "MAX/num_tracks(resets)", "max")
+        self.scalar_logger.add_log("task_state", "MIN/num_tracks(resets)", "min")
+        self.scalar_logger.add_log("task_state", "AVG/laps_completed", "mean")
+
         self.scalar_logger.add_log("task_reward", "AVG/boundary", "mean")
         self.scalar_logger.add_log("task_reward", "AVG/heading", "mean")
         self.scalar_logger.add_log("task_reward", "AVG/progress", "mean")
@@ -409,13 +413,6 @@ class RaceGatesTask(TaskCore):
         # progress
         progress_rew = self._previous_position_dist - self._position_dist
 
-        # Update logs
-        self.scalar_logger.log("task_state", "AVG/position_distance", self._position_dist)
-        self.scalar_logger.log("task_state", "AVG/boundary_distance", boundary_dist)
-        self.scalar_logger.log("task_state", "AVG/normed_linear_velocity", linear_velocity)
-        self.scalar_logger.log("task_state", "MAX/normed_linear_velocity", linear_velocity)
-        self.scalar_logger.log("task_state", "AVG/absolute_angular_velocity", angular_velocity)
-
         # heading reward (encourages the robot to face the target)
         heading_rew = torch.exp(-heading_dist / self._task_cfg.position_heading_exponential_reward_coeff)
 
@@ -451,6 +448,11 @@ class RaceGatesTask(TaskCore):
         self._target_index = self._target_index + goal_reached
         # Check if the trajectory is completed
         self._trajectory_completed = self._target_index > self._num_goals
+        
+        # Track lap completion: when trajectory is completed, increment lap counter
+        lap_completed = self._trajectory_completed.int()
+        self._laps_completed = self._laps_completed + lap_completed
+        
         # To avoid out of bounds errors, set the target index to 0 if the trajectory is completed
         # If the task loops, then the target index is set to 0 which will make the robot go back to the first goal
         # The episode termination is handled in the get_dones method (looping or not)
@@ -460,6 +462,15 @@ class RaceGatesTask(TaskCore):
         self._previous_position_dist[reached_ids] = 0
 
         # Update logs
+        self.scalar_logger.log("task_state", "AVG/position_distance", self._position_dist)
+        self.scalar_logger.log("task_state", "AVG/boundary_distance", boundary_dist)
+        self.scalar_logger.log("task_state", "AVG/normed_linear_velocity", linear_velocity)
+        self.scalar_logger.log("task_state", "MAX/normed_linear_velocity", linear_velocity)
+        self.scalar_logger.log("task_state", "AVG/absolute_angular_velocity", angular_velocity)
+        self.scalar_logger.log("task_state", "MAX/num_tracks(resets)", self._num_resets_per_env)
+        self.scalar_logger.log("task_state", "MIN/num_tracks(resets)", self._num_resets_per_env)
+        self.scalar_logger.log("task_state", "AVG/laps_completed", self._laps_completed)
+        
         self.scalar_logger.log("task_reward", "AVG/boundary", boundary_rew)
         self.scalar_logger.log("task_reward", "AVG/heading", heading_rew)
         self.scalar_logger.log("task_reward", "AVG/progress", progress_rew)
@@ -516,6 +527,9 @@ class RaceGatesTask(TaskCore):
         # Reset the target index and trajectory completed
         # self._target_index[env_ids] = 0
         self._trajectory_completed[env_ids] = False
+        
+        # Reset the lap counter
+        self._laps_completed[env_ids] = 0
 
         # The first 6 env actions define ranges, we need to make sure they don't exceed the [0,1] range.
         # They are given as [min, delta] we will convert them to [min, max] that is max = min + delta
@@ -578,8 +592,9 @@ class RaceGatesTask(TaskCore):
 
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
         # If the task is set to loop, don't terminate the episode early.
+        # If not looping, terminate after completing the specified number of laps
         if not self._task_cfg.loop:
-            task_completed = torch.where(self._trajectory_completed > 0, ones, task_completed)
+            task_completed = torch.where(self._laps_completed >= self._task_cfg.num_laps, ones, task_completed)
         return task_failed, task_completed
 
     def set_goals(self, env_ids: torch.Tensor):
@@ -654,6 +669,7 @@ class RaceGatesTask(TaskCore):
             else:
                 self._target_index[env_ids] = 0
 
+        self._num_resets_per_env[env_ids] += 1
 
     def set_initial_conditions(self, env_ids: torch.Tensor) -> None:
         """

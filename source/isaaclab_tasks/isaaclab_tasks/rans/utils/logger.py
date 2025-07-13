@@ -107,9 +107,9 @@ class ScalarLogger:
                         self._step_logs[rew_state_key][key][env_ids], episode_length
                     )
                 elif op == "max":
-                    self._episode_logs[rew_state_key][key][env_ids] = self._step_logs[rew_state_key][key][env_ids].max()
+                    self._episode_logs[rew_state_key][key][env_ids] = self._step_logs[rew_state_key][key][env_ids]
                 elif op == "min":
-                    self._episode_logs[rew_state_key][key][env_ids] = self._step_logs[rew_state_key][key][env_ids].min()
+                    self._episode_logs[rew_state_key][key][env_ids] = self._step_logs[rew_state_key][key][env_ids]
                 else:
                     self._episode_logs[rew_state_key][key][env_ids] = self._step_logs[rew_state_key][key][env_ids]
 
@@ -122,19 +122,25 @@ class ScalarLogger:
         extras = dict()
         for rew_state_key in self._episode_logs.keys():
             for key in self._episode_logs[rew_state_key]:
-                extras[rew_state_key + "/" + key] = self._episode_logs[rew_state_key][key].mean()
+                op = self._logs_operation[rew_state_key][key]
+                if op == "max":
+                    extras[rew_state_key + "/" + key] = self._episode_logs[rew_state_key][key].max()
+                elif op == "min":
+                    extras[rew_state_key + "/" + key] = self._episode_logs[rew_state_key][key].min()
+                else:
+                    extras[rew_state_key + "/" + key] = self._episode_logs[rew_state_key][key].mean()
 
         return extras
 
     def min_logs(self, type, name, value):
         """Minimum operation when adding a new data point to the logs."""
 
-        return value
+        return value.to(torch.float32)
 
     def max_logs(self, type, name, value):
         """Maximum operation when adding a new data point to the logs."""
 
-        return value
+        return value.to(torch.float32)
 
     def sum_logs(self, type, name, value):
         """Sum operation when adding a new data point to the logs."""

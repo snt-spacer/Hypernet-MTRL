@@ -51,9 +51,9 @@ class RaceGatesCfg(TaskCoreCfg):
     """Minimal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
     spawn_max_ang_vel: float = 0.0
     """Maximal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
-    spawn_at_random_gate: bool = False
-    fixed_track_id: int = 10
-    same_track_for_all_envs: bool = True
+    spawn_at_random_gate: bool = True
+    fixed_track_id: int = 42
+    same_track_for_all_envs: bool = False
 
     # Goal spawn
     max_num_corners: int = 13
@@ -73,6 +73,8 @@ class RaceGatesCfg(TaskCoreCfg):
     """A coefficient that affects the edginess of the track. Defaults to 0.0."""
     loop: bool = True
     """Whether the track should loop or not. Defaults to True."""
+    num_laps: int = 1
+    """Number of laps to complete before terminating when loop is False. Defaults to 1."""
     gate_width: float = 0.75
     
 
