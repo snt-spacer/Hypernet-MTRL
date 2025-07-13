@@ -55,3 +55,4 @@ from .go_to_position_plots import GoToPositionPlots
 from .go_to_pose_plots import GoToPosePlots
 from .go_through_poses_plots import GoThroughPosesPlots
 from .track_velocities_plots import TrackVelocitiesPlots
+from .race_gates_plots import RaceGatesPlots

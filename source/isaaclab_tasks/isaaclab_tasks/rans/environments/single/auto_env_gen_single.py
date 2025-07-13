@@ -24,7 +24,7 @@ from isaaclab_tasks.rans import ROBOT_CFG_FACTORY, ROBOT_FACTORY, TASK_CFG_FACTO
 class SingleEnvCfg(DirectRLEnvCfg):
     # env
     decimation = 6
-    episode_length_s = 50.0
+    episode_length_s = 500.0
 
     robot_name = "Leatherback"
     task_name = "RaceGates"

@@ -82,7 +82,7 @@ class RaceGatesCfg(TaskCoreCfg):
     """A coefficient that affects the smoothness of the track. Defaults to 0.2."""
     edgy: float = 0.0
     """A coefficient that affects the edginess of the track. Defaults to 0.0."""
-    loop: bool = True
+    loop: bool = False
     num_laps: int = 1
     gate_width: float = 0.75
     

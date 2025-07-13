@@ -47,6 +47,12 @@ parser.add_argument(
     default="PPO",
     help="The RL algorithm used for training the rsl-rl agent.",
 )
+parser.add_argument(
+    "--track_id",
+    type=int,
+    default=42,
+    help="The track ID to use for the evaluation. If set to -1, a random track will be generated.",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -148,7 +154,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             elif "num_laps:" in line:
                 new_content.append("    num_laps: int = 1\n")
             elif "fixed_track_id:" in line:
-                new_content.append("    fixed_track_id: int = 42\n")
+                new_content.append(f"    fixed_track_id: int = {args_cli.track_id}\n")
             elif "spawn_at_random_gate:" in line:
                 new_content.append("    spawn_at_random_gate: bool = False\n")
             else:
