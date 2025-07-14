@@ -229,6 +229,7 @@ class RaceGatesTask(TaskCore):
         self._ALL_INDICES = torch.arange(self._num_envs, dtype=torch.long, device=self._device)
         self._num_resets_per_env = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
         self._laps_completed = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
+        self._missed_gate = torch.zeros((self._num_envs,), device=self._device, dtype=torch.bool)
 
     def create_logs(self) -> None:
         """
@@ -378,10 +379,10 @@ class RaceGatesTask(TaskCore):
         points_with_padding[:, :num_goals] = normalized_points
         gates_positions = points_with_padding.view(self._num_envs, -1)
         
-        combined_task_data = torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids), gates_positions), dim=-1)
+        # combined_task_data = torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids), gates_positions), dim=-1)
 
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), combined_task_data
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), gates_positions
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -440,6 +441,14 @@ class RaceGatesTask(TaskCore):
             torch.abs(pos_proj[:, 1]) < self._task_cfg.gate_width / 2,
         )
 
+        self._missed_gate = torch.logical_and(
+            torch.logical_and(
+                pos_proj[:, 0] < 0,
+                pos_proj[:, 0] > -1,
+            ),
+            torch.abs(pos_proj[:, 1]) > self._task_cfg.gate_width / 2,
+        )
+        
         # Checks if the goal is reached (robot has moved from being in front of the gate to behind it)
         goal_reached = torch.logical_and(is_after_gate, self._previous_is_before_gate).int()
         goal_reverse = torch.logical_and(is_before_gate, self._previous_is_after_gate).int()
@@ -489,6 +498,7 @@ class RaceGatesTask(TaskCore):
             + self._task_cfg.time_penalty
             + self._task_cfg.reached_bonus * goal_reached
             + self._task_cfg.reverse_penalty * goal_reverse
+            + self._missed_gate.int() * self._task_cfg.missed_gate_penalty
         ) + self._robot.compute_rewards(env_ids=self._env_ids)
 
     def reset(
@@ -567,6 +577,7 @@ class RaceGatesTask(TaskCore):
         # is_after_gate: robot is behind the gate (negative x in gate frame)
         self._previous_is_before_gate[env_ids] = False
         self._previous_is_after_gate[env_ids] = False
+        self._missed_gate[env_ids] = False
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -586,6 +597,12 @@ class RaceGatesTask(TaskCore):
         task_failed = torch.zeros_like(self._goal_reached, dtype=torch.long)
         task_failed = torch.where(
             self._position_dist > self._task_cfg.maximum_robot_distance,
+            ones,
+            task_failed,
+        )
+        # Add missed gate as a failure condition
+        task_failed = torch.where(
+            self._missed_gate,
             ones,
             task_failed,
         )

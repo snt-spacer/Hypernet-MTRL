@@ -3,10 +3,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Script to play a checkpoint if an RL agent from RSL-RL."""
-
-"""Launch Isaac Sim Simulator first."""
-
 import argparse
 import sys
 
@@ -14,6 +10,7 @@ from isaaclab.app import AppLauncher
 
 # local imports
 import cli_args  # isort: skip
+import os
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
@@ -53,14 +50,58 @@ parser.add_argument(
     default=42,
     help="The track ID to use for the evaluation. If set to -1, a random track will be generated.",
 )
+parser.add_argument(
+    "--num_laps",
+    type=int,
+    default=1,
+    help="The number of laps to complete in the evaluation. Default is 1 lap.",
+)
+parser.add_argument(
+    "--same_track_for_all_envs",
+    type=bool,
+    default=True,
+    help="If True, all environments will use the same track. If False, each environment will use a different track.",
+)
+
+
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
+
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
 args_cli, hydra_args = parser.parse_known_args()
 # always enable cameras to record video
 if args_cli.video:
     args_cli.enable_cameras = True
+
+# Modify dynamically the task configuration BEFORE Hydra loads it
+def modify_racing_config():
+    print("[INFO] Modifying RaceGates task configuration for evaluation...")
+    new_content = []
+    loop = False
+    if args_cli.num_laps > 1:
+        loop = True
+    eval_racing_cfg_path = os.path.normpath(os.path.join(os.getcwd(), "source", "isaaclab_tasks", "isaaclab_tasks", "rans", "tasks_cfg", "race_gates_cfg.py"))
+    with open(eval_racing_cfg_path, 'r') as file:
+        for line in file:
+            if "loop:" in line:
+                new_content.append(f"    loop: bool = {loop}\n")
+            elif "num_laps:" in line:
+                new_content.append(f"    num_laps: int = {args_cli.num_laps}\n")
+            elif "fixed_track_id:" in line:
+                new_content.append(f"    fixed_track_id: int = {args_cli.track_id}\n")
+            elif "spawn_at_random_gate:" in line:
+                new_content.append("    spawn_at_random_gate: bool = False\n")
+            elif "same_track_for_all_envs:" in line:
+                new_content.append(f"    same_track_for_all_envs: bool = {args_cli.same_track_for_all_envs}\n")
+            else:
+                new_content.append(line)
+    with open(eval_racing_cfg_path, 'w') as file:
+        file.writelines(new_content)
+
+
+modify_racing_config()
+
 
 # clear out sys.argv for Hydra
 sys.argv = [sys.argv[0]] + hydra_args
@@ -110,7 +151,8 @@ agent_cfg_entry_point = "rsl_rl_cfg_entry_point" if algorithm in ["ppo"] else f"
 
 @hydra_task_config(args_cli.task, agent_cfg_entry_point)
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlOnPolicyRunnerCfg):
-    
+
+    # Load checkpoint if specified
     if args_cli.overload_experiment_cfg:
         if args_cli.checkpoint:
             agent_cfg = cli_args.load_rsl_rl_cfg(args_cli.checkpoint, args_cli.task)
@@ -143,25 +185,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     env_cfg.seed = agent_cfg.seed
     env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device
-    
-    # Modify dynamically the task configuration. IsaacLab do something about this.
-    new_content = []
-    eval_racing_cfg_path = os.path.normpath(os.path.join(os.getcwd(), "source", "isaaclab_tasks", "isaaclab_tasks", "rans", "tasks_cfg", "race_gates_cfg.py"))
-    with open(eval_racing_cfg_path, 'r') as file:
-        for line in file:
-            if "loop:" in line:
-                new_content.append("    loop: bool = False\n")
-            elif "num_laps:" in line:
-                new_content.append("    num_laps: int = 1\n")
-            elif "fixed_track_id:" in line:
-                new_content.append(f"    fixed_track_id: int = {args_cli.track_id}\n")
-            elif "spawn_at_random_gate:" in line:
-                new_content.append("    spawn_at_random_gate: bool = False\n")
-            else:
-                new_content.append(line)
-    with open(eval_racing_cfg_path, 'w') as file:
-        file.writelines(new_content)
-
+    env_cfg.episode_length_s = 120 * args_cli.num_laps
 
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)

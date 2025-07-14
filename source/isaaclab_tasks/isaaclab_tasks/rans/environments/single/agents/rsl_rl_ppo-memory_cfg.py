@@ -11,7 +11,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticMemory
 @configclass
 class SingleRobotPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 1000
+    max_iterations = 4000
     save_interval = 50
     experiment_name = "multitask_racing_baseline_noTrackInfo"
     logger = "wandb"
@@ -31,18 +31,18 @@ class SingleRobotPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         use_embeddings=True,
         embeddings_size=32,
         generator_size=(32, 32),
-        num_memory_obs=46, # Two times the number of max_num_corners on the race_gates task (y,x of points)
+        num_memory_obs=26, #46 Two times the number of max_num_corners on the race_gates task (y,x of points)
         network_type="hybrid", #pure, hybrid
     )
     algorithm = RslRlPpoAlgorithmCfg(
-        value_loss_coef=0.5,
+        value_loss_coef=1.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
         entropy_coef=0.005,
         num_learning_epochs=5,
         num_mini_batches=4,
-        learning_rate=4.0e-3,
-        schedule="adaptive", # fixed, adaptive
+        learning_rate=1.0e-3,
+        schedule="adaptive", #adaptive, fixed
         gamma=0.99,
         lam=0.95,
         desired_kl=0.01,

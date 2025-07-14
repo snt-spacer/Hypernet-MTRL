@@ -12,7 +12,7 @@ class RaceGatesMetrics(BaseTaskMetrics, Registerable):
         target_positions = self.trajectories['target_positions'][0][0]
         
         # Initialize with max timesteps (for environments that didn't complete)
-        total_timesteps = torch.full((self.env.num_envs,), self.trajectories['trajectory_completed'].shape[-1], dtype=torch.float32, device=self.trajectories_masks.device)
+        total_timesteps = torch.full((self.trajectories['trajectory_completed'].shape[0],), self.trajectories['trajectory_completed'].shape[-1], dtype=torch.float32, device=self.trajectories_masks.device)
         
         # Find first occurrence of trajectory completion for each environment
         trajectory_completed_env, trajectory_completed_idx = torch.where(self.trajectories['trajectory_completed'] == True)
@@ -33,7 +33,7 @@ class RaceGatesMetrics(BaseTaskMetrics, Registerable):
         
         # Create mask for valid timesteps (until trajectory completion)
         # Get the completion timesteps for each environment
-        total_timesteps = torch.full((self.env.num_envs,), self.trajectories['trajectory_completed'].shape[-1], dtype=torch.float32, device=self.trajectories_masks.device)
+        total_timesteps = torch.full((self.trajectories['trajectory_completed'].shape[0],), self.trajectories['trajectory_completed'].shape[-1], dtype=torch.float32, device=self.trajectories_masks.device)
         trajectory_completed_env, trajectory_completed_idx = torch.where(self.trajectories['trajectory_completed'] == True)
         total_timesteps[trajectory_completed_env] = trajectory_completed_idx.float()
         

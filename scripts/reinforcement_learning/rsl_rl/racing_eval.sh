@@ -4,8 +4,8 @@
 # Common evaluation parameters
 SCRIPT_PATH="./scripts/reinforcement_learning/rsl_rl/eval_racing.py"
 TASK="Isaac-RANS-Single-v0"
-NUM_ENVS=8
-TRACK_ID=10
+NUM_ENVS=4096
+TRACK_ID=42
 BASE_LOG_DIR="logs/rsl_rl/multitask_racing_baseline_noTrackInfo"
 
 # Common arguments that apply to all evaluations

@@ -90,6 +90,21 @@ def pre_process_actions(prev_action: torch.Tensor, delta_pose: torch.Tensor, gri
             prev_action.fill_(0)
         prev_action.clamp_(-1, 1)
         return prev_action
+    elif args_cli.robot_name == "Leatherback_v2":
+        if delta_pose[0][0] > 0:  # forward
+            prev_action[:, 0] = 1.0
+        elif delta_pose[0][0] < 0:  # backward
+            prev_action[:, 0] = -1.0
+        else:
+            prev_action[:, 0] = 0.0
+            
+        if delta_pose[0][1] > 0:  # left
+            prev_action[:, 1] = 1.0
+        elif delta_pose[0][1] < 0:  # right
+            prev_action[:, 1] = -1.0
+        else:
+            prev_action[:, 1] = 0.0
+        return prev_action
     elif args_cli.robot_name == "LeoRover":
         return delta_pose[0, :2].unsqueeze(0)
         # return torch.tensor([[0.1, 1.0]], device=delta_pose.device)
