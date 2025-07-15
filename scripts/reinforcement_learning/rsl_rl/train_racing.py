@@ -51,7 +51,7 @@ def modify_racing_config():
             if "loop:" in line:
                 new_content.append("    loop: bool = True\n")
             elif "num_laps:" in line:
-                new_content.append("    num_laps: int = 1\n")
+                new_content.append("    num_laps: int = 5\n")
             elif "fixed_track_id:" in line:
                 new_content.append("    fixed_track_id: int = -1\n")
             elif "spawn_at_random_gate:" in line:

@@ -99,9 +99,9 @@ def pre_process_actions(prev_action: torch.Tensor, delta_pose: torch.Tensor, gri
             prev_action[:, 0] = 0.0
             
         if delta_pose[0][1] > 0:  # left
-            prev_action[:, 1] = 1.0
+            prev_action[:, 1] = 0.5
         elif delta_pose[0][1] < 0:  # right
-            prev_action[:, 1] = -1.0
+            prev_action[:, 1] = -0.5
         else:
             prev_action[:, 1] = 0.0
         return prev_action
