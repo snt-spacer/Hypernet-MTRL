@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import pandas as pd
 import os
 import numpy as np
@@ -66,6 +67,109 @@ class BaseTaskPlots(AutoRegister):
         raise NotImplementedError("Subclasses should implement this method.")
     
 
+    def plot_trajectory_completed_successfully(self, key_to_plot: str):
+        key_name, units = key_to_plot.split(".")
+
+        fig, ax = plt.subplots(figsize=(14, 8))
+
+        data_to_plot = []
+        label_names = []
+
+        
+        colors_indx = []
+        for group_key, group_dfs in self._dfs.items():
+            try:
+                group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
+                group_values = group_values.dropna()
+                total_vals = len(group_values)
+                false_vals = group_values.sum()
+                true_vals = total_vals - false_vals
+                data_to_plot.append([true_vals, false_vals])
+
+                colors_indx.append(self._plot_cfg['runs_names'].index(group_key.split("_")[-1]))
+                label_names.append(group_key.split("_")[-1])
+
+            except KeyError as e:
+                print(f"KeyError: {e}. The key '{key_to_plot}' does not exist in the DataFrames.")
+                print(self.__class__.__name__)
+                return
+            
+        # Use colors from plot_cfg based on the order of groups
+        outer_colors = [self._plot_cfg["box_colors"][index] for index in colors_indx]
+        
+        # Create inner colors by making variations of the outer colors
+        inner_colors = []
+        for i, outer_color in enumerate(outer_colors):
+            # Convert hex to RGB
+            outer_rgb = mcolors.hex2color(outer_color)
+            
+            # Create two variations: lighter and darker
+            # For true values (successful): make it lighter
+            lighter = tuple(min(1.0, c + 0.2) for c in outer_rgb)
+            # For false values (unsuccessful): make it darker  
+            darker = tuple(max(0.0, c - 0.2) for c in outer_rgb)
+            
+            inner_colors.extend([mcolors.rgb2hex(lighter), mcolors.rgb2hex(darker)])
+
+        vals = np.array(data_to_plot)
+        size = 0.3
+        
+        # Create custom autopct function for outer pie chart
+        def make_autopct_outer(values):
+            def my_autopct(pct):
+                total = sum(values)
+                val = int(round(pct*total/100.0))
+                return f'{pct:.1f}%\n(Total Num Envs {val})'
+            return my_autopct
+        
+        # Outer pie chart with group labels
+        outer_wedges, outer_texts, outer_autotexts = ax.pie(
+            vals.sum(axis=1), 
+            radius=1, 
+            colors=outer_colors,
+            labels=label_names,
+            wedgeprops=dict(width=size, edgecolor='w'),
+            autopct=make_autopct_outer(vals.sum(axis=1)),
+            pctdistance=0.85,
+            labeldistance=1.1
+        )
+
+        # Inner pie chart with success/failure labels
+        inner_labels = []
+        for i, (success, failure) in enumerate(data_to_plot):
+            inner_labels.extend(['Success', 'DNF'])
+
+        # Create custom autopct function for inner pie chart
+        def make_autopct_inner(values, labels_list):
+            counter = 0
+            def my_autopct(pct):
+                nonlocal counter
+                total = sum(values)
+                val = int(round(pct*total/100.0))
+                label_type = "Success" if counter % 2 == 0 else "DNF"
+                counter += 1
+                return f'{label_type}\n{val}'
+            return my_autopct
+
+        inner_wedges, inner_texts, inner_autotexts = ax.pie(
+            vals.flatten(), 
+            radius=1-size, 
+            colors=inner_colors,
+            # labels=inner_labels,
+            wedgeprops=dict(width=size, edgecolor='w'),
+            autopct=make_autopct_inner(vals.flatten(), inner_labels),
+            pctdistance=0.7,
+            textprops={'fontsize': 8}
+        )
+
+        ax.set(aspect="equal", title='Trajectory Completion Success Rate')
+        plt.tight_layout()
+        if key_name == "faild_trajectories_mask":
+            key_name = "trajectory_completition_comparison"
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.svg")
+        plt.savefig(save_path)
+        plt.close()
+
     def boxplot(self, key_to_plot: str):
         key_name, units = key_to_plot.split(".")
 
@@ -84,12 +188,14 @@ class BaseTaskPlots(AutoRegister):
 
             try:
                 group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
+                group_values = group_values.dropna()
             except KeyError as e:
                 print(f"KeyError: {e}. The key '{key_to_plot}' does not exist in the DataFrames.")
                 print(self.__class__.__name__)
                 return
             
             colors_indx.append(self._plot_cfg['runs_names'].index(group_key.split("_")[-1]))
+            
             
             data_to_plot.append(group_values)
             label_names.append(group_key.split("_")[-1])
@@ -595,4 +701,4 @@ class BaseTaskPlots(AutoRegister):
             save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates-mean-sd_{group_name}.svg")
             plt.savefig(save_path, bbox_inches='tight')
             plt.close(fig)
-        
+    

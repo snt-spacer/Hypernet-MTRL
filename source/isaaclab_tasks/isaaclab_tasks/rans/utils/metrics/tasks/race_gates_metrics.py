@@ -20,8 +20,13 @@ class RaceGatesMetrics(BaseTaskMetrics, Registerable):
         # For environments that completed, use completion timestep + 1 (since we want time including the completion step)
         total_timesteps[trajectory_completed_env] = trajectory_completed_idx.float() + 1
 
+        # Remove trajectories that didn't complete
+        faild_trajectories_mask = self.trajectories['missed_gate'].sum(dim=-1) > 0
+        total_timesteps[faild_trajectories_mask] = torch.nan
+
         time_in_s = total_timesteps * self.step_dt
         self.metrics["time_to_complete_a_loop.s"] = time_in_s
+        self.metrics["faild_trajectories_mask.u"] = faild_trajectories_mask
 
     @BaseTaskMetrics.register
     def average_velocity(self):
@@ -36,6 +41,9 @@ class RaceGatesMetrics(BaseTaskMetrics, Registerable):
         total_timesteps = torch.full((self.trajectories['trajectory_completed'].shape[0],), self.trajectories['trajectory_completed'].shape[-1], dtype=torch.float32, device=self.trajectories_masks.device)
         trajectory_completed_env, trajectory_completed_idx = torch.where(self.trajectories['trajectory_completed'] == True)
         total_timesteps[trajectory_completed_env] = trajectory_completed_idx.float()
+        # Remove trajectories that didn't complete
+        faild_trajectories_mask = self.trajectories['missed_gate'].sum(dim=-1) > 0
+        total_timesteps[faild_trajectories_mask] = torch.nan
         
         # Create mask for timesteps before completion
         timestep_indices = torch.arange(velocity_magnitude.shape[1], device=velocity_magnitude.device).float()

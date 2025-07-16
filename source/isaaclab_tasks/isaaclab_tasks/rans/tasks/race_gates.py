@@ -108,6 +108,7 @@ class RaceGatesTask(TaskCore):
                 "sin_heading_to_subsequent_goals_error",
                 "cos_target_heading_to_subsequent_goals_error",
                 "sin_target_heading_to_subsequent_goals_error",
+                "missed_gate",
             ]
     
     @property
@@ -131,6 +132,7 @@ class RaceGatesTask(TaskCore):
             "sin_heading_to_subsequent_goals_error": [f".sin(heading)_sub_goal_{i}.u" for i in range(self._task_cfg.max_num_corners - 1)],
             "cos_target_heading_to_subsequent_goals_error": [f".cos(target_heading)_sub_goal_{i}.u" for i in range(self._task_cfg.max_num_corners - 1)],
             "sin_target_heading_to_subsequent_goals_error": [f".sin(target_heading)_sub_goal_{i}.u" for i in range(self._task_cfg.max_num_corners - 1)],
+            "missed_gate": [".u"],
         }
 
     @property
@@ -195,6 +197,7 @@ class RaceGatesTask(TaskCore):
             "sin_heading_to_subsequent_goals_error": reshaped_sin_heading_to_subsequent_goals_error,
             "cos_target_heading_to_subsequent_goals_error": reshaped_cos_target_heading_to_subsequent_goals_error,
             "sin_target_heading_to_subsequent_goals_error": reshaped_sin_target_heading_to_subsequent_goals_error,
+            "missed_gate": self._missed_gate,
         }
 
     def initialize_buffers(self, env_ids: torch.Tensor | None = None) -> None:
@@ -367,7 +370,7 @@ class RaceGatesTask(TaskCore):
         for randomizer in self.randomizers:
             randomizer.observations(observations=self._task_data)
         
-        
+        # Gates positions normalization & padding
         num_goals = int(self._num_goals[0].item()) + 1    
         points = self._target_positions[:, :num_goals] - self._env_origins[:, :2].unsqueeze(1)
         normalized_points = points / (self._task_cfg.scale)
@@ -378,11 +381,24 @@ class RaceGatesTask(TaskCore):
         )
         points_with_padding[:, :num_goals] = normalized_points
         gates_positions = points_with_padding.view(self._num_envs, -1)
+
+        # Gates headings normalization & padding
+        headings = self._target_heading[:, :num_goals]
+        normalized_headings = torch.atan2(torch.sin(headings), torch.cos(headings)) # Normalize headings to [-π, π] range
+        normalized_headings = normalized_headings / math.pi  # Normalize to [-1, 1]:
+        headings_with_padding = torch.zeros(
+            (self._num_envs, self._task_cfg.max_num_corners),
+            device=self._device,
+            dtype=torch.float32,
+        )
+        headings_with_padding[:, :num_goals] = normalized_headings
+
+        track_info = torch.concat((gates_positions, headings_with_padding), dim=-1) #TODO: test if this is good or position_i, headings_i instead is better 
         
         # combined_task_data = torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids), gates_positions), dim=-1)
 
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), gates_positions
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), track_info
 
     def compute_rewards(self) -> torch.Tensor:
         """

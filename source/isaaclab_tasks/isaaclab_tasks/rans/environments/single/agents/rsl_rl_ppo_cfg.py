@@ -11,7 +11,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 2000
+    max_iterations = 4000
     save_interval = 50
     experiment_name = "multitask_racing_baseline_noTrackInfo"
     logger = "wandb"

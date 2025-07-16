@@ -11,23 +11,47 @@ import yaml
 def main():
     
     list_of_folders = [
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_12-34-20_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        # ],
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_12-23-18_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        # ],
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_12-10-01_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        # ],
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_11-56-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        # ],
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_11-13-22_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+        # ],
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_10-59-34_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+        # ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_12-34-20_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_14-42-48_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_12-23-18_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_15-36-48_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_12-10-01_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_10-26-40_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_11-56-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_11-18-58_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_11-13-22_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_12-04-29_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
         ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_10-59-34_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_12-49-51_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_13-37-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_16-54-39_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
         ],
     ]
 
@@ -44,19 +68,25 @@ def main():
             "#623652", 
         ],
         "runs_names": [
-            "Expert 37",
-            "Expert 42",
-            "Memory 42",
-            "Memory -1",
-            "Baseline -1",
-            "Baseline 42",
-            "seed-7",
-            "seed-8",
+            # "Expert 37",
+            # "Expert 42",
+            # "Memory 42",
+            # "Memory -1",
+            # "Baseline -1",
+            # "Baseline 42",
+            "Expert TrackID 2 32,32",
+            "Baseline 32,32",
+            "Hypernetwork 32,32",
+            "Hypernetwork 64,64",
+            "Hypernetwork 64,32,64",
+            "Hypernetwork 32",
+            "Hypernetwork 512,128,64,32",
+            "Expert TrackID 1 32,32",
         ],
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/plots/test_plots" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/plots/hypernetworks" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 

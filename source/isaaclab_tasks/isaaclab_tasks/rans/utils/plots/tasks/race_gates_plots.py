@@ -19,9 +19,21 @@ class RaceGatesPlots(BaseTaskPlots, Registerable):
 
         self.labels_to_plot = list(keys_set)
 
+        bar_chart_keys_set = set()
+        for group_dfs in dfs.values():
+            for df in group_dfs:
+                bar_chart_keys_set.update(
+                    key for key in df.columns if key.startswith("faild_trajectories_mask")
+                )
+
+        self.bar_char_labels_to_plot = list(bar_chart_keys_set)
+
     def plot(self):
         for label_to_plot in self.labels_to_plot:
             self.boxplot(label_to_plot)
+
+        for label_to_plot in self.bar_char_labels_to_plot:
+            self.plot_trajectory_completed_successfully(label_to_plot)
             
         self.plot_trajectory_with_targets()
         self.plot_trajectory_with_targets_mean_sd()

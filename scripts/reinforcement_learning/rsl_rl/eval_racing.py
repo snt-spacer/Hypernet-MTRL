@@ -47,7 +47,7 @@ parser.add_argument(
 parser.add_argument(
     "--track_id",
     type=int,
-    default=42,
+    default=2,
     help="The track ID to use for the evaluation. If set to -1, a random track will be generated.",
 )
 parser.add_argument(
