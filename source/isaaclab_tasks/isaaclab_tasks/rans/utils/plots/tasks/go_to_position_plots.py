@@ -60,3 +60,4 @@ class GoToPositionPlots(BaseTaskPlots, Registerable):
         self.plot_linear_velocity_over_time()
         self.plot_angular_velocity_over_time()
         self.plot_actions_over_time()
+        self.plot_masses()

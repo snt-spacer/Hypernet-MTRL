@@ -180,7 +180,7 @@ class FloatingPlatformRobot(RobotCore):
             randomizer.actions(dt=self.scene.physics_dt, actions=actions)
 
         self._previous_actions = self._actions.clone()
-        self._actions = (actions > 0.5).float()
+        self._actions = (actions > 0.5).float() #TODO: Remove when rsl_rl supports multidiscrete actions
 
         # Calculate the number of active thrusters (those with a value of 1)
         n_active_thrusters = torch.sum(actions[:, : self._robot_cfg.num_thrusters], dim=1, keepdim=True)
@@ -244,6 +244,7 @@ class FloatingPlatformRobot(RobotCore):
         # action_space = vector.utils.batch_space(single_action_space, self._num_envs)
 
         # return single_action_space, action_space
+        # TODO: Multidiscrete on rsl_rl
         single_action_space = spaces.Box(low=0.0, high=1.0, shape=(self._robot_cfg.num_thrusters,), dtype=np.float32)
         action_space = vector.utils.batch_space(single_action_space, self._num_envs)
 

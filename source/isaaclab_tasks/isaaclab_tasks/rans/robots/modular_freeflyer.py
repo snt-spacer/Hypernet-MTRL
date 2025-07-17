@@ -15,6 +15,8 @@ from isaaclab_tasks.rans import ModularFreeflyerRobotCfg
 
 from .robot_core import RobotCore
 
+import numpy as np
+
 
 class ModularFreeflyerRobot(RobotCore):
     def __init__(
@@ -151,10 +153,10 @@ class ModularFreeflyerRobot(RobotCore):
         self.scalar_logger.add_log("robot_reward", "AVG/action_rate", "mean")
         self.scalar_logger.add_log("robot_reward", "AVG/joint_acceleration", "mean")
 
-    def get_observations(self) -> torch.Tensor:
-        return self._unaltered_actions
+    def get_observations(self, env_ids: torch.Tensor) -> torch.Tensor:
+        return self._unaltered_actions[env_ids]
 
-    def compute_rewards(self) -> torch.Tensor:
+    def compute_rewards(self, env_ids: torch.Tensor) -> torch.Tensor:
         # TODO: DT should be factored in?
 
         # Compute
@@ -164,12 +166,12 @@ class ModularFreeflyerRobot(RobotCore):
         # Log data
         self.scalar_logger.log("robot_state", "AVG/action_rate", action_rate)
         self.scalar_logger.log("robot_state", "AVG/joint_acceleration", joint_accelerations)
-        self.scalar_logger.log("robot_reward", "AVG/action_rate", action_rate)
-        self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", joint_accelerations)
+        self.scalar_logger.log("robot_reward", "AVG/action_rate", action_rate * self._robot_cfg.rew_joint_accel_scale)
+        self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", joint_accelerations * self._robot_cfg.rew_joint_accel_scale)
 
         return (
-            action_rate * self._robot_cfg.rew_action_rate_scale
-            + joint_accelerations * self._robot_cfg.rew_joint_accel_scale
+            action_rate[env_ids] * self._robot_cfg.rew_action_rate_scale
+            + joint_accelerations[env_ids] * self._robot_cfg.rew_joint_accel_scale
         )
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
@@ -224,7 +226,7 @@ class ModularFreeflyerRobot(RobotCore):
             randomizer.actions(dt=self.scene.physics_dt, actions=actions)
 
         self._previous_actions = self._actions.clone()
-        self._actions = actions
+        self._actions = (actions > 0.5).float() #TODO: Remove when rsl_rl supports multidiscrete actions -> self._actions = actions
 
         # Assumes the action space is [-1, 1]
         if self._robot_cfg.action_mode == "continuous":
@@ -273,7 +275,12 @@ class ModularFreeflyerRobot(RobotCore):
         self._robot.write_joint_state_to_sim(zeros, zeros, joint_ids=self._lock_ids, env_ids=env_ids)
 
     def configure_gym_env_spaces(self):
-        single_action_space = spaces.MultiDiscrete([2] * self._robot_cfg.num_thrusters)
+        # single_action_space = spaces.MultiDiscrete([2] * self._robot_cfg.num_thrusters)
+        # action_space = vector.utils.batch_space(single_action_space, self._num_envs)
+
+        # return single_action_space, action_space
+        # TODO: Multidiscrete on rsl_rl
+        single_action_space = spaces.Box(low=0.0, high=1.0, shape=(self._robot_cfg.num_thrusters,), dtype=np.float32)
         action_space = vector.utils.batch_space(single_action_space, self._num_envs)
 
         return single_action_space, action_space

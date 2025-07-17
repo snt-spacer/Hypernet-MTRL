@@ -7,6 +7,7 @@ import os
 import datetime
 import yaml
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class EvalMetrics:
     def __init__(self, env, robot_name: str, task_name: str, folder_path: str, device: str = "cuda", num_runs_per_env: int = 1, task_index: int = 0):
@@ -179,8 +180,8 @@ class EvalMetrics:
 
         return all_trajectory_lengths, all_extracted_trajectories
 
-    def save_extracted_trajectories_to_csv(self):
-        """Saves the extracted trajectories to a CSV file in the metrics directory, one row per time step per trajectory. Vectorized for speed."""
+    # def save_extracted_trajectories_to_csv(self):
+        """Saves the extracted trajectories to a CSV file in the metrics directory, one row per time step per trajectory."""
         import numpy as np
         import pandas as pd
         import os
@@ -192,46 +193,183 @@ class EvalMetrics:
             print("[WARNING] No extracted_trajectories to save.")
             return
 
-        dim_names = ['x', 'y', 'z']
         keys = list(self.extracted_trajectories.keys())
         if not keys:
             print("[WARNING] extracted_trajectories is empty.")
             return
+
+        # Pre-allocate lists to hold all data for all trajectories
+        all_trajectory_indices = []
+        all_step_indices = []
+        all_data_columns = {key: [] for key in keys} # To hold processed data for each key
+
+        dim_names = ['x', 'y', 'z']
+
         num_trajectories = len(self.extracted_trajectories[keys[0]])
-        all_dfs = []
+
         for traj_idx in range(num_trajectories):
-            # Find the length of this trajectory (use the first key)
             first_tensor = self.extracted_trajectories[keys[0]][traj_idx]
             if not (hasattr(first_tensor, 'shape') and hasattr(first_tensor, '__getitem__')):
                 print(f"[WARNING] Trajectory {traj_idx} first key is not array-like, skipping.")
                 continue
+
             traj_len = first_tensor.shape[0]
-            data = {
-                'trajectory': np.full(traj_len, traj_idx, dtype=int),
-                'step': np.arange(traj_len, dtype=int)
-            }
+
+            all_trajectory_indices.append(np.full(traj_len, traj_idx, dtype=int))
+            all_step_indices.append(np.arange(traj_len, dtype=int))
+
             for key in keys:
                 tensor = self.extracted_trajectories[key][traj_idx]
                 arr = tensor.cpu().numpy() if hasattr(tensor, 'cpu') else np.array(tensor)
+
                 if arr.ndim == 1:
-                    data[key] = arr
+                    all_data_columns[key].append(arr)
                 elif arr.ndim == 2:
-                    for d in range(arr.shape[1]):
-                        dim_label = dim_names[d] if arr.shape[1] <= 3 else str(d)
-                        data[f"{key}_{dim_label}"] = arr[:, d]
+                    # Store 2D arrays directly, we'll flatten/name them later during DataFrame construction
+                    all_data_columns[key].append(arr)
                 else:
-                    # flatten higher dims
-                    flat = arr.reshape(arr.shape[0], -1)
-                    for d in range(flat.shape[1]):
-                        data[f"{key}_{d}"] = flat[:, d]
-            df_traj = pd.DataFrame(data)
-            all_dfs.append(df_traj)
-        if all_dfs:
-            df = pd.concat(all_dfs, ignore_index=True)
-            df.to_csv(save_path, index=False, float_format='%.4f')
-            print(f"[INFO] Saved extracted trajectories to {save_path}")
-        else:
+                    # Flatten higher dims and store
+                    all_data_columns[key].append(arr.reshape(arr.shape[0], -1))
+
+        if not all_trajectory_indices: # Check if any valid trajectories were processed
             print("[WARNING] No valid trajectories to save.")
+            return
+
+        # Concatenate all collected data into single large arrays
+        combined_trajectory_indices = np.concatenate(all_trajectory_indices)
+        combined_step_indices = np.concatenate(all_step_indices)
+
+        final_data = {
+            'trajectory': combined_trajectory_indices,
+            'step': combined_step_indices
+        }
+
+        # Process and add the actual trajectory data
+        for key, list_of_arrays in all_data_columns.items():
+            if not list_of_arrays: # Skip if no data was collected for this key
+                continue
+
+            combined_key_data = np.concatenate(list_of_arrays)
+
+            if combined_key_data.ndim == 1:
+                final_data[key] = combined_key_data
+            elif combined_key_data.ndim == 2:
+                # Determine column names for 2D data
+                num_dims = combined_key_data.shape[1]
+                if num_dims <= 3:
+                    column_suffixes = dim_names[:num_dims]
+                else:
+                    column_suffixes = [str(d) for d in range(num_dims)]
+                
+                for d in range(num_dims):
+                    final_data[f"{key}_{column_suffixes[d]}"] = combined_key_data[:, d]
+            else:
+                # This case should ideally be handled by the reshape earlier,
+                # but as a safeguard, if a higher dim array somehow made it here,
+                # flatten and add
+                flat = combined_key_data.reshape(combined_key_data.shape[0], -1)
+                for d in range(flat.shape[1]):
+                    final_data[f"{key}_{d}"] = flat[:, d]
+
+        # Create one large DataFrame
+        df = pd.DataFrame(final_data)
+        df.to_csv(save_path, index=False, float_format='%.4f')
+        print(f"[INFO] Saved extracted trajectories to {save_path}")
+
+    def save_extracted_trajectories_to_csv(self, max_workers=32):
+        """Saves the extracted trajectories to a CSV file in the metrics directory,
+        processing each trajectory in parallel threads."""
+        save_path = os.path.join(self.save_path, "metrics", f"extracted_trajectories_{self.task_name}.csv")
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        if not hasattr(self, 'extracted_trajectories') or self.extracted_trajectories is None:
+            print("[WARNING] No extracted_trajectories to save.")
+            return
+
+        keys = list(self.extracted_trajectories.keys())
+        if not keys:
+            print("[WARNING] extracted_trajectories is empty.")
+            return
+
+        dim_names = ['x', 'y', 'z']
+        num_trajectories = len(self.extracted_trajectories[keys[0]])
+
+        # Worker function to process one trajectory index
+        def _process_one(traj_idx):
+            first_tensor = self.extracted_trajectories[keys[0]][traj_idx]
+            if not (hasattr(first_tensor, 'shape') and hasattr(first_tensor, '__getitem__')):
+                return None  # skip
+
+            traj_len = first_tensor.shape[0]
+            traj_idxs = np.full(traj_len, traj_idx, dtype=int)
+            step_idxs = np.arange(traj_len, dtype=int)
+            data_cols = {}
+
+            for key in keys:
+                tensor = self.extracted_trajectories[key][traj_idx]
+                arr = tensor.cpu().numpy() if hasattr(tensor, 'cpu') else np.array(tensor)
+
+                # reshape as needed
+                if arr.ndim == 1:
+                    data_cols[key] = arr
+                elif arr.ndim == 2:
+                    data_cols[key] = arr
+                else:
+                    data_cols[key] = arr.reshape(arr.shape[0], -1)
+
+            return traj_idxs, step_idxs, data_cols
+
+        # Run the processing in parallel
+        results = []
+        with ThreadPoolExecutor(max_workers=max_workers) as exe:
+            futures = {exe.submit(_process_one, idx): idx for idx in range(num_trajectories)}
+            for fut in as_completed(futures):
+                res = fut.result()
+                if res is not None:
+                    results.append(res)
+
+        if not results:
+            print("[WARNING] No valid trajectories to save.")
+            return
+
+        # Unpack and concatenate
+        all_traj_idxs = [r[0] for r in results]
+        all_step_idxs = [r[1] for r in results]
+        all_data = {key: [] for key in keys}
+        for _, _, data_cols in results:
+            for key, arr in data_cols.items():
+                all_data[key].append(arr)
+
+        combined_trajectory_indices = np.concatenate(all_traj_idxs)
+        combined_step_indices = np.concatenate(all_step_idxs)
+
+        final_data = {
+            'trajectory': combined_trajectory_indices,
+            'step': combined_step_indices
+        }
+
+        # Flatten and name columns
+        for key, list_of_arrays in all_data.items():
+            combined = np.concatenate(list_of_arrays)
+            if combined.ndim == 1:
+                final_data[key] = combined
+            elif combined.ndim == 2:
+                cols = combined.shape[1]
+                if cols <= 3:
+                    suffixes = dim_names[:cols]
+                else:
+                    suffixes = [str(i) for i in range(cols)]
+                for d in range(cols):
+                    final_data[f"{key}_{suffixes[d]}"] = combined[:, d]
+            else:
+                flat = combined.reshape(combined.shape[0], -1)
+                for d in range(flat.shape[1]):
+                    final_data[f"{key}_{d}"] = flat[:, d]
+
+        df = pd.DataFrame(final_data)
+        df.to_csv(save_path, index=False, float_format='%.4f')
+        print(f"[INFO] Saved extracted trajectories to {save_path}")
+
 
     def pad_trajectories(self, all_trajectory_lengths: list, all_extracted_trajectories:dict[str, list[torch.Tensor]]) -> tuple[dict[str, torch.Tensor], torch.Tensor]:
         """Pads the extracted trajectories to the same length.
@@ -260,3 +398,4 @@ class EvalMetrics:
         trajectories_padding_mask = traj_range[None, :] < traj_lengths_tensor[:, None]
 
         return extracted_trajectories, trajectories_padding_mask
+

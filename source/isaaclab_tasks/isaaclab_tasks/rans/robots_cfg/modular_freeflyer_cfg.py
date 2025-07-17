@@ -25,7 +25,7 @@ from .robot_core_cfg import RobotCoreCfg
 class ModularFreeflyerRobotCfg(RobotCoreCfg):
     """Core configuration for a RANS task."""
 
-    robot_name: str = "modular_freeflyer"
+    robot_name: str = "ModularFreeflyer"
 
     robot_cfg: ArticulationCfg = MODULAR_FREEFLYER_2D_CFG.replace(prim_path="/World/envs/env_.*/Robot")
     marker_height = 0.75
@@ -37,8 +37,8 @@ class ModularFreeflyerRobotCfg(RobotCoreCfg):
     y_lock_name = "y_lock_joint"
     z_lock_name = "z_lock_joint"
 
-    rew_action_rate_scale = -0.12 / 8
-    rew_joint_accel_scale = -2.5e-6
+    rew_action_rate_scale = 0 #-0.12 / 8
+    rew_joint_accel_scale = 0 #-2.5e-6
 
     action_mode = "continuous"
 
@@ -57,11 +57,12 @@ class ModularFreeflyerRobotCfg(RobotCoreCfg):
     split_thrust = True  # Split max thrust force among thrusters
 
     # Randomization
+    body_name: str = "body"
     mass_rand_cfg: MassRandomizationCfg = MassRandomizationCfg(
-        enable=False, randomization_modes=["uniform"], body_name="body", max_delta=0.25
+        enable=False, randomization_modes=["uniform"], body_name=body_name, max_delta=5.0
     )
     com_rand_cfg: CoMRandomizationCfg = CoMRandomizationCfg(
-        enable=False, randomization_modes=["uniform"], body_name="body", max_delta=0.05
+        enable=False, randomization_modes=["uniform"], body_name=body_name, max_delta=0.05
     )
     wrench_rand_cfg = WrenchRandomizationCfg(
         enable=False,

@@ -82,6 +82,7 @@ class GoToPositionTask(TaskCore):
             "half_init_lin_vel_x",
             "half_init_lin_vel_y",
             "half_init_ang_vel",
+            "masses"
         ]
     
     @property
@@ -103,6 +104,7 @@ class GoToPositionTask(TaskCore):
             "half_init_lin_vel_x": [".half_init_lin_vel_x.u"],
             "half_init_lin_vel_y": [".half_init_lin_vel_y.u"],
             "half_init_ang_vel": [".half_init_ang_vel.u"],
+            "masses": [".mass.kg"]
         }
     
     @property
@@ -123,6 +125,7 @@ class GoToPositionTask(TaskCore):
             "half_init_lin_vel_x": self._half_init_lin_vel_x,
             "half_init_lin_vel_y": self._half_init_lin_vel_y,
             "half_init_ang_vel": self._half_init_ang_vel,
+            "masses": self.masses
         }
 
     def initialize_buffers(self, env_ids: torch.Tensor | None = None) -> None:
@@ -152,6 +155,9 @@ class GoToPositionTask(TaskCore):
         self.scalar_logger.add_log("task_state", "GoToPosition/EMA/position_distance", "ema")
         self.scalar_logger.add_log("task_state", "GoToPosition/EMA/boundary_distance", "ema")
         self.scalar_logger.add_log("task_state", "GoToPosition/AVG/target_heading_error", "mean")
+        self.scalar_logger.add_log("task_state", "GoToPosition/AVG/masses", "mean")
+        self.scalar_logger.add_log("task_state", "GoToPosition/AVG/mass_env0", "mean")
+
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/position", "mean")
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/heading", "mean")
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/linear_velocity", "mean")
@@ -206,8 +212,13 @@ class GoToPositionTask(TaskCore):
         self._half_init_lin_vel_y = torch.abs(self.initial_velocity[:, 1] / 2) >= torch.abs(self._robot.root_com_vel_w[self._env_ids, 1])
         self._half_init_ang_vel = torch.abs(self.initial_velocity[:, 5] / 2) >= torch.abs(self._robot.root_com_vel_w[self._env_ids, -1])
 
+        # Task specific observations
+        body_id, _ = self.scene[self._robot._robot_cfg.robot_name].find_bodies(self._robot._robot_cfg.body_name)
+        self.masses = self.scene[self._robot._robot_cfg.robot_name].root_physx_view.get_masses().to(self._device)[self._env_ids, body_id]
+        task_obs = self.masses.unsqueeze(-1)  
+
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), task_obs
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -254,7 +265,9 @@ class GoToPositionTask(TaskCore):
         self.scalar_logger.log("task_state", "GoToPosition/AVG/normed_linear_velocity", linear_velocity)
         self.scalar_logger.log("task_state", "GoToPosition/AVG/absolute_angular_velocity", angular_velocity)
         self.scalar_logger.log("task_state", "GoToPosition/AVG/target_heading_error", target_heading_error)
-
+        self.scalar_logger.log("task_state", "GoToPosition/AVG/masses", self.masses)
+        self.scalar_logger.log("task_state", "GoToPosition/AVG/mass_env0", self.masses[0])
+        
         # position reward
         position_rew = torch.exp(-self._position_dist / self._task_cfg.position_exponential_reward_coeff)
 
@@ -304,7 +317,7 @@ class GoToPositionTask(TaskCore):
         # Return the reward by combining the different components and adding the robot rewards
         return (
             position_rew * self._task_cfg.position_weight
-            + progress_rew * self._task_cfg.progress_weight
+            # + progress_rew * self._task_cfg.progress_weight
             + heading_rew * self._task_cfg.heading_weight
             + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight

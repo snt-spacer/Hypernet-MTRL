@@ -181,6 +181,8 @@ class SingleEnv(DirectRLEnv):
         self.robot_api.process_actions(actions)
 
     def _apply_action(self) -> None:
+        # print(self.robot_api.root_link_pos_w[:, :2])
+        # breakpoint()
         self.robot_api.apply_actions()
 
     def _get_observations(self) -> dict:
@@ -220,6 +222,7 @@ class SingleEnv(DirectRLEnv):
 
         super()._reset_idx(env_ids)
 
+        self.robot_api.reset(env_ids)
         self.task_api.reset(env_ids)
 
     def _set_debug_vis_impl(self, debug_vis: bool) -> None:

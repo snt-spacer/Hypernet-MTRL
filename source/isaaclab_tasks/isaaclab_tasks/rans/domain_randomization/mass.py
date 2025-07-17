@@ -138,7 +138,8 @@ class MassRandomization(Registerable, RandomizationCore):
             env_ids = self._ALL_INDICES
 
         self._current_mass[env_ids, self._body_id] += (gen_actions - 0.5) * 2 * self._cfg.max_delta
-        self._current_mass = torch.clamp(self._current_mass, self._cfg.min_mass, self._cfg.max_mass)
+        self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
+        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
 
     def fn_on_reset_normal(
         self, env_ids: torch.Tensor | None = None, gen_actions: torch.Tensor | None = None, **kwargs
@@ -159,7 +160,8 @@ class MassRandomization(Registerable, RandomizationCore):
             env_ids = self._ALL_INDICES
 
         self._current_mass[env_ids, self._body_id] += gen_actions * self._cfg.std
-        self._current_mass = torch.clamp(self._current_mass, self._cfg.min_mass, self._cfg.max_mass)
+        self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
+        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
 
     def fn_on_update_constant_time_decay(self, dt: float = 0.0, **kwargs):
         """Change the mass of the rigid bodies by decaying it throughout the episode.
@@ -168,7 +170,8 @@ class MassRandomization(Registerable, RandomizationCore):
             dt: The time step. (in seconds)"""
 
         self._current_mass *= 1 + self._cfg.mass_change_rate * dt
-        self._current_mass = torch.clamp(self._current_mass, self._cfg.min_mass, self._cfg.max_mass)
+        self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
+        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
 
     def fn_on_update_action_based_decay(self, actions: torch.Tensor | None = None, dt: float = 0.0, **kwargs):
         """Change the mass of the rigid bodies by decaying it throughout the episode based on the actions.
@@ -178,7 +181,8 @@ class MassRandomization(Registerable, RandomizationCore):
             dt: The time step. (in seconds)"""
 
         self._current_mass *= 1 + self._cfg.mass_change_rate * torch.norm(actions, dim=1) * dt
-        self._current_mass = torch.clamp(self._current_mass, self._cfg.min_mass, self._cfg.max_mass)
+        self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
+        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
 
     def apply_randomization(self, ids: torch.Tensor | None = None) -> None:
         """Updates the mass of the robot. The mass is in kg.
@@ -192,3 +196,7 @@ class MassRandomization(Registerable, RandomizationCore):
             ids_cpu = ids.to("cpu")
 
         self._asset.root_physx_view.set_masses(self._current_mass.to("cpu"), ids_cpu)
+        self._asset.root_physx_view.set_inertias(
+            self.mass_decrease_ratio.unsqueeze(-1).to("cpu") * self._asset.root_physx_view.get_inertias(),
+            indices=ids_cpu,
+        )

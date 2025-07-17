@@ -30,28 +30,7 @@ def main():
         #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-13_10-59-34_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
         # ],
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_14-42-48_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_15-36-48_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_10-26-40_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_11-18-58_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_12-04-29_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_12-49-51_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_13-37-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-        ],
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-15_16-54-39_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_orbital/2025-07-16_15-16-20_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42",
         ],
     ]
 
@@ -86,7 +65,7 @@ def main():
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/plots/hypernetworks" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/plots/orbital_mass" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 
@@ -168,7 +147,7 @@ def main():
             trajectories_dfs=trajectories_dfs,
             labels=labels,
             env_info=env_info,
-            folder_path=folder_path,
+            folder_path=save_plots_folder_path,
             plot_cfg=plot_cfg,
         )
         robot_plots_factory.plot()
