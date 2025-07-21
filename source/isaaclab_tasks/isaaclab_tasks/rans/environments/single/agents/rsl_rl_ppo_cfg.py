@@ -27,7 +27,7 @@ class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
         critic_hidden_dims=[32, 32],
         activation="elu",
         clip_actions=True,
-        clip_actions_range=[0, 1],
+        clip_actions_range=[-1, 1],
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,

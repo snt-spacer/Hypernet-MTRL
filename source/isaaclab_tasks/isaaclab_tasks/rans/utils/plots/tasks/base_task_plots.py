@@ -47,20 +47,22 @@ class BaseTaskPlots(AutoRegister):
         dfs_to_concat = []
         trajectory_offset = 0
 
-        for group_key, group_dfs in self._trajectories_dfs.items():
-            for df in group_dfs:
-                df = df.copy()
-                df['trajectory'] += trajectory_offset
-                dfs_to_concat.append(df)
-                max_traj = df['trajectory'].max()
-                trajectory_offset = max_traj + 1
+        if len(self._trajectories_dfs) > 0:
+            for group_key, group_dfs in self._trajectories_dfs.items():
+                for df in group_dfs:
+                    df = df.copy()
+                    df['trajectory'] += trajectory_offset
+                    dfs_to_concat.append(df)
+                    max_traj = df['trajectory'].max()
+                    trajectory_offset = max_traj + 1
 
-        self.trajectories_to_plot = pd.concat(dfs_to_concat, ignore_index=True)
+            self.trajectories_to_plot = pd.concat(dfs_to_concat, ignore_index=True)
+            trajectory_names = self.trajectories_to_plot['trajectory'].unique()
+            self.trajectory_color_map_hex = {name: "#%06x" % random.randint(0, 0xFFFFFF) for name in trajectory_names}
 
         self.ALPHA_VALUE = 0.8
 
-        trajectory_names = self.trajectories_to_plot['trajectory'].unique()
-        self.trajectory_color_map_hex = {name: "#%06x" % random.randint(0, 0xFFFFFF) for name in trajectory_names}
+        
 
 
     def plot(self):

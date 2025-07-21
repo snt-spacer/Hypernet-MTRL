@@ -7,6 +7,7 @@ import math
 import torch
 from gymnasium import spaces, vector
 
+import isaaclab.sim as sim_utils
 from isaaclab.assets import Articulation
 from isaaclab.scene import InteractiveScene
 from isaaclab.utils import math as math_utils
@@ -16,6 +17,9 @@ from isaaclab_tasks.rans import ModularFreeflyerRobotCfg
 from .robot_core import RobotCore
 
 import numpy as np
+
+from isaaclab.markers import ARROW_CFG, VisualizationMarkers
+from isaaclab.utils.math import quat_from_angle_axis, quat_mul, quat_apply
 
 
 class ModularFreeflyerRobot(RobotCore):
@@ -128,6 +132,9 @@ class ModularFreeflyerRobot(RobotCore):
             dtype=torch.float32,
         )
 
+        self._thrusters_active_mask = torch.full((self._num_envs, self._robot_cfg.num_thrusters), True, dtype=torch.bool, device=self._device)
+        self.random_values_thruster_activation= self._rng.sample_uniform_torch(0, 1, (self._robot_cfg.num_thrusters,), env_ids)
+
     def run_setup(self, robot: Articulation) -> None:
         """Loads the robot into the task. After it has been loaded."""
         super().run_setup(robot)
@@ -143,6 +150,12 @@ class ModularFreeflyerRobot(RobotCore):
         self._root_idx = self._robot.find_bodies(self._robot_cfg.root_body_name)[0]
         # Get the thrust generator
         self._thrust_generator = ThrustGenerator(self._robot_cfg, self._num_envs, self._device)
+
+        if self._robot_cfg.is_reaction_wheel:
+            self._reaction_wheel_dof_idx, _ = self._robot.find_joints(self._robot_cfg.reaction_wheel_dof_name)
+
+        self.asset = self.scene[self._robot_cfg.robot_name]
+        self.default_com: torch.Tensor = self.asset.root_physx_view.get_coms().to(self._device)
 
     def create_logs(self) -> None:
         super().create_logs()
@@ -201,6 +214,15 @@ class ModularFreeflyerRobot(RobotCore):
         self._robot.set_joint_position_target(zeros, joint_ids=self._lock_ids, env_ids=env_ids)
         self._robot.set_joint_velocity_target(zeros, joint_ids=self._lock_ids, env_ids=env_ids)
 
+        if self._robot_cfg.is_reaction_wheel:
+            rw_reset = torch.zeros(
+                (len(env_ids), len(self._reaction_wheel_dof_idx)),
+                device=self._device,
+                dtype=torch.float32,
+            )
+            self._robot.set_joint_velocity_target(rw_reset, joint_ids=self._reaction_wheel_dof_idx, env_ids=env_ids)
+
+
     def process_actions(self, actions: torch.Tensor) -> None:
         """Process the actions for the robot.
 
@@ -215,8 +237,8 @@ class ModularFreeflyerRobot(RobotCore):
             actions (torch.Tensor): The actions to process."""
 
         # Enforce action limits at the robot level
-        actions = actions.float()  # RuntimeError: result type Float can't be cast to the desired output type long int
-        actions.clip_(min=0.0, max=1.0)
+        # actions = actions.float()  # RuntimeError: result type Float can't be cast to the desired output type long int
+        # actions.clip_(min=0.0, max=1.0)
         # Store the unaltered actions, by default the robot should only observe the unaltered actions.
         self._previous_unaltered_actions = self._unaltered_actions.clone()
         self._unaltered_actions = actions.clone()
@@ -226,16 +248,20 @@ class ModularFreeflyerRobot(RobotCore):
             randomizer.actions(dt=self.scene.physics_dt, actions=actions)
 
         self._previous_actions = self._actions.clone()
-        self._actions = (actions > 0.5).float() #TODO: Remove when rsl_rl supports multidiscrete actions -> self._actions = actions
+        self._actions = actions
+        # self._actions = (actions > 0.5).float() #TODO: Remove when rsl_rl supports multidiscrete actions -> self._actions = actions
+        self._actions = self._actions
 
         # Assumes the action space is [-1, 1]
         if self._robot_cfg.action_mode == "continuous":
             self._thrust_actions = self._actions[:, : self._robot_cfg.num_thrusters]
             self._thrust_actions = (self._thrust_actions + 1) / 2.0
-            self._reaction_wheel_actions = self._actions[:, -1]
+            self._thrust_actions[~self._thrusters_active_mask] = 0.0
         else:
             self._thrust_actions = (self._actions[:, : self._robot_cfg.num_thrusters] > 0.0).float()
-            self._reaction_wheel_actions = self._actions[:, -1]
+        
+        if self._robot_cfg.is_reaction_wheel:
+            self._reaction_wheel_actions = self._actions[:, -1].unsqueeze(-1) * self._robot_cfg.reaction_wheel_scale
 
         # Log data
         self.scalar_logger.log("robot_state", "AVG/thrust", torch.sum(self._thrust_actions, dim=-1))
@@ -254,6 +280,11 @@ class ModularFreeflyerRobot(RobotCore):
         self._robot.set_external_force_and_torque(
             self._thrust_forces, self._thrust_torques, positions=self._thrust_positions, body_ids=self._thrusters_ids
         )
+
+        if self._robot_cfg.is_reaction_wheel:
+            self._robot.set_joint_velocity_target(
+                self._reaction_wheel_actions, joint_ids=self._reaction_wheel_dof_idx
+            )
 
     def set_pose(
         self,
@@ -280,10 +311,58 @@ class ModularFreeflyerRobot(RobotCore):
 
         # return single_action_space, action_space
         # TODO: Multidiscrete on rsl_rl
-        single_action_space = spaces.Box(low=0.0, high=1.0, shape=(self._robot_cfg.num_thrusters,), dtype=np.float32)
+        single_action_space = spaces.Box(low=-1.0, high=1.0, shape=(self._dim_robot_act,), dtype=np.float32)
         action_space = vector.utils.batch_space(single_action_space, self._num_envs)
 
         return single_action_space, action_space
+
+    def create_robot_visualization(self) -> None:
+        self._thruster_markers = []
+        for i in range(self._robot_cfg.num_thrusters):
+            cfg = ARROW_CFG.copy().replace(  # type: ignore
+                prim_path=f"/Visuals/thrusters/thruster{i}"
+            )
+            cfg.markers["arrow"].tail_radius = 0.1
+            cfg.markers["arrow"].tail_length = 1.0
+            cfg.markers["arrow"].head_radius = 0.2
+            cfg.markers["arrow"].head_length = 0.5
+
+            # Use a different color for each thruster (gradient from red to blue)
+            blue = i / max(self._robot_cfg.num_thrusters - 1, 1)
+            cfg.markers["arrow"].visual_material = sim_utils.PreviewSurfaceCfg(
+                emissive_color=(1.0 - blue, 0.2, blue)
+            )
+
+            # Create the marker and add to list
+            self._thruster_markers.append(VisualizationMarkers(cfg))
+
+    def update_robot_visualization(self) -> None:
+        # This is a visualization of the force, not the trhusters, basically the arrow points in the direction of the force not the thrust
+        N = self.root_link_pos_w.shape[0]       # batch size
+        base_quat = self.root_link_quat_w       # (N,4)
+        pos_w    = self.root_link_pos_w         # (N,3)
+        thrust_actions = self._thrust_actions   # (N, num_thrusters)
+
+        for i, marker in enumerate(self._thruster_markers):
+            # —— compute world position & orientation exactly as before ——
+            local_offset = self._thrust_positions[:, i]               # (N,3)
+            world_offset = quat_apply(base_quat, local_offset)        # (N,3)
+            thrust_pos   = pos_w + world_offset                       # (N,3)
+
+            theta  = self._robot_cfg.thruster_transforms[i][2]
+            angle  = torch.full((N,), theta, device=base_quat.device)
+            axis   = torch.tensor([0.0,0.0,1.0], device=base_quat.device).repeat(N,1)
+            local_q        = quat_from_angle_axis(angle, axis)        # (N,4)
+            thruster_quat_w = quat_mul(base_quat, local_q)            # (N,4)
+
+            # —— NEW: build a uniform XYZ scale from the thrust magnitude ——
+            t = thrust_actions[:, i].clamp(0.0, 1.0)                  # (N,)  in [0,1]
+            # if your base arrow was 1.0 long, this will shorten it down toward 0
+            scales = torch.stack([t, t, t], dim=1)                    # (N,3)
+
+            # visualize with per‑instance scales
+            marker.visualize(thrust_pos, thruster_quat_w, scales=scales)
+
 
     ##
     # Derived base properties
@@ -559,15 +638,15 @@ class ThrustGenerator:
 
         rand_forces = actions * self._thrust_force
         # Split transforms into translation and rotation
-        R = self._transforms2D[:, :, :2, :2].reshape(-1, 2, 2)
-        T = self._transforms2D[:, :, 2, :2].reshape(-1, 2)
+        self.R = self._transforms2D[:, :, :2, :2].reshape(-1, 2, 2)
+        self.T = self._transforms2D[:, :, 2, :2].reshape(-1, 2)
         # Create a zero tensor to add 3rd dimension
-        zero = torch.zeros((T.shape[0], 1), device=self._device, dtype=torch.float32)
+        zero = torch.zeros((self.T.shape[0], 1), device=self._device, dtype=torch.float32)
         # Generate positions
-        positions = torch.cat([T, zero], dim=-1)
+        positions = torch.cat([self.T, zero], dim=-1)
         # Project forces
         force_vector = self.unit_vector * rand_forces.view(-1, self._robot_cfg.num_thrusters, 1)
-        rotated_forces = torch.matmul(R.reshape(-1, 2, 2), force_vector.view(-1, 2, 1))
+        rotated_forces = torch.matmul(self.R.reshape(-1, 2, 2), force_vector.view(-1, 2, 1))
         projected_forces = torch.cat([rotated_forces[:, :, 0], zero], dim=-1)
         return positions.reshape(-1, self._robot_cfg.num_thrusters, 3), projected_forces.reshape(
             -1, self._robot_cfg.num_thrusters, 3

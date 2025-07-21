@@ -59,7 +59,7 @@ class ModularFreeflyerRobotCfg(RobotCoreCfg):
     # Randomization
     body_name: str = "body"
     mass_rand_cfg: MassRandomizationCfg = MassRandomizationCfg(
-        enable=False, randomization_modes=["uniform"], body_name=body_name, max_delta=5.0
+        enable=False, randomization_modes=["uniform"], body_name=body_name, max_delta=5.0, min_mass=1.5, max_mass=10.0
     )
     com_rand_cfg: CoMRandomizationCfg = CoMRandomizationCfg(
         enable=False, randomization_modes=["uniform"], body_name=body_name, max_delta=0.05

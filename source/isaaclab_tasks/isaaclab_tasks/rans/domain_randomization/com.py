@@ -104,6 +104,9 @@ class CoMRandomization(Registerable, RandomizationCore):
             self._body_id, _ = self._asset.find_bodies(self._cfg.body_name)
             self._default_com: torch.Tensor = self._asset.root_physx_view.get_coms().to(self._device)
             self._current_com = self._default_com.clone()
+            self._default_inertias: torch.Tensor = self._asset.root_physx_view.get_inertias().to(self._device)
+            self._current_inertias = self._default_inertias.clone()
+            # self._masses: torch.Tensor = self._asset.root_physx_view.get_masses().to(self._device)
 
     def default_reset(self, env_ids: torch.Tensor | None = None, **kwargs) -> None:
         """The default reset function for the randomization."""
@@ -113,12 +116,48 @@ class CoMRandomization(Registerable, RandomizationCore):
 
         # By default, the com is set to the default com
         self._current_com[env_ids, self._body_id] = self._default_com[env_ids, self._body_id]
+        # Reset inertias to default
+        self._current_inertias[env_ids, self._body_id] = self._default_inertias[env_ids, self._body_id]
 
     def default_update(self, **kwargs) -> None:
         """The default update function for the randomization."""
 
         # Do nothing
         pass
+
+    def _update_inertias(self, env_ids: torch.Tensor) -> None:
+        """Update the inertia tensor based on the change in center of mass using the parallel axis theorem.
+        
+        Args:
+            env_ids: The ids of the environments to update.
+        """
+        # Calculate the CoM shift vector
+        com_shift = self._current_com[env_ids, self._body_id, :3] - self._default_com[env_ids, self._body_id, :3]
+        
+        # Get the mass for the body
+        mass = self._asset.root_physx_view.get_masses().to(self._device)[env_ids, self._body_id]
+        
+        # Apply parallel axis theorem: I_new = I_old + m * (d^2 * I - d ⊗ d)
+        # where d is the CoM shift vector, I is the identity matrix, and ⊗ is outer product
+        
+        # Calculate d^2 (squared magnitude of the shift)
+        d_squared = torch.sum(com_shift ** 2, dim=-1, keepdim=True)  # Shape: [num_envs, 1]
+        
+        # Create identity matrix for each environment
+        identity = torch.eye(3, device=self._device).unsqueeze(0).expand(len(env_ids), -1, -1)  # Shape: [num_envs, 3, 3]
+        
+        # Calculate outer product d ⊗ d for each environment
+        com_shift_expanded = com_shift.unsqueeze(-1)  # Shape: [num_envs, 3, 1]
+        outer_product = torch.bmm(com_shift_expanded, com_shift_expanded.transpose(-2, -1))  # Shape: [num_envs, 3, 3]
+        
+        # Calculate the inertia correction term: m * (d^2 * I - d ⊗ d)
+        mass_expanded = mass.unsqueeze(-1).unsqueeze(-1)  # Shape: [num_envs, 1, 1]
+        d_squared_expanded = d_squared.unsqueeze(-1)  # Shape: [num_envs, 1, 1]
+        inertia_correction = mass_expanded * (d_squared_expanded * identity - outer_product)
+        flat_inertia_correction = inertia_correction.view(len(env_ids), 9)  # Flatten to [num_envs, 9]
+
+        # Update the inertias
+        self._current_inertias[env_ids, self._body_id] = self._default_inertias[env_ids, self._body_id] + flat_inertia_correction
 
     def fn_on_reset_uniform(
         self, env_ids: torch.Tensor | None, gen_actions: torch.Tensor | None = None, **kwargs
@@ -157,6 +196,9 @@ class CoMRandomization(Registerable, RandomizationCore):
             self._current_com[env_ids, self._body_id, 2] += (
                 torch.cos(phi) * (gen_actions - 0.5) * 2 * self._cfg.max_delta
             )
+        
+        # Update inertias based on the CoM change
+        self._update_inertias(env_ids)
 
     def fn_on_reset_normal(
         self, env_ids: torch.Tensor | None = None, gen_actions: torch.Tensor | None = None, **kwargs
@@ -187,6 +229,9 @@ class CoMRandomization(Registerable, RandomizationCore):
             self._current_com[env_ids, self._body_id, 0] += torch.cos(theta) * torch.sin(phi) * normal
             self._current_com[env_ids, self._body_id, 1] += torch.sin(theta) * torch.sin(phi) * normal
             self._current_com[env_ids, self._body_id, 2] += torch.cos(phi) * normal
+        
+        # Update inertias based on the CoM change
+        self._update_inertias(env_ids)
 
     def fn_on_update_spring(self, dt: float = 0.0, accelerations: torch.Tensor | None = None, **kwargs) -> None:
         """Change the mass of the rigid bodies by decaying it throughout the episode.
@@ -197,7 +242,7 @@ class CoMRandomization(Registerable, RandomizationCore):
         raise NotImplementedError
 
     def apply_randomization(self, ids: torch.Tensor | None = None) -> None:
-        """Updates the com of the robot.
+        """Updates the com and inertias of the robot.
 
         Args:
             ids: The ids of the environments."""
@@ -208,3 +253,4 @@ class CoMRandomization(Registerable, RandomizationCore):
             ids_cpu = ids.to("cpu")
 
         self._asset.root_physx_view.set_coms(self._current_com.to("cpu"), ids_cpu)
+        self._asset.root_physx_view.set_inertias(self._current_inertias.to("cpu"), indices=ids_cpu)

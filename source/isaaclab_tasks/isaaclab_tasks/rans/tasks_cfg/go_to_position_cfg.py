@@ -73,9 +73,20 @@ class GoToPositionCfg(TaskCoreCfg):
     noisy_observation_cfg: NoisyObservationsCfg = NoisyObservationsCfg(
         enable=False, randomization_modes=["uniform"], slices=[0, (1, 3), (3, 5), 5], max_delta=[0.03, 0.01, 0.03, 0.01]
     )
+    thruster_mask_multiplier: float = 0.5
+    """[0,1] The higher the more power to gen_actions for masking the activation of thrusters."""
 
     # Spaces
     observation_space: int = 6
     state_space: int = 0
     action_space: int = 0
-    gen_space: int = 4
+    gen_space: int = 5
+
+
+    # Evaluation
+    eval_mode: bool = True
+    """If True, the task is in evaluation mode. Defaults to False."""
+    eval_mass: float = 0.0
+    """Mass of the robot in kg for evaluation. Defaults to 0.0 kg, which means no mass change."""
+    eval_thruster_pattern = [True, False, False, False, False, False, False, False]
+    """The thruster activation pattern for evaluation."""

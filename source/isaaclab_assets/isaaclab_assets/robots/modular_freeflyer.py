@@ -17,7 +17,7 @@ import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg
 from isaaclab.sim import schemas, schemas_cfg
 from isaaclab.utils import configclass
-
+from isaaclab.actuators import ImplicitActuatorCfg
 
 @configclass
 class ModularFreeFlyer2DProps:
@@ -117,17 +117,23 @@ def generate_freeflyer(root_path: str, robot_cfg: ModularFreeFlyer2DProps) -> No
         )
     # Add a body for the reaction wheel
     reaction_wheel_path = root_path + "/reaction_wheel"
-    reaction_wheel_prim = prim_utils.create_prim(reaction_wheel_path)
+    reaction_wheel_prim = prim_utils.create_prim(
+        prim_path=reaction_wheel_path, 
+        prim_type="Cylinder",
+        attributes={"height": robot_cfg.height / 4, "radius": robot_cfg.radius / 5},
+    )
     physx_utils.setPhysics(prim=reaction_wheel_prim, kinematic=False)
-    schemas.define_mass_properties(reaction_wheel_path, no_mass_props)
-    schemas.createJoint(
+    schemas.define_mass_properties(reaction_wheel_path, schemas_cfg.MassPropertiesCfg(mass=0.5))
+    rw_joint = schemas.createJoint(
         stage=stage,
-        joint_type="Fixed",
+        joint_type="Revolute",
         from_prim=reaction_wheel_prim,
         to_prim=body_prim,
-        joint_name="fixed_joint_reaction_wheel",
+        joint_name="revolute_joint_reaction_wheel",
         joint_base_path=joint_base_path,
     )
+    rw_joint.GetAttribute("physics:axis").Set("Z")
+    # TODO add driveAPI to the joint
 
     # Create three joints to lock the platform in the XY plane. (reduce to 3DoF)
     anchor_path = root_path + "/anchor_body"
@@ -205,6 +211,13 @@ MODULAR_FREEFLYER_2D_CFG = ArticulationCfg(
             "z_lock_joint": 0.0,
         },
     ),
-    actuators={},
+    actuators={
+        "rw_wheel_actuator": ImplicitActuatorCfg(
+            joint_names_expr=[".*_reaction_wheel"],
+            effort_limit=40000.0,
+            velocity_limit=100.0,
+            stiffness=0.0,
+            damping=100000.0,
+        ),
+    },
 )
-"""Configuration for a simple ackermann robot."""

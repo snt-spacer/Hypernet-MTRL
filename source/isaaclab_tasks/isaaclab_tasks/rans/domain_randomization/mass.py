@@ -103,6 +103,7 @@ class MassRandomization(Registerable, RandomizationCore):
             self._body_id, _ = self._asset.find_bodies(self._cfg.body_name)
             self._default_mass: torch.Tensor = self._asset.root_physx_view.get_masses().to(self._device)
             self._current_mass = self._default_mass.clone()
+            self._default_inertias: torch.Tensor = self._asset.root_physx_view.get_inertias().to(self._device)
 
     def default_reset(self, env_ids: torch.Tensor | None, **kwargs) -> None:
         """The default reset function for the randomization."""
@@ -139,7 +140,7 @@ class MassRandomization(Registerable, RandomizationCore):
 
         self._current_mass[env_ids, self._body_id] += (gen_actions - 0.5) * 2 * self._cfg.max_delta
         self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
-        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
+        self.mass_decrease_ratio = self._current_mass / self._default_mass
 
     def fn_on_reset_normal(
         self, env_ids: torch.Tensor | None = None, gen_actions: torch.Tensor | None = None, **kwargs
@@ -161,7 +162,7 @@ class MassRandomization(Registerable, RandomizationCore):
 
         self._current_mass[env_ids, self._body_id] += gen_actions * self._cfg.std
         self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
-        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
+        self.mass_decrease_ratio = self._current_mass / self._default_mass
 
     def fn_on_update_constant_time_decay(self, dt: float = 0.0, **kwargs):
         """Change the mass of the rigid bodies by decaying it throughout the episode.
@@ -170,8 +171,8 @@ class MassRandomization(Registerable, RandomizationCore):
             dt: The time step. (in seconds)"""
 
         self._current_mass *= 1 + self._cfg.mass_change_rate * dt
-        self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
-        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
+        self._current_mass[:, self._body_id] = torch.clamp(self._current_mass[:, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
+        self.mass_decrease_ratio = self._current_mass / self._default_mass
 
     def fn_on_update_action_based_decay(self, actions: torch.Tensor | None = None, dt: float = 0.0, **kwargs):
         """Change the mass of the rigid bodies by decaying it throughout the episode based on the actions.
@@ -181,8 +182,8 @@ class MassRandomization(Registerable, RandomizationCore):
             dt: The time step. (in seconds)"""
 
         self._current_mass *= 1 + self._cfg.mass_change_rate * torch.norm(actions, dim=1) * dt
-        self._current_mass[env_ids, self._body_id] = torch.clamp(self._current_mass[env_ids, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
-        self.mass_decrease_ratio = self._current_mass / self._asset.root_physx_view.get_masses().to(self._device)
+        self._current_mass[:, self._body_id] = torch.clamp(self._current_mass[:, self._body_id], self._cfg.min_mass, self._cfg.max_mass)
+        self.mass_decrease_ratio = self._current_mass / self._default_mass
 
     def apply_randomization(self, ids: torch.Tensor | None = None) -> None:
         """Updates the mass of the robot. The mass is in kg.
@@ -197,6 +198,6 @@ class MassRandomization(Registerable, RandomizationCore):
 
         self._asset.root_physx_view.set_masses(self._current_mass.to("cpu"), ids_cpu)
         self._asset.root_physx_view.set_inertias(
-            self.mass_decrease_ratio.unsqueeze(-1).to("cpu") * self._asset.root_physx_view.get_inertias(),
+            self.mass_decrease_ratio.unsqueeze(-1).to("cpu") * self._default_inertias.to("cpu"),
             indices=ids_cpu,
         )

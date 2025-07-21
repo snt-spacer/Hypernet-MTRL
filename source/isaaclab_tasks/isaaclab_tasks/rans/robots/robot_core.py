@@ -271,6 +271,12 @@ class RobotCore:
 
     def configure_gym_env_spaces(self) -> None:
         raise NotImplementedError
+    
+    def create_robot_visualization(self) -> None:
+        pass
+
+    def update_robot_visualization(self) -> None:
+        pass
 
     @property
     def eval_data(self) -> dict:

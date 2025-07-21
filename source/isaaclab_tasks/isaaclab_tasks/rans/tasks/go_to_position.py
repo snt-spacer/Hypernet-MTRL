@@ -145,6 +145,8 @@ class GoToPositionTask(TaskCore):
         self._half_init_lin_vel_x = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
         self._half_init_lin_vel_y = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
         self._half_init_ang_vel = torch.zeros((self._num_envs, 1), device=self._device, dtype=torch.float32)
+        
+        
 
     def create_logs(self) -> None:
         """
@@ -157,6 +159,8 @@ class GoToPositionTask(TaskCore):
         self.scalar_logger.add_log("task_state", "GoToPosition/AVG/target_heading_error", "mean")
         self.scalar_logger.add_log("task_state", "GoToPosition/AVG/masses", "mean")
         self.scalar_logger.add_log("task_state", "GoToPosition/AVG/mass_env0", "mean")
+        self.scalar_logger.add_log("task_state", "GoToPosition/AVG/coms", "mean")
+        self.scalar_logger.add_log("task_state", "GoToPosition/AVG/com_env0", "mean")
 
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/position", "mean")
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/heading", "mean")
@@ -215,7 +219,17 @@ class GoToPositionTask(TaskCore):
         # Task specific observations
         body_id, _ = self.scene[self._robot._robot_cfg.robot_name].find_bodies(self._robot._robot_cfg.body_name)
         self.masses = self.scene[self._robot._robot_cfg.robot_name].root_physx_view.get_masses().to(self._device)[self._env_ids, body_id]
-        task_obs = self.masses.unsqueeze(-1)  
+        normalized_masses = (self.masses - self._robot._robot_cfg.mass_rand_cfg.min_mass) / (self._robot._robot_cfg.mass_rand_cfg.max_mass - self._robot._robot_cfg.mass_rand_cfg.min_mass)
+        self.coms = self.scene[self._robot._robot_cfg.robot_name].root_physx_view.get_coms().to(self._device)[self._env_ids, body_id]
+        min_com = self._robot.default_com[self._env_ids, body_id] - self._robot._robot_cfg.com_rand_cfg.max_delta
+        max_com = self._robot.default_com[self._env_ids, body_id] + self._robot._robot_cfg.com_rand_cfg.max_delta
+        nomalized_coms = (self.coms - min_com) / (max_com - min_com)
+
+        task_obs = torch.concat((
+            normalized_masses.unsqueeze(-1), 
+            nomalized_coms, 
+            self._robot._thrusters_active_mask[self._env_ids]
+        ), dim=-1)  # [masses, com_x, com_y, thrusters_active_mask]
 
         # Concatenate the task observations with the robot observations
         return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), task_obs
@@ -267,6 +281,8 @@ class GoToPositionTask(TaskCore):
         self.scalar_logger.log("task_state", "GoToPosition/AVG/target_heading_error", target_heading_error)
         self.scalar_logger.log("task_state", "GoToPosition/AVG/masses", self.masses)
         self.scalar_logger.log("task_state", "GoToPosition/AVG/mass_env0", self.masses[0])
+        self.scalar_logger.log("task_state", "GoToPosition/AVG/coms", self.coms[:, 0])
+        self.scalar_logger.log("task_state", "GoToPosition/AVG/com_env0", self.coms[0][0])
         
         # position reward
         position_rew = torch.exp(-self._position_dist / self._task_cfg.position_exponential_reward_coeff)
@@ -341,6 +357,7 @@ class GoToPositionTask(TaskCore):
         - gen_actions[1]: The value used to sample the angle between the spawn heading and the heading required to be looking at the goal.
         - gen_actions[2]: The value used to sample the linear velocity of the robot at spawn.
         - gen_actions[3]: The value used to sample the angular velocity of the robot at spawn.
+        - gen_actions[4]: The probability of enabling thrusters (1 = easy with more thrusters enabled, 0 = hard with fewer thrusters enabled).
 
         Args:
             env_ids (torch.Tensor): The ids of the environments.
@@ -380,11 +397,11 @@ class GoToPositionTask(TaskCore):
         )
 
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
-        task_completed = torch.where(
-            self._goal_reached > self._task_cfg.reset_after_n_steps_in_tolerance,
-            ones,
-            task_completed,
-        )
+        # task_completed = torch.where(
+        #     self._goal_reached > self._task_cfg.reset_after_n_steps_in_tolerance,
+        #     ones,
+        #     task_completed,
+        # )
         return task_failed, task_completed
 
     def set_goals(self, env_ids: torch.Tensor) -> None:
@@ -486,6 +503,46 @@ class GoToPositionTask(TaskCore):
         self._robot.set_pose(initial_pose, self._env_ids[env_ids])
         self._robot.set_velocity(self.initial_velocity[env_ids], self._env_ids[env_ids])
 
+        if self._task_cfg.eval_mode:
+            # Set a new mass for eval
+            if self._task_cfg.eval_mass > 0:
+                asset_name = env.env.unwrapped.robot_api._robot_cfg.robot_name
+                asset = env.env.unwrapped.scene[asset_name]
+                body_id, _ = asset.find_bodies("body")
+                default_mass = asset.root_physx_view.get_masses().to(env.unwrapped.device)
+                current_mass = default_mass.clone()
+                current_mass[:, body_id] = self._task_cfg.eval_mass
+                mass_decrease_ratio = current_mass / asset.root_physx_view.get_masses().to(env.unwrapped.device)
+                ALL_INDICES_CPU = torch.arange(env.env.unwrapped.num_envs, device="cpu")
+                env.env.unwrapped.scene[asset_name].root_physx_view.set_masses(current_mass.to("cpu"), ALL_INDICES_CPU)
+                env.env.unwrapped.scene[asset_name].root_physx_view.set_inertias(
+                    mass_decrease_ratio.unsqueeze(-1).to("cpu") * asset.root_physx_view.get_inertias(),
+                    indices=ALL_INDICES_CPU,
+                )
+            # Set a new CoM for eval
+            # Set a thruster activation mask for eval
+            if self._task_cfg.eval_thruster_pattern is not None:
+                num_thrusters = self._robot._robot_cfg.num_thrusters  
+                pattern = self._task_cfg.eval_thruster_pattern
+                if len(pattern) != num_thrusters:
+                    raise ValueError(f"Pattern length {len(pattern)} doesn't match number of thrusters {num_thrusters}")
+                thruster_pattern_tensor = torch.tensor(pattern, device=self._device, dtype=torch.bool)
+                thrusters_mask_eval = thruster_pattern_tensor.unsqueeze(0).expand(self.scene.num_envs, -1)
+                self._robot._thrusters_active_mask[env_ids] = thrusters_mask_eval[env_ids]
+                
+        else:
+            # Randomize thruster mask using gen_actions[4] to bias towards more enabled thrusters
+            # gen_actions[4] = 1.0 means hard (low probability of thrusters being enabled)
+            # gen_actions[4] = 0.0 means hard (high probability of thrusters being enabled)
+            num_thrusters = self._robot._robot_cfg.num_thrusters  
+            # Use gen_actions[4] to set the probability of each thruster being enabled
+            thruster_enable_prob = self._gen_actions[env_ids, 4] * self._task_cfg.thruster_mask_multiplier
+            # Generate random values for each thruster for each environment
+            self._robot.random_values_thruster_activation[self._env_ids[env_ids]] = self._rng.sample_uniform_torch(0, 1, (num_thrusters,), env_ids)
+            # Compare with probability to determine thruster mask (1 = enabled, 0 = disabled)
+            thruster_mask = (self._robot.random_values_thruster_activation[self._env_ids[env_ids]] > thruster_enable_prob.unsqueeze(1))
+            self._robot._thrusters_active_mask[env_ids] = thruster_mask
+
     def create_task_visualization(self) -> None:
         """Adds the visual marker to the scene.
 
@@ -506,6 +563,8 @@ class GoToPositionTask(TaskCore):
         self.goal_pos_visualizer = VisualizationMarkers(goal_marker_cfg)
         self.robot_pos_visualizer = VisualizationMarkers(robot_marker_cfg)
 
+        self._robot.create_robot_visualization()
+
     def update_task_visualization(self) -> None:
         """Updates the visual marker to the scene."""
 
@@ -521,6 +580,8 @@ class GoToPositionTask(TaskCore):
             self.goal_pos_visualizer.visualize(self._markers_pos)
             self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[self._env_ids, :2]
             self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w[self._env_ids])
+
+        self._robot.update_robot_visualization()
 
         
 

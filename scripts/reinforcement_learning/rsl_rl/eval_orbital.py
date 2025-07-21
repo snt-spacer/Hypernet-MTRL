@@ -47,6 +47,18 @@ parser.add_argument(
     default="PPO",
     help="The RL algorithm used for training the rsl-rl agent.",
 )
+parser.add_argument(
+    "--eval_mass",
+    type=float,
+    default=0.0,
+    help="Mass of the robot in kg for evaluation. Defaults to 0.0 kg, which means no mass change.",
+)
+parser.add_argument(
+    "--eval_thruster_pattern",
+    type=str,
+    default="[True, True, True, True, True, True, True, True]",
+    help="The thruster activation pattern for evaluation.",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -55,6 +67,36 @@ args_cli, hydra_args = parser.parse_known_args()
 # always enable cameras to record video
 if args_cli.video:
     args_cli.enable_cameras = True
+
+# Modify dynamically the task configuration BEFORE Hydra loads it
+def modify_orbital_config():
+    print("[INFO] Modifying RaceGates task configuration for evaluation...")
+    new_content = []
+
+    # from source.isaaclab_tasks.isaaclab_tasks.rans import task_cfg
+    # from pathlib import Path
+    # task_cfg_path = Path(task_cfg.__file__).parent.join("race_gates_cfg.py").resolve() # __path__
+    import source.isaaclab_tasks
+    import os
+    from pathlib import Path
+    eval_racing_cfg_path = os.path.normpath(os.path.join(os.getcwd(), "source", "isaaclab_tasks", "isaaclab_tasks", "rans", "tasks_cfg", "go_to_position_cfg.py")
+    )
+    with open(eval_racing_cfg_path, 'r') as file:
+        for line in file:
+            if "eval_mode:" in line:
+                new_content.append("    eval_mode: bool = True\n")
+            elif "eval_mass:" in line:
+                new_content.append(f"    eval_mass: float = {args_cli.eval_mass}\n")
+            elif "eval_thruster_pattern" in line:
+                new_content.append(f"    eval_thruster_pattern = {args_cli.eval_thruster_pattern}\n")
+            else:
+                new_content.append(line)
+    with open(eval_racing_cfg_path, 'w') as file:
+        file.writelines(new_content)
+
+
+modify_orbital_config()
+
 
 # clear out sys.argv for Hydra
 sys.argv = [sys.argv[0]] + hydra_args
@@ -248,41 +290,12 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     else:
         # For single task: use the original approach
         data = {k: [] for k in env.env.get_wrapper_attr('eval_data_keys')}
-        data["dones"] = []
-
-
-    # Set a new mass for eval
-    asset_name = env.env.unwrapped.robot_api._robot_cfg.robot_name
-    asset = env.env.unwrapped.scene[asset_name]
-    body_id, _ = asset.find_bodies("body")
-    default_mass = asset.root_physx_view.get_masses().to(env.unwrapped.device)
-    current_mass = default_mass.clone()
-    current_mass[:, body_id] = 10
-    mass_decrease_ratio = current_mass / asset.root_physx_view.get_masses().to(env.unwrapped.device)
-
-    ALL_INDICES_CPU = torch.arange(env.env.unwrapped.num_envs, device="cpu")
-    env.env.unwrapped.scene[asset_name].root_physx_view.set_masses(current_mass.to("cpu"), ALL_INDICES_CPU)
-    env.env.unwrapped.scene[asset_name].root_physx_view.set_inertias(
-        mass_decrease_ratio.unsqueeze(-1).to("cpu") * asset.root_physx_view.get_inertias(),
-        indices=ALL_INDICES_CPU,
-    )
+        data["dones"] = []    
 
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
-    # Initialize wandb if requested
-    use_wandb = False #(hasattr(agent_cfg, 'logger') and agent_cfg.logger == 'wandb') or (hasattr(args_cli, 'logger') and args_cli.logger == 'wandb')
-    if use_wandb:
-        wandb_kwargs = getattr(agent_cfg, 'wandb_kwargs', {"project": "isaaclab", "entity": "isaaclab"})
-        wandb.init(
-            project=wandb_kwargs.get("project", "isaaclab"),
-            entity=wandb_kwargs.get("entity", "isaaclab"),
-            name=f"eval_{agent_cfg.experiment_name}",
-            group=agent_cfg.experiment_name,
-            config=vars(args_cli),
-            dir=log_dir,
-            reinit=True,
-        )
+
     # simulate environment
     while simulation_app.is_running():
         start_time = time.time()
@@ -323,18 +336,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                     if torch.any(task_dones == 1):
                         completed_indices = torch.where(task_dones == 1)[0]
                         task_completion_counts[i][completed_indices] += 1
-                        # Log to wandb at episode end for these envs
-                        if use_wandb:
-                            # Log task logs
-                            if hasattr(task_api, 'scalar_logger'):
-                                log_dict = task_api.scalar_logger.compute_extras()
-                                wandb.log({f"task_{i}/" + k: v.item() if hasattr(v, 'item') else v for k, v in log_dict.items()})
-                            # Log robot logs (for this chunk)
-                            robot_logger = getattr(env.env.get_wrapper_attr('robot_api'), 'scalar_logger', None)
-                            if robot_logger is not None:
-                                # Only log for the relevant chunk
-                                robot_log_dict = robot_logger.compute_extras()
-                                wandb.log({f"robot_{i}/" + k: v.item() if hasattr(v, 'item') else v for k, v in robot_log_dict.items()})
+
                 
                 # Check if all tasks have completed their required runs
                 all_tasks_completed = True
@@ -354,19 +356,6 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                     data[k].append(v)
 
                 data["dones"].append(dones)
-
-                # # Log to wandb at episode end for these envs
-                # if use_wandb and torch.any(dones == 1):
-                #     # Log task logs
-                #     task_logger = getattr(env.env.get_wrapper_attr('task_api'), 'scalar_logger', None)
-                #     if task_logger is not None:
-                #         log_dict = task_logger.compute_extras()
-                #         wandb.log({"task/" + k: v.item() if hasattr(v, 'item') else v for k, v in log_dict.items()})
-                #     # Log robot logs
-                #     robot_logger = getattr(env.env.get_wrapper_attr('robot_api'), 'scalar_logger', None)
-                #     if robot_logger is not None:
-                #         robot_log_dict = robot_logger.compute_extras()
-                #         wandb.log({"robot/" + k: v.item() if hasattr(v, 'item') else v for k, v in robot_log_dict.items()})
 
                 # Check if the number of runs per env is reached
                 if torch.all(torch.sum(torch.cat(data["dones"], dim=-1).view(-1, env_cfg.scene.num_envs), dim=0) >= args_cli.runs_per_env).item():
@@ -398,9 +387,6 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             # Save extracted trajectories
             eval_metrics.save_extracted_trajectories_to_csv()
 
-            if use_wandb:
-                df = eval_metrics.convert_metrics_to_pd()
-                wandb.log({f"metrics/task_{i}_{task_name}": wandb.Table(dataframe=df)})
     else:
         # Single task metrics calculation
         data = {k: torch.stack(v, dim=0) for k, v in data.items()}
@@ -411,14 +397,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         end_time = time.time()
         print(f"[INFO] Time taken to save extracted trajectories: {end_time - init_time:.2f} seconds")
         # Log processed metrics to wandb after metrics calculation
-        if use_wandb:
-            df = eval_metrics.convert_metrics_to_pd()
-            wandb.log({f"metrics/{task_name}": wandb.Table(dataframe=df)})
 
-    
 
-    if use_wandb:
-        wandb.finish()
+
 
 
 if __name__ == "__main__":
