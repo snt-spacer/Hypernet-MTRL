@@ -197,7 +197,11 @@ class EvalMetrics:
         if not keys:
             print("[WARNING] extracted_trajectories is empty.")
             return
-        num_trajectories = len(self.extracted_trajectories[keys[0]])
+
+        if len(self.extracted_trajectories[keys[0]]) > 64:
+            num_trajectories = 64
+        else:
+            num_trajectories = len(self.extracted_trajectories[keys[0]])
         all_dfs = []
         for traj_idx in range(num_trajectories):
             # Find the length of this trajectory (use the first key)
