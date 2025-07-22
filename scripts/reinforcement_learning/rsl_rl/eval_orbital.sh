@@ -17,10 +17,13 @@ THRUSTERS_PATERNS=(
 CHECKPOINTS=(
     # "2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/model_850.pt"
     # "2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/model_1100.pt"
-    "2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/model_10000.pt"
-    "2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/model_9200.pt"
-    "2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/model_11650.pt"
-    "2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/model_11600.pt"
+
+    # "2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/model_10000.pt"
+    # "2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/model_9200.pt"
+    # "2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/model_11650.pt"
+    # "2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/model_11600.pt"
+
+    "2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/model_7850.pt"
 )
 
 mkdir -p "${METRICS_SAVE_DIR}"

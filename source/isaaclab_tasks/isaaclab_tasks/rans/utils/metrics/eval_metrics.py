@@ -181,100 +181,100 @@ class EvalMetrics:
         return all_trajectory_lengths, all_extracted_trajectories
 
     # def save_extracted_trajectories_to_csv(self):
-        """Saves the extracted trajectories to a CSV file in the metrics directory, one row per time step per trajectory."""
-        import numpy as np
-        import pandas as pd
-        import os
+        # """Saves the extracted trajectories to a CSV file in the metrics directory, one row per time step per trajectory."""
+        # import numpy as np
+        # import pandas as pd
+        # import os
 
-        save_path = os.path.join(self.save_path, "metrics", f"extracted_trajectories_{self.task_name}.csv")
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        # save_path = os.path.join(self.save_path, "metrics", f"extracted_trajectories_{self.task_name}.csv")
+        # os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-        if not hasattr(self, 'extracted_trajectories') or self.extracted_trajectories is None:
-            print("[WARNING] No extracted_trajectories to save.")
-            return
+        # if not hasattr(self, 'extracted_trajectories') or self.extracted_trajectories is None:
+        #     print("[WARNING] No extracted_trajectories to save.")
+        #     return
 
-        keys = list(self.extracted_trajectories.keys())
-        if not keys:
-            print("[WARNING] extracted_trajectories is empty.")
-            return
+        # keys = list(self.extracted_trajectories.keys())
+        # if not keys:
+        #     print("[WARNING] extracted_trajectories is empty.")
+        #     return
 
-        # Pre-allocate lists to hold all data for all trajectories
-        all_trajectory_indices = []
-        all_step_indices = []
-        all_data_columns = {key: [] for key in keys} # To hold processed data for each key
+        # # Pre-allocate lists to hold all data for all trajectories
+        # all_trajectory_indices = []
+        # all_step_indices = []
+        # all_data_columns = {key: [] for key in keys} # To hold processed data for each key
 
-        dim_names = ['x', 'y', 'z']
+        # dim_names = ['x', 'y', 'z']
 
-        num_trajectories = len(self.extracted_trajectories[keys[0]])
+        # num_trajectories = len(self.extracted_trajectories[keys[0]])
 
-        for traj_idx in range(num_trajectories):
-            first_tensor = self.extracted_trajectories[keys[0]][traj_idx]
-            if not (hasattr(first_tensor, 'shape') and hasattr(first_tensor, '__getitem__')):
-                print(f"[WARNING] Trajectory {traj_idx} first key is not array-like, skipping.")
-                continue
+        # for traj_idx in range(num_trajectories):
+        #     first_tensor = self.extracted_trajectories[keys[0]][traj_idx]
+        #     if not (hasattr(first_tensor, 'shape') and hasattr(first_tensor, '__getitem__')):
+        #         print(f"[WARNING] Trajectory {traj_idx} first key is not array-like, skipping.")
+        #         continue
 
-            traj_len = first_tensor.shape[0]
+        #     traj_len = first_tensor.shape[0]
 
-            all_trajectory_indices.append(np.full(traj_len, traj_idx, dtype=int))
-            all_step_indices.append(np.arange(traj_len, dtype=int))
+        #     all_trajectory_indices.append(np.full(traj_len, traj_idx, dtype=int))
+        #     all_step_indices.append(np.arange(traj_len, dtype=int))
 
-            for key in keys:
-                tensor = self.extracted_trajectories[key][traj_idx]
-                arr = tensor.cpu().numpy() if hasattr(tensor, 'cpu') else np.array(tensor)
+        #     for key in keys:
+        #         tensor = self.extracted_trajectories[key][traj_idx]
+        #         arr = tensor.cpu().numpy() if hasattr(tensor, 'cpu') else np.array(tensor)
 
-                if arr.ndim == 1:
-                    all_data_columns[key].append(arr)
-                elif arr.ndim == 2:
-                    # Store 2D arrays directly, we'll flatten/name them later during DataFrame construction
-                    all_data_columns[key].append(arr)
-                else:
-                    # Flatten higher dims and store
-                    all_data_columns[key].append(arr.reshape(arr.shape[0], -1))
+        #         if arr.ndim == 1:
+        #             all_data_columns[key].append(arr)
+        #         elif arr.ndim == 2:
+        #             # Store 2D arrays directly, we'll flatten/name them later during DataFrame construction
+        #             all_data_columns[key].append(arr)
+        #         else:
+        #             # Flatten higher dims and store
+        #             all_data_columns[key].append(arr.reshape(arr.shape[0], -1))
 
-        if not all_trajectory_indices: # Check if any valid trajectories were processed
-            print("[WARNING] No valid trajectories to save.")
-            return
+        # if not all_trajectory_indices: # Check if any valid trajectories were processed
+        #     print("[WARNING] No valid trajectories to save.")
+        #     return
 
-        # Concatenate all collected data into single large arrays
-        combined_trajectory_indices = np.concatenate(all_trajectory_indices)
-        combined_step_indices = np.concatenate(all_step_indices)
+        # # Concatenate all collected data into single large arrays
+        # combined_trajectory_indices = np.concatenate(all_trajectory_indices)
+        # combined_step_indices = np.concatenate(all_step_indices)
 
-        final_data = {
-            'trajectory': combined_trajectory_indices,
-            'step': combined_step_indices
-        }
+        # final_data = {
+        #     'trajectory': combined_trajectory_indices,
+        #     'step': combined_step_indices
+        # }
 
-        # Process and add the actual trajectory data
-        for key, list_of_arrays in all_data_columns.items():
-            if not list_of_arrays: # Skip if no data was collected for this key
-                continue
+        # # Process and add the actual trajectory data
+        # for key, list_of_arrays in all_data_columns.items():
+        #     if not list_of_arrays: # Skip if no data was collected for this key
+        #         continue
 
-            combined_key_data = np.concatenate(list_of_arrays)
+        #     combined_key_data = np.concatenate(list_of_arrays)
 
-            if combined_key_data.ndim == 1:
-                final_data[key] = combined_key_data
-            elif combined_key_data.ndim == 2:
-                # Determine column names for 2D data
-                num_dims = combined_key_data.shape[1]
-                if num_dims <= 3:
-                    column_suffixes = dim_names[:num_dims]
-                else:
-                    column_suffixes = [str(d) for d in range(num_dims)]
+        #     if combined_key_data.ndim == 1:
+        #         final_data[key] = combined_key_data
+        #     elif combined_key_data.ndim == 2:
+        #         # Determine column names for 2D data
+        #         num_dims = combined_key_data.shape[1]
+        #         if num_dims <= 3:
+        #             column_suffixes = dim_names[:num_dims]
+        #         else:
+        #             column_suffixes = [str(d) for d in range(num_dims)]
                 
-                for d in range(num_dims):
-                    final_data[f"{key}_{column_suffixes[d]}"] = combined_key_data[:, d]
-            else:
-                # This case should ideally be handled by the reshape earlier,
-                # but as a safeguard, if a higher dim array somehow made it here,
-                # flatten and add
-                flat = combined_key_data.reshape(combined_key_data.shape[0], -1)
-                for d in range(flat.shape[1]):
-                    final_data[f"{key}_{d}"] = flat[:, d]
+        #         for d in range(num_dims):
+        #             final_data[f"{key}_{column_suffixes[d]}"] = combined_key_data[:, d]
+        #     else:
+        #         # This case should ideally be handled by the reshape earlier,
+        #         # but as a safeguard, if a higher dim array somehow made it here,
+        #         # flatten and add
+        #         flat = combined_key_data.reshape(combined_key_data.shape[0], -1)
+        #         for d in range(flat.shape[1]):
+        #             final_data[f"{key}_{d}"] = flat[:, d]
 
-        # Create one large DataFrame
-        df = pd.DataFrame(final_data)
-        df.to_csv(save_path, index=False, float_format='%.4f')
-        print(f"[INFO] Saved extracted trajectories to {save_path}")
+        # # Create one large DataFrame
+        # df = pd.DataFrame(final_data)
+        # df.to_csv(save_path, index=False, float_format='%.4f')
+        # print(f"[INFO] Saved extracted trajectories to {save_path}")
 
     def save_extracted_trajectories_to_csv(self, max_workers=32):
         """Saves the extracted trajectories to a CSV file in the metrics directory,
@@ -292,7 +292,12 @@ class EvalMetrics:
             return
 
         dim_names = ['x', 'y', 'z']
-        num_trajectories = len(self.extracted_trajectories[keys[0]])
+        
+        # Extract only the first 32 trajectories
+        if len(self.extracted_trajectories[keys[0]]) > 32:
+            num_trajectories = 32
+        else:
+            num_trajectories = len(self.extracted_trajectories[keys[0]])
 
         # Worker function to process one trajectory index
         def _process_one(traj_idx):

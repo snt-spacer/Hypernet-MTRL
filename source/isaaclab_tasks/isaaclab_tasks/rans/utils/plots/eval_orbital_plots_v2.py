@@ -11,188 +11,443 @@ import yaml
 def main():
     # Define your CSV file groups directly, now each group can contain multiple sets of files (for different seeds)
     list_of_grouped_csv_data = [
-        {
-            "group_name": "HyperNet Pattern 0", # This is the name that will appear in plot_cfg["runs_names"]
-            "task_name": "GoToPosition",
-            "robot_name": "ModularFreeflyer",
-            "runs": [
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_0/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_0/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_0/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_0/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                # Add more seeds for this group here
-            ]
-        },
-        {
-            "group_name": "HyperNet Pattern 1", # This is the name that will appear in plot_cfg["runs_names"]
-            "task_name": "GoToPosition",
-            "robot_name": "ModularFreeflyer",
-            "runs": [
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_1/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_1/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_1/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_1/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_1/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                # Add more seeds for this group here
-            ]
-        },
-        {
-            "group_name": "HyperNet Pattern 2", # This is the name that will appear in plot_cfg["runs_names"]
-            "task_name": "GoToPosition",
-            "robot_name": "ModularFreeflyer",
-            "runs": [
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_2/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_2/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_2/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_2/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_2/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                # Add more seeds for this group here
-            ]
-        },
-        {
-            "group_name": "HyperNet Pattern 3", # This is the name that will appear in plot_cfg["runs_names"]
-            "task_name": "GoToPosition",
-            "robot_name": "ModularFreeflyer",
-            "runs": [
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_3/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_3/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_3/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_3/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_3/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                # Add more seeds for this group here
-            ]
-        },
-        {
-            "group_name": "HyperNet Pattern 4", # This is the name that will appear in plot_cfg["runs_names"]
-            "task_name": "GoToPosition",
-            "robot_name": "ModularFreeflyer",
-            "runs": [
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_4/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_4/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_4/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_4/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_4/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_4/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                # Add more seeds for this group here
-            ]
-        },
-        {
-            "group_name": "HyperNet Pattern 5", # This is the name that will appear in plot_cfg["runs_names"]
-            "task_name": "GoToPosition",
-            "robot_name": "ModularFreeflyer",
-            "runs": [
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_5/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_5/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_5/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_5/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                {
-                    "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_5/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
-                    "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_5/extracted_trajectories_GoToPosition.csv",
-                    "env_info_yaml": "",
-                },
-                # Add more seeds for this group here
-            ]
-        },
+        # {
+        #     "group_name": "HyperNet Pattern 0", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_0/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_0/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 0", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 1", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_1/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_1/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_1/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_1/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_1/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 1", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 2", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_2/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_2/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_2/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_2/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_2/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 2", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 3", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_3/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_3/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_3/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_3/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_3/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 3", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 4", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_4/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_4/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_4/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_4/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_4/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_4/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 4", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 5", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_06-00-25_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_5/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_07-54-39_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-37/pattern_5/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_5/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_09-43-20_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-8888/pattern_5/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_5/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_11-38-10_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-653/pattern_5/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 5", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-21_20-47-43_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
         # Add more experiment groups as needed
+
+
+        # {
+        #     "group_name": "HyperNet Pattern 0", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 0", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_0/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 1", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 1", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_1/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 2", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 2", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_2/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 3", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 3", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_3/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 4", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 4", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_4/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "HyperNet Pattern 5", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-17_18-34-33_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
+        # {
+        #     "group_name": "Vanilla Pattern 5", # This is the name that will appear in plot_cfg["runs_names"]
+        #     "task_name": "GoToPosition",
+        #     "robot_name": "ModularFreeflyer",
+        #     "runs": [
+        #         {
+        #             "metrics_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42_metrics.csv",
+        #             "trajectories_csv": "/workspace/isaaclab/source/evaluation_metrics/orbital_exp/2025-07-18_07-33-48_rsl-rl_ppo_GoToPosition_ModularFreeflyer_r-0_seed-42/pattern_5/extracted_trajectories_GoToPosition.csv",
+        #             "env_info_yaml": "",
+        #         },
+        #         # Add more seeds for this group here
+        #     ]
+        # },
     ]
 
     plot_cfg = {
         "title": "",
         "box_colors": [
-            "#FF3D50",
-            "#FFA034",
-            "#2FA1FF",
-            "#A734FF",
-            "#FFFF3D",
-            "#4DFF3D",
-            "#FF3DBB",
-            "#623652",
+            # "#FF3D50",
+            # "#FFA034",
+            # "#2FA1FF",
+            # "#A734FF",
+            # "#FFFF3D",
+            # "#4DFF3D",
+            # "#FF3DBB",
+            # "#623652",
+            # "#00CED1",  # Dark Turquoise
+            # "#1E90FF",  # Dodger Blue
+            # "#4682B4",  # Steel Blue
+            # "#32CD32",  # Lime Green
+            # "#008080",  # Teal
+            # "#20B2AA",  # Light Sea Green
+            # "#8A2BE2",  # Blue Violet
+            # "#9932CC",  # Dark Orchid
+            # "#BA55D3",  # Medium Orchid
+            # "#FF8C00",  # Dark Orange
+            # "#D2691E",  # Chocolate
+            # "#B8860B",  # Dark Goldenrod
+            "#FF69B4",  # Hot Pink
+            "#DB7093",  # Pale Violet Red
+            "#C71585",  # Medium Violet Red
+            "#DC143C",  # Crimson
+            "#B22222",  # Firebrick
+            "#808080",  # Grey
+            "#D3D3D3",  # Light Grey
         ],
         "runs_names": [], # This will be filled with group names
         "zoom_in": False,

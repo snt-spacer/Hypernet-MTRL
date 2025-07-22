@@ -11,7 +11,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 4000
+    max_iterations = 12000
     save_interval = 50
     experiment_name = "multitask_orbital"
     logger = "wandb"
@@ -36,8 +36,8 @@ class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
         entropy_coef=0.005,
         num_learning_epochs=5,
         num_mini_batches=4,
-        learning_rate=1.0e-3,
-        schedule="adaptive", #adaptive, fixed
+        learning_rate=1.0e-4,
+        schedule="fixed", #adaptive, fixed
         gamma=0.99,
         lam=0.95,
         desired_kl=0.01,
