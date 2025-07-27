@@ -32,8 +32,9 @@ class RaceGatesPlots(BaseTaskPlots, Registerable):
         for label_to_plot in self.labels_to_plot:
             self.boxplot(label_to_plot)
 
-        for label_to_plot in self.bar_char_labels_to_plot:
-            self.plot_trajectory_completed_successfully(label_to_plot)
-            
-        self.plot_trajectory_with_targets()
-        self.plot_trajectory_with_targets_mean_sd()
+        if len(self._trajectories_dfs) > 0:
+            for label_to_plot in self.bar_char_labels_to_plot:
+                self.plot_trajectory_completed_successfully(label_to_plot)
+                
+            self.plot_trajectory_with_targets()
+            self.plot_trajectory_with_targets_mean_sd()

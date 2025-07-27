@@ -56,8 +56,10 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
         # for label_to_plot in self.labels_dots:
         #     self.dotplot(label_to_plot)
 
-        self.plot_xy_trajectories_0_centered()
-        self.plot_position_distance_over_time()
-        self.plot_linear_velocity_over_time()
-        self.plot_angular_velocity_over_time()
-        self.plot_actions_over_time()
+
+        if len(self._trajectories_dfs) > 0:
+            self.plot_xy_trajectories_0_centered()
+            self.plot_position_distance_over_time()
+            self.plot_linear_velocity_over_time()
+            self.plot_angular_velocity_over_time()
+            self.plot_actions_over_time()

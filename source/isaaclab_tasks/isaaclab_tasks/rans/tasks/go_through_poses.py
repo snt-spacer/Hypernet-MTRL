@@ -12,6 +12,7 @@ from isaaclab.scene import InteractiveScene
 from isaaclab_tasks.rans import GoThroughPosesCfg
 
 from .task_core import TaskCore
+import torch.nn.functional as F
 
 EPS = 1e-6  # small constant to avoid divisions by 0 and log(0)
 
@@ -324,8 +325,11 @@ class GoThroughPosesTask(TaskCore):
         for randomizer in self.randomizers:
             randomizer.observations(observations=self._task_data)
 
+        task_id_one_hot = F.one_hot(torch.tensor([self._task_uid], device=self._device), num_classes=self._num_tasks).squeeze(0).repeat(self._num_envs, 1)
+        task_obs = task_id_one_hot
+
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), task_obs
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -423,9 +427,9 @@ class GoThroughPosesTask(TaskCore):
             progress_rew * self._task_cfg.progress_weight
             + heading_rew * self._task_cfg.position_heading_weight
             + target_heading_rew * self._task_cfg.position_heading_weight
-            + linear_velocity_rew * self._task_cfg.linear_velocity_weight
-            + angular_velocity_rew * self._task_cfg.angular_velocity_weight
-            + boundary_rew * self._task_cfg.boundary_weight
+            # + linear_velocity_rew * self._task_cfg.linear_velocity_weight
+            # + angular_velocity_rew * self._task_cfg.angular_velocity_weight
+            # + boundary_rew * self._task_cfg.boundary_weight
             + self._task_cfg.time_penalty
             + self._task_cfg.reached_bonus * goal_reached
         ) + self._robot.compute_rewards(env_ids=self._env_ids)  # type: ignore[return-value]
@@ -514,8 +518,8 @@ class GoThroughPosesTask(TaskCore):
 
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
         # If the task is set to loop, don't terminate the episode early.
-        if not self._task_cfg.loop:
-            task_completed = torch.where(self._trajectory_completed > 0, ones, task_completed)
+        # if not self._task_cfg.loop:
+        #     task_completed = torch.where(self._trajectory_completed > 0, ones, task_completed)
         return task_failed, task_completed
 
     def set_goals(self, env_ids: torch.Tensor):

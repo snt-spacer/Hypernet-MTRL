@@ -79,7 +79,7 @@ class BaseTaskPlots(AutoRegister):
 
         
         colors_indx = []
-        for group_key, group_dfs in self._dfs.items():
+        for color_idx, (group_key, group_dfs) in enumerate(self._dfs.items()):
             try:
                 group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
                 group_values = group_values.dropna()
@@ -88,7 +88,8 @@ class BaseTaskPlots(AutoRegister):
                 true_vals = total_vals - false_vals
                 data_to_plot.append([true_vals, false_vals])
 
-                colors_indx.append(self._plot_cfg['runs_names'].index(group_key.split("_")[-1]))
+                # Use the enumeration index, cycling through available colors if needed
+                colors_indx.append(color_idx % len(self._plot_cfg["box_colors"]))
                 label_names.append(group_key.split("_")[-1])
 
             except KeyError as e:
@@ -182,7 +183,7 @@ class BaseTaskPlots(AutoRegister):
 
         
         colors_indx = []
-        for group_key, group_dfs in self._dfs.items():
+        for color_idx, (group_key, group_dfs) in enumerate(self._dfs.items()):
             # Concatenate all values of the key across the group's dataframes
             # for group_idx, df in enumerate(group_dfs):
             #     print("#" * 20)
@@ -196,11 +197,12 @@ class BaseTaskPlots(AutoRegister):
                 print(self.__class__.__name__)
                 return
             
-            colors_indx.append(self._plot_cfg['runs_names'].index(group_key.split("_")[-1]))
+            # Use the enumeration index, cycling through available colors if needed
+            colors_indx.append(color_idx % len(self._plot_cfg["box_colors"]))
             
             
             data_to_plot.append(group_values)
-            label_names.append(group_key.split("_")[-1])
+            label_names.append(group_key)
 
         box = ax.boxplot(
             data_to_plot,
@@ -243,7 +245,7 @@ class BaseTaskPlots(AutoRegister):
         label_names = []
 
         colors_indx = []
-        for group_key, group_dfs in self._dfs.items():
+        for color_idx, (group_key, group_dfs) in enumerate(self._dfs.items()):
             try:
                 group_values = pd.concat([df[key_to_plot] for df in group_dfs], ignore_index=True)
             except KeyError as e:
@@ -251,7 +253,8 @@ class BaseTaskPlots(AutoRegister):
                 print(self.__class__.__name__)
                 return
             
-            colors_indx.append(self._plot_cfg['runs_names'].index(group_key.split("_")[-1]))
+            # Use the enumeration index, cycling through available colors if needed
+            colors_indx.append(color_idx % len(self._plot_cfg["box_colors"]))
             
             data_to_plot.append(group_values)
             label_names.append(group_key.split("_")[-1])

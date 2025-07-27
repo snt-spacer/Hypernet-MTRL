@@ -29,10 +29,11 @@ class ModularFreeflyerRobot(RobotCore):
         robot_cfg: ModularFreeflyerRobotCfg = ModularFreeflyerRobotCfg(),
         robot_uid: int = 0,
         num_envs: int = 1,
+        num_tasks: int = 1,
         decimation: int = 6,
         device: str = "cuda",
     ) -> None:
-        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, device=device)
+        super().__init__(scene=scene, robot_uid=robot_uid, num_envs=num_envs, decimation=decimation, num_tasks=num_tasks, device=device)
         self._robot_cfg = robot_cfg
         self._dim_robot_obs = self._robot_cfg.observation_space
         self._dim_robot_act = self._robot_cfg.action_space
@@ -132,8 +133,6 @@ class ModularFreeflyerRobot(RobotCore):
             dtype=torch.float32,
         )
 
-        self._thrusters_active_mask = torch.full((self._num_envs, self._robot_cfg.num_thrusters), True, dtype=torch.bool, device=self._device)
-        self.random_values_thruster_activation= self._rng.sample_uniform_torch(0, 1, (self._robot_cfg.num_thrusters,), env_ids)
 
     def run_setup(self, robot: Articulation) -> None:
         """Loads the robot into the task. After it has been loaded."""
@@ -256,7 +255,6 @@ class ModularFreeflyerRobot(RobotCore):
         if self._robot_cfg.action_mode == "continuous":
             self._thrust_actions = self._actions[:, : self._robot_cfg.num_thrusters]
             self._thrust_actions = (self._thrust_actions + 1) / 2.0
-            self._thrust_actions[~self._thrusters_active_mask] = 0.0
         else:
             self._thrust_actions = (self._actions[:, : self._robot_cfg.num_thrusters] > 0.0).float()
         

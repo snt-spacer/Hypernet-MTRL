@@ -69,14 +69,15 @@ class GoToPoseCfg(TaskCoreCfg):
     # Reward
     position_exponential_reward_coeff: float = 1
     heading_exponential_reward_coeff: float = 1
-    linear_velocity_min_value: float = 0.5
-    linear_velocity_max_value: float = 2.0
-    angular_velocity_min_value: float = 0.5
-    angular_velocity_max_value: float = 3.14
+    linear_velocity_min_value: float = 0.0
+    linear_velocity_max_value: float = 0.45
+    angular_velocity_min_value: float = 0.0
+    angular_velocity_max_value: float = 0.9
     boundary_exponential_reward_coeff: float = 1.0
     pose_weight: float = 1.0
+    heading_weight: float = 1.0
     linear_velocity_weight: float = -0.05
-    angular_velocity_weight: float = -0.5
+    angular_velocity_weight: float = -0.05
     boundary_weight: float = -10.0
     progress_weight: float = 0.2
 

@@ -53,16 +53,16 @@ class GoToPositionCfg(TaskCoreCfg):
     heading_exponential_reward_coeff: float = 0.25
     min_heading_dist_scaler: float = 0.5
     max_heading_dist_scaler: float = 2.5
-    linear_velocity_min_value: float = 0.5
-    linear_velocity_max_value: float = 2.0
+    linear_velocity_min_value: float = 0.0
+    linear_velocity_max_value: float = 0.45
     angular_velocity_min_value: float = 0.0
-    angular_velocity_max_value: float = 20.0
+    angular_velocity_max_value: float = 0.9
     boundary_exponential_reward_coeff: float = 1.0
     position_weight: float = 1.0
     progress_weight: float = 0.2
     heading_weight: float = 0.25
     linear_velocity_weight: float = -0.05
-    angular_velocity_weight: float = -0.1
+    angular_velocity_weight: float = -0.05
     boundary_weight: float = -10.0
 
     min_heading_dist_scaler: float = 0.5

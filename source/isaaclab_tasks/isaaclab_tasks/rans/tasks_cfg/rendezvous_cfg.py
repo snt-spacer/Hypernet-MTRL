@@ -93,10 +93,10 @@ class RendezvousCfg(TaskCoreCfg):
     # Reward Would be good to have a config for each reward type
     position_heading_exponential_reward_coeff: float = 0.25
     position_heading_weight: float = 0.1
-    linear_velocity_min_value: float = 0.5
-    linear_velocity_max_value: float = 2.0
-    angular_velocity_min_value: float = 0.5
-    angular_velocity_max_value: float = 20.0
+    linear_velocity_min_value: float = 0.0
+    linear_velocity_max_value: float = 0.45
+    angular_velocity_min_value: float = 0.0
+    angular_velocity_max_value: float = 0.9
     boundary_exponential_reward_coeff: float = 1.0
     linear_velocity_weight: float = -0.00
     angular_velocity_weight: float = -0.05

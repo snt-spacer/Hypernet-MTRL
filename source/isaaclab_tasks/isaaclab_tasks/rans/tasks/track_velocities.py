@@ -13,6 +13,7 @@ from isaaclab.scene import InteractiveScene
 from isaaclab_tasks.rans import TrackVelocitiesCfg
 
 from .task_core import TaskCore
+import torch.nn.functional as F
 
 EPS = 1e-6  # small constant to avoid divisions by 0 and log(0)
 
@@ -195,8 +196,11 @@ class TrackVelocitiesTask(TaskCore):
         for randomizer in self.randomizers:
             randomizer.observations(observations=self._task_data)
 
+        task_id_one_hot = F.one_hot(torch.tensor([self._task_uid], device=self._device), num_classes=self._num_tasks).squeeze(0).repeat(self._num_envs, 1)
+        task_obs = task_id_one_hot
+
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), task_obs
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -248,9 +252,9 @@ class TrackVelocitiesTask(TaskCore):
         self._goal_reached += goal_is_reached
 
         # Update logs (exponential moving average to see the performance at the end of the episode)
-        self.scalar_logger.log("task_reward", "TrackVelocities/EMA/linear_velocity", linear_velocity_rew)
-        self.scalar_logger.log("task_reward", "TrackVelocities/EMA/lateral_velocity", lateral_velocity_rew)
-        self.scalar_logger.log("task_reward", "TrackVelocities/EMA/angular_velocity", angular_velocity_rew)
+        self.scalar_logger.log("task_reward", "TrackVelocities/EMA/linear_velocity", linear_velocity_rew * self._task_cfg.linear_velocity_weight)
+        self.scalar_logger.log("task_reward", "TrackVelocities/EMA/lateral_velocity", lateral_velocity_rew * self._task_cfg.lateral_velocity_weight)
+        self.scalar_logger.log("task_reward", "TrackVelocities/EMA/angular_velocity", angular_velocity_rew * self._task_cfg.angular_velocity_weight)
 
         # Return the reward by combining the different components and adding the robot rewards
         return (
@@ -300,16 +304,16 @@ class TrackVelocitiesTask(TaskCore):
             torch.Tensor: Whether the platforms should be killed or not."""
 
         # Kill the robot if it goes too far, but don't count it as an early termination.
-        position_distance = torch.norm(
+        position_distance = torch.linalg.norm(
             self._env_origins[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2], dim=-1
         )
         ones = torch.ones_like(self._goal_reached, dtype=torch.long)
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
-        task_completed = torch.where(
-            position_distance > self._task_cfg.maximum_robot_distance,
-            ones,
-            task_completed,
-        )
+        # task_completed = torch.where(
+        #     position_distance > self._task_cfg.maximum_robot_distance,
+        #     ones,
+        #     task_completed,
+        # )
 
         # This task cannot be failed.
         zeros = torch.zeros_like(self._goal_reached, dtype=torch.long)
@@ -517,7 +521,7 @@ class TrackVelocitiesTask(TaskCore):
         marker_orientation[:, 0] = torch.cos(marker_heading * 0.5)
         marker_orientation[:, 3] = torch.sin(marker_heading * 0.5)
         marker_scale[:, 0] = (
-            torch.norm(
+            torch.linalg.norm(
                 torch.stack(
                     (self._linear_velocity_target, self._lateral_velocity_target),
                     dim=-1,
@@ -549,7 +553,7 @@ class TrackVelocitiesTask(TaskCore):
         marker_orientation[:, 0] = torch.cos(marker_heading * 0.5)
         marker_orientation[:, 3] = torch.sin(marker_heading * 0.5)
         marker_scale[:, 0] = (
-            torch.norm(self._robot.root_com_lin_vel_b[self._env_ids, :2], dim=-1)
+            torch.linalg.norm(self._robot.root_com_lin_vel_b[self._env_ids, :2], dim=-1)
             * self._task_cfg.visualization_linear_velocity_scale
         )
         self.robot_linvel_visualizer.visualize(marker_pos, marker_orientation, marker_scale)
@@ -560,3 +564,5 @@ class TrackVelocitiesTask(TaskCore):
         marker_orientation[:, 3] = torch.sin(marker_heading * 0.5)
         marker_scale[:, 0] = self._robot.root_com_ang_vel_w[self._env_ids, -1] * self._task_cfg.visualization_angular_velocity_scale
         self.robot_angvel_visualizer.visualize(marker_pos, marker_orientation, marker_scale)
+
+        self._robot.update_robot_visualization()

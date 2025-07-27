@@ -12,6 +12,7 @@ from isaaclab.scene import InteractiveScene
 from isaaclab_tasks.rans import RendezvousCfg
 
 from .task_core import TaskCore
+import torch.nn.functional as F
 
 EPS = 1e-6  # small constant to avoid divisions by 0 and log(0)
 
@@ -211,10 +212,13 @@ class RendezvousTask(TaskCore):
         self.scalar_logger.add_log("task_state", "Rendezvous/AVG/absolute_angular_velocity", "mean")
         self.scalar_logger.add_log("task_state", "Rendezvous/AVG/position_distance", "mean")
         self.scalar_logger.add_log("task_state", "Rendezvous/AVG/boundary_distance", "mean")
+        self.scalar_logger.add_log("task_state", "Rendezvous/AVG/heading_distance", "mean")
+        self.scalar_logger.add_log("task_state", "Rendezvous/AVG/target_heading_distance", "mean")
         self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/linear_velocity", "mean")
         self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/angular_velocity", "mean")
         self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/boundary", "mean")
-        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/heading", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/position_heading", "mean")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/target_heading", "mean")
         self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/progress", "mean")
         self.scalar_logger.add_log("task_reward", "Rendezvous/SUM/num_goals", "sum")
 
@@ -237,14 +241,14 @@ class RendezvousTask(TaskCore):
         Angle measurements are converted to a cosine and a sine to avoid discontinuities in 0 and 2pi.
         This provides a continuous representation of the angle.
 
-        self._task_data[:, 0] = The linear velocity of the robot along the x-axis.
-        self._task_data[:, 1] = The linear velocity of the robot along the y-axis.
-        self._task_data[:, 2] = The angular velocity of the robot.
-        self._task_data[:, 3] = The distance between the robot and the target position.
-        self._task_data[:, 4] = The cosine of the angle between the robot's heading and the target position.
-        self._task_data[:, 5] = The sine of the angle between the robot's heading and the target position.
-        self._task_data[:, 6] = The cosine of the angle between the robot's heading and the target heading.
-        self._task_data[:, 7] = The sine of the angle between the robot's heading and the target heading.
+        self._task_data[:, 0] = The distance between the robot and the target position.
+        self._task_data[:, 1] = The cosine of the angle between the robot's heading and the target position.
+        self._task_data[:, 2] = The sine of the angle between the robot's heading and the target position.
+        self._task_data[:, 3] = The cosine of the angle between the robot's heading and the target heading.
+        self._task_data[:, 4] = The sine of the angle between the robot's heading and the target heading.
+        self._task_data[:, 5] = The linear velocity of the robot along the x-axis.
+        self._task_data[:, 6] = The linear velocity of the robot along the y-axis.
+        self._task_data[:, 7] = The angular velocity of the robot.
         self._task_data[:, 8 + i*5] = The distance between the n th and the n+1 th goal.
         self._task_data[:, 9 + i*5] = The cosine of the angle between the n th goal and the n+1 th goal's position.
         self._task_data[:, 10 + i*5] = The sine of the angle between the n th goal and the n+1 th goal's position.
@@ -277,13 +281,13 @@ class RendezvousTask(TaskCore):
 
         # Store in buffer
         # breakpoint()
-        self._task_data[:, 0:2] = self._robot.root_com_lin_vel_b[self._env_ids, :2]
-        self._task_data[:, 2] = self._robot.root_com_ang_vel_w[self._env_ids, -1]
-        self._task_data[:, 3] = position_dist
-        self._task_data[:, 4] = torch.cos(target_heading_error)
-        self._task_data[:, 5] = torch.sin(target_heading_error)
-        self._task_data[:, 6] = torch.cos(heading_error)
-        self._task_data[:, 7] = torch.sin(heading_error)
+        self._task_data[:, 0] = position_dist
+        self._task_data[:, 1] = torch.cos(target_heading_error)
+        self._task_data[:, 2] = torch.sin(target_heading_error)
+        self._task_data[:, 3] = torch.cos(heading_error)
+        self._task_data[:, 4] = torch.sin(heading_error)
+        self._task_data[:, 5:7] = self._robot.root_com_lin_vel_b[self._env_ids, :2]
+        self._task_data[:, 7] = self._robot.root_com_ang_vel_w[self._env_ids, -1]
 
         # We compute the observations of the subsequent goals in the previous goal's frame.
         for i in range(self._task_cfg.num_subsequent_goals - 1):
@@ -334,8 +338,11 @@ class RendezvousTask(TaskCore):
         for randomizer in self.randomizers:
             randomizer.observations(observations=self._task_data)
 
+        task_id_one_hot = F.one_hot(torch.tensor([self._task_uid], device=self._device), num_classes=self._num_tasks).squeeze(0).repeat(self._num_envs, 1)
+        task_obs = task_id_one_hot
+
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), task_obs
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -377,6 +384,8 @@ class RendezvousTask(TaskCore):
 
         # Update logs
         self.scalar_logger.log("task_state", "Rendezvous/AVG/position_distance", self._position_dist)
+        self.scalar_logger.log("task_state", "Rendezvous/AVG/heading_distance", heading_dist)
+        self.scalar_logger.log("task_state", "Rendezvous/AVG/target_heading_distance", target_heading_dist)
         self.scalar_logger.log("task_state", "Rendezvous/AVG/boundary_distance", boundary_dist)
         self.scalar_logger.log("task_state", "Rendezvous/AVG/normed_linear_velocity", linear_velocity)
         self.scalar_logger.log("task_state", "Rendezvous/AVG/absolute_angular_velocity", angular_velocity)
@@ -393,6 +402,14 @@ class RendezvousTask(TaskCore):
         linear_velocity_rew[
             linear_velocity_rew > (self._task_cfg.linear_velocity_max_value - self._task_cfg.linear_velocity_min_value)
         ] = (self._task_cfg.linear_velocity_max_value - self._task_cfg.linear_velocity_min_value)
+        # max_possible_linear_rew = (
+        #     self._task_cfg.linear_velocity_max_value - self._task_cfg.linear_velocity_min_value
+        # )
+        # # Normalize to 0-1 based on its own max possible value from the previous calculation
+        # if max_possible_linear_rew > EPS:  # Avoid division by zero
+        #     linear_velocity_rew = linear_velocity_rew / max_possible_linear_rew
+        # else:
+        #     linear_velocity_rew = torch.zeros_like(linear_velocity_rew)
         # angular velocity reward
         angular_velocity_rew = angular_velocity - self._task_cfg.angular_velocity_min_value
         angular_velocity_rew[angular_velocity_rew < 0] = 0
@@ -400,6 +417,13 @@ class RendezvousTask(TaskCore):
             angular_velocity_rew
             > (self._task_cfg.angular_velocity_max_value - self._task_cfg.angular_velocity_min_value)
         ] = (self._task_cfg.angular_velocity_max_value - self._task_cfg.angular_velocity_min_value)
+        # Normalize to 0-1 based on its own max possible value from the previous calculation
+        max_possible_angular_rew = (self._task_cfg.angular_velocity_max_value - self._task_cfg.angular_velocity_min_value)
+        if max_possible_angular_rew > EPS: # Avoid division by zero
+            angular_velocity_rew = angular_velocity_rew / max_possible_angular_rew
+        else:
+            angular_velocity_rew = torch.zeros_like(angular_velocity_rew)
+
         # boundary rew
         boundary_rew = torch.exp(-boundary_dist / self._task_cfg.boundary_exponential_reward_coeff)
 
@@ -421,11 +445,12 @@ class RendezvousTask(TaskCore):
         self._previous_position_dist[reached_ids] = 0
 
         # Update logs
-        self.scalar_logger.log("task_reward", "Rendezvous/AVG/linear_velocity", linear_velocity_rew)
-        self.scalar_logger.log("task_reward", "Rendezvous/AVG/angular_velocity", angular_velocity_rew)
-        self.scalar_logger.log("task_reward", "Rendezvous/AVG/boundary", boundary_rew)
-        self.scalar_logger.log("task_reward", "Rendezvous/AVG/heading", heading_rew)
-        self.scalar_logger.log("task_reward", "Rendezvous/AVG/progress", progress_rew)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/linear_velocity", linear_velocity_rew * self._task_cfg.linear_velocity_weight)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/angular_velocity", angular_velocity_rew * self._task_cfg.angular_velocity_weight)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/boundary", boundary_rew * self._task_cfg.boundary_weight)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/position_heading", heading_rew * self._task_cfg.position_heading_weight)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/target_heading", target_heading_rew * self._task_cfg.position_heading_weight)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/progress", progress_rew * self._task_cfg.progress_weight)
         self.scalar_logger.log("task_reward", "Rendezvous/SUM/num_goals", goal_reached)
 
         # Return the reward by combining the different components and adding the robot rewards
@@ -435,7 +460,7 @@ class RendezvousTask(TaskCore):
             + target_heading_rew * self._task_cfg.position_heading_weight
             + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
-            + boundary_rew * self._task_cfg.boundary_weight
+            # + boundary_rew * self._task_cfg.boundary_weight
             + self._task_cfg.time_penalty
             + self._task_cfg.reached_bonus * goal_reached
         ) + self._robot.compute_rewards(env_ids=self._env_ids)  # type: ignore[return-value]
@@ -516,16 +541,16 @@ class RendezvousTask(TaskCore):
         self._position_dist = torch.linalg.norm(self._position_error, dim=-1)
         ones = torch.ones_like(self._goal_reached, dtype=torch.long)
         task_failed = torch.zeros_like(self._goal_reached, dtype=torch.long)
-        task_failed = torch.where(
-            self._position_dist > self._task_cfg.maximum_robot_distance,
-            ones,
-            task_failed,
-        )
+        # task_failed = torch.where(
+        #     self._position_dist > self._task_cfg.maximum_robot_distance,
+        #     ones,
+        #     task_failed,
+        # )
 
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
         # If the task is set to loop, don't terminate the episode early.
-        if not self._task_cfg.loop:
-            task_completed = torch.where(self._trajectory_completed > 0, ones, task_completed)
+        # if not self._task_cfg.loop:
+        #     task_completed = torch.where(self._trajectory_completed > 0, ones, task_completed)
         return task_failed, task_completed
 
     # def set_goals(self, env_ids: torch.Tensor):
@@ -882,3 +907,5 @@ class RendezvousTask(TaskCore):
         # Update the robot visualization. TODO Ideally we should lift the diamond a bit.
         self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[self._env_ids, :2]
         self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
+
+        self._robot.update_robot_visualization()

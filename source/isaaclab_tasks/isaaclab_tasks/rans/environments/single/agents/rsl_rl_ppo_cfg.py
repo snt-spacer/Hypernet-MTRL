@@ -11,12 +11,12 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 12000
+    max_iterations = 4000
     save_interval = 50
-    experiment_name = "multitask_orbital"
+    experiment_name = "multitask_memory_control"
     logger = "wandb"
     wandb_kwargs = {
-        "project": "multitask_orbital",
+        "project": "multitask_memory_control",
         "entity": "spacer-rl",
         "group": "zeroG",
     }
@@ -37,7 +37,7 @@ class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
         num_learning_epochs=5,
         num_mini_batches=4,
         learning_rate=1.0e-4,
-        schedule="fixed", #adaptive, fixed
+        schedule="adaptive", #adaptive, fixed
         gamma=0.99,
         lam=0.95,
         desired_kl=0.01,

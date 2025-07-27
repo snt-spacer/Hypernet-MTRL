@@ -35,8 +35,9 @@ class TrackVelocitiesPlots(BaseTaskPlots, Registerable):
         for label_to_plot in self.labels_to_plot:
             self.boxplot(label_to_plot)
 
-        self.plot_linear_velocity_over_time()
-        self.plot_angular_velocity_over_time()
-        self.plot_linear_velocity_error_over_time()
-        self.plot_angular_velocity_error_over_time()
-        self.plot_actions_over_time()
+        if len(self._trajectories_dfs) > 0:
+            self.plot_linear_velocity_over_time()
+            self.plot_angular_velocity_over_time()
+            self.plot_linear_velocity_error_over_time()
+            self.plot_angular_velocity_error_over_time()
+            self.plot_actions_over_time()

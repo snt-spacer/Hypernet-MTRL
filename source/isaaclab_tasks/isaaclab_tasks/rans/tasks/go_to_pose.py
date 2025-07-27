@@ -12,6 +12,7 @@ from isaaclab.scene import InteractiveScene
 from isaaclab_tasks.rans import GoToPoseCfg
 
 from .task_core import TaskCore
+import torch.nn.functional as F
 
 EPS = 1e-6  # small constant to avoid divisions by 0 and log(0)
 
@@ -167,7 +168,7 @@ class GoToPoseTask(TaskCore):
 
         # position error
         position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
-        position_dist = torch.norm(position_error, dim=-1)
+        position_dist = torch.linalg.norm(position_error, dim=-1)
         # position error expressed as distance and angular error (to the position)
         heading = self._robot.heading_w[self._env_ids]
         target_heading_w = torch.atan2(
@@ -194,8 +195,11 @@ class GoToPoseTask(TaskCore):
         for randomizer in self.randomizers:
             randomizer.observations(observations=self._task_data)
 
+        task_id_one_hot = F.one_hot(torch.tensor([self._task_uid], device=self._device), num_classes=self._num_tasks).squeeze(0).repeat(self._num_envs, 1)
+        task_obs = task_id_one_hot
+
         # Concatenate the task observations with the robot observations
-        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1)
+        return torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids)), dim=-1), task_obs
 
     def compute_rewards(self) -> torch.Tensor:
         """
@@ -210,7 +214,7 @@ class GoToPoseTask(TaskCore):
             torch.Tensor: The reward for the current state of the robot."""
         # position error
         self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
-        self._position_dist = torch.norm(self._position_error, dim=-1)
+        self._position_dist = torch.linalg.norm(self._position_error, dim=-1)
         # breakpoint()
         # heading error (to the target heading)
         self._heading_error = torch.arctan2(
@@ -222,7 +226,7 @@ class GoToPoseTask(TaskCore):
         # boundary distance
         boundary_dist = torch.abs(self._task_cfg.maximum_robot_distance - self._position_dist)
         # normed linear velocity
-        linear_velocity = torch.norm(self._robot.root_com_vel_w[self._env_ids, :2], dim=-1)
+        linear_velocity = torch.linalg.norm(self._robot.root_com_vel_w[self._env_ids, :2], dim=-1)
         # normed angular velocity
         angular_velocity = torch.abs(self._robot.root_com_vel_w[self._env_ids, -1])
         # progress
@@ -252,6 +256,13 @@ class GoToPoseTask(TaskCore):
             angular_velocity_rew
             > (self._task_cfg.angular_velocity_max_value - self._task_cfg.angular_velocity_min_value)
         ] = (self._task_cfg.angular_velocity_max_value - self._task_cfg.angular_velocity_min_value)
+        # Normalize to 0-1 based on its own max possible value from the previous calculation
+        max_possible_angular_rew = (self._task_cfg.angular_velocity_max_value - self._task_cfg.angular_velocity_min_value)
+        if max_possible_angular_rew > EPS: # Avoid division by zero
+            angular_velocity_rew = angular_velocity_rew / max_possible_angular_rew
+        else:
+            angular_velocity_rew = torch.zeros_like(angular_velocity_rew)
+
         # boundary reward
         boundary_rew = torch.exp(-boundary_dist / self._task_cfg.boundary_exponential_reward_coeff)
         # progress reward
@@ -271,20 +282,21 @@ class GoToPoseTask(TaskCore):
         self._goal_reached += goal_is_reached  # if it is add 1
 
         # Update logs (exponential moving average to see the performance at the end of the episode)
-        self.scalar_logger.log("task_reward", "GoToPose/AVG/position", position_rew)
-        self.scalar_logger.log("task_reward", "GoToPose/AVG/heading", heading_rew)
-        self.scalar_logger.log("task_reward", "GoToPose/AVG/linear_velocity", linear_velocity_rew)
-        self.scalar_logger.log("task_reward", "GoToPose/AVG/angular_velocity", angular_velocity_rew)
-        self.scalar_logger.log("task_reward", "GoToPose/AVG/boundary", boundary_rew)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/position", (position_rew) * (heading_rew) * self._task_cfg.pose_weight)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/heading", heading_rew * self._task_cfg.heading_weight)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/linear_velocity", linear_velocity_rew * self._task_cfg.linear_velocity_weight)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/angular_velocity", angular_velocity_rew * self._task_cfg.angular_velocity_weight)
+        self.scalar_logger.log("task_reward", "GoToPose/AVG/boundary", boundary_rew * self._task_cfg.boundary_weight)
 
         # Return the reward by combining the different components and adding the robot rewards
         return (
             (position_rew) * (heading_rew) * self._task_cfg.pose_weight
-            + progress_rew * self._task_cfg.progress_weight
-            + linear_velocity_rew * self._task_cfg.linear_velocity_weight
+            # + (heading_rew) * self._task_cfg.heading_weight
+            # + progress_rew * self._task_cfg.progress_weight
+            # + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
-            + boundary_rew * self._task_cfg.boundary_weight
-            + progress_rew * self._task_cfg.progress_weight
+            # + boundary_rew * self._task_cfg.boundary_weight
+            # + progress_rew * self._task_cfg.progress_weight
         ) + self._robot.compute_rewards(env_ids=self._env_ids)
 
     def reset(
@@ -336,21 +348,21 @@ class GoToPoseTask(TaskCore):
 
         self._position_error = self._target_positions[:, :2] - self._robot.root_link_pos_w[self._env_ids, :2]
         self._previous_position_dist = self._position_dist.clone()
-        self._position_dist = torch.norm(self._position_error, dim=-1)
+        self._position_dist = torch.linalg.norm(self._position_error, dim=-1)
         ones = torch.ones_like(self._goal_reached, dtype=torch.long)
         task_failed = torch.zeros_like(self._goal_reached, dtype=torch.long)
-        task_failed = torch.where(
-            self._position_dist > self._task_cfg.maximum_robot_distance,
-            ones,
-            task_failed,
-        )
+        # task_failed = torch.where(
+        #     self._position_dist > self._task_cfg.maximum_robot_distance,
+        #     ones,
+        #     task_failed,
+        # )
 
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
-        task_completed = torch.where(
-            self._goal_reached > self._task_cfg.reset_after_n_steps_in_tolerance,
-            ones,
-            task_completed,
-        )
+        # task_completed = torch.where(
+        #     self._goal_reached > self._task_cfg.reset_after_n_steps_in_tolerance,
+        #     ones,
+        #     task_completed,
+        # )
         return task_failed, task_completed
 
     def set_goals(self, env_ids: torch.Tensor) -> None:
@@ -486,3 +498,5 @@ class GoToPoseTask(TaskCore):
             self.goal_pos_visualizer.visualize(self._markers_pos, self._markers_quat)
             self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[self._env_ids, :2]
             self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w[self._env_ids])
+
+        self._robot.update_robot_visualization()

@@ -213,6 +213,7 @@ class TaskCore:
         except Exception as e:
             print("Error in TaskCore reset: ", e)
             print("gen_actions: ", gen_actions)
+        # self._gen_actions[env_ids] = torch.zeros((len(env_ids), self.num_gen_actions), device=self._device)
 
         # Reset the randomizers
         for randomizer in self.randomizers:
