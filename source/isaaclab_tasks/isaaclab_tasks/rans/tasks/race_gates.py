@@ -248,11 +248,15 @@ class RaceGatesTask(TaskCore):
         self.scalar_logger.add_log("task_state", "MAX/num_tracks(resets)", "max")
         self.scalar_logger.add_log("task_state", "MIN/num_tracks(resets)", "min")
         self.scalar_logger.add_log("task_state", "AVG/laps_completed", "mean")
+        self.scalar_logger.add_log("task_state", "SUM/num_goals", "sum")
 
         self.scalar_logger.add_log("task_reward", "AVG/boundary", "mean")
         self.scalar_logger.add_log("task_reward", "AVG/heading", "mean")
         self.scalar_logger.add_log("task_reward", "AVG/progress", "mean")
-        self.scalar_logger.add_log("task_reward", "SUM/num_goals", "sum")
+        self.scalar_logger.add_log("task_reward", "AVG/goals_reward", "mean")
+        self.scalar_logger.add_log("task_reward", "AVG/time_penalty", "mean")
+        self.scalar_logger.add_log("task_reward", "AVG/reverse_penalty", "mean")
+        self.scalar_logger.add_log("task_reward", "AVG/missed_gate_penalty", "mean")
 
     def get_observations(self) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -496,11 +500,17 @@ class RaceGatesTask(TaskCore):
         self.scalar_logger.log("task_state", "MAX/num_tracks(resets)", self._num_resets_per_env)
         self.scalar_logger.log("task_state", "MIN/num_tracks(resets)", self._num_resets_per_env)
         self.scalar_logger.log("task_state", "AVG/laps_completed", self._laps_completed)
+        self.scalar_logger.log("task_state", "SUM/num_goals", goal_reached)
         
-        self.scalar_logger.log("task_reward", "AVG/boundary", boundary_rew)
-        self.scalar_logger.log("task_reward", "AVG/heading", heading_rew)
-        self.scalar_logger.log("task_reward", "AVG/progress", progress_rew)
-        self.scalar_logger.log("task_reward", "SUM/num_goals", goal_reached)
+        self.scalar_logger.log("task_reward", "AVG/boundary", boundary_rew * self._task_cfg.boundary_weight)
+        self.scalar_logger.log("task_reward", "AVG/heading", heading_rew * self._task_cfg.position_heading_weight)
+        self.scalar_logger.log("task_reward", "AVG/progress", progress_rew * self._task_cfg.progress_weight)
+        self.scalar_logger.log("task_reward", "AVG/time_penalty", self._task_cfg.time_penalty)
+        self.scalar_logger.log("task_reward", "AVG/goals_reward", goal_reached * self._task_cfg.reached_bonus)
+        self.scalar_logger.log("task_reward", "AVG/reverse_penalty", goal_reverse * self._task_cfg.reverse_penalty)
+        self.scalar_logger.log("task_reward", "AVG/missed_gate_penalty", self._missed_gate.int() * self._task_cfg.missed_gate_penalty)
+
+        
 
         # Set the previous values
         self._previous_is_before_gate = is_before_gate.clone()
@@ -617,7 +627,7 @@ class RaceGatesTask(TaskCore):
             ones,
             task_failed,
         )
-        # Add missed gate as a failure condition
+        # # Add missed gate as a failure condition
         task_failed = torch.where(
             self._missed_gate,
             ones,

@@ -30,7 +30,7 @@ class SingleEnvCfg(DirectRLEnvCfg):
     task_name = "RaceGates"
 
     # scene
-    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=0.0, replicate_physics=True)
+    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=40.0, replicate_physics=True)
 
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1.0 / 60.0, render_interval=decimation)
@@ -185,6 +185,10 @@ class SingleEnv(DirectRLEnv):
 
     def _get_observations(self) -> dict:
         general_obs, track_obs = self.task_api.get_observations()
+        
+        if self.task_api._task_cfg.type_of_training == "padd":
+            general_obs = torch.cat([general_obs, track_obs], dim=-1)
+
         observations = {"policy": 
                             {
                                 "general_obs": general_obs,

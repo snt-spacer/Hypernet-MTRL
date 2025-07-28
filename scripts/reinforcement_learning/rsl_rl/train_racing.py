@@ -34,6 +34,12 @@ parser.add_argument(
 parser.add_argument("--run_num",type=int,default=0,help="The run number for the current experiment.")
 parser.add_argument("--fixed_track_id",type=int,default=-1,help="The fixed track id for the racing task. -1 means random track.")
 parser.add_argument("--same_track_for_all_envs",type=bool,default=False,help="If True, all environments will use the same track. If False, each environment will use a different track.")
+parser.add_argument(
+    "--type_of_training",
+    type=str,
+    default="padd",
+    help="The type of training to use. Options: 'hyper' or 'padd'.",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -60,6 +66,8 @@ def modify_racing_config():
                 new_content.append("    spawn_at_random_gate: bool = True\n")
             elif "same_track_for_all_envs:" in line:
                 new_content.append(f"    same_track_for_all_envs: bool = {args_cli.same_track_for_all_envs}\n")
+            elif "type_of_training:" in line:
+                new_content.append(f"    type_of_training: str = \"{args_cli.type_of_training}\"\n")
             else:
                 new_content.append(line)
     with open(eval_racing_cfg_path, 'w') as file:

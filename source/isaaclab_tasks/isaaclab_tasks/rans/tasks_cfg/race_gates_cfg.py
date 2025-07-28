@@ -51,13 +51,13 @@ class RaceGatesCfg(TaskCoreCfg):
     """Minimal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
     spawn_max_ang_vel: float = 0.0
     """Maximal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
-    spawn_at_random_gate: bool = False
-    fixed_track_id: int = 2
+    spawn_at_random_gate: bool = True
+    fixed_track_id: int = -1
     """Controls track generation across environments and resets:
     - If -1: Each environment gets a different random track every reset
     - If set to a specific number: All environments get the same track (but new track each reset)
     Combined with same_track_for_all_envs for full control over track behavior."""
-    same_track_for_all_envs: bool = True
+    same_track_for_all_envs: bool = False
     """Controls track persistence across resets:
     - If True: The same track is used for all environments and persists across resets
     - If False: New tracks are generated each reset (behavior depends on fixed_track_id)
@@ -83,7 +83,7 @@ class RaceGatesCfg(TaskCoreCfg):
     edgy: float = 0.0
     """A coefficient that affects the edginess of the track. Defaults to 0.0."""
     loop: bool = True
-    num_laps: int = 2
+    num_laps: int = 5
     gate_width: float = 0.75
     
 
@@ -96,12 +96,12 @@ class RaceGatesCfg(TaskCoreCfg):
     """Maximal distance between the robot and the target position. Defaults to 10 m."""
 
     # Reward Would be good to have a config for each reward type
-    position_heading_exponential_reward_coeff: float = 0.25
-    position_heading_weight: float = 0.0
+    position_heading_exponential_reward_coeff: float = 0.8
+    position_heading_weight: float = 0.25
     boundary_exponential_reward_coeff: float = 1.0
     boundary_weight: float = -10.0
-    time_penalty: float = -0.0
-    reached_bonus: float = 50.0
+    time_penalty: float = -0.01
+    reached_bonus: float = 100.0
     reverse_penalty: float = -100.0
     progress_weight: float = 2.0
     missed_gate_penalty: float = -100.0
@@ -119,8 +119,12 @@ class RaceGatesCfg(TaskCoreCfg):
         + sum([[0.03, 0.01, 0.01] for _ in range(num_subsequent_goals - 1)], []),
     )
 
+    # Type of training options: "hyper", "padd"
+    type_of_training: str = "hyper"
+    
     # Spaces
-    observation_space: int = 3 + 5 * num_subsequent_goals
+    base_observation_space = 3 + 5 * num_subsequent_goals
+    observation_space = base_observation_space + (20 if type_of_training == "padd" else 0)
     state_space: int = 0
     action_space: int = 0
     gen_space: int = 11
