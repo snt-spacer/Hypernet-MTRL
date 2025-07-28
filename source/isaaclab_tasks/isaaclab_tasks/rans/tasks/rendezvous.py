@@ -449,7 +449,7 @@ class RendezvousTask(TaskCore):
         self.scalar_logger.log("task_reward", "Rendezvous/AVG/angular_velocity", angular_velocity_rew * self._task_cfg.angular_velocity_weight)
         self.scalar_logger.log("task_reward", "Rendezvous/AVG/boundary", boundary_rew * self._task_cfg.boundary_weight)
         self.scalar_logger.log("task_reward", "Rendezvous/AVG/position_heading", heading_rew * self._task_cfg.position_heading_weight)
-        self.scalar_logger.log("task_reward", "Rendezvous/AVG/target_heading", target_heading_rew * self._task_cfg.position_heading_weight)
+        self.scalar_logger.log("task_reward", "Rendezvous/AVG/target_heading", target_heading_rew * self._task_cfg.target_heading_weight)
         self.scalar_logger.log("task_reward", "Rendezvous/AVG/progress", progress_rew * self._task_cfg.progress_weight)
         self.scalar_logger.log("task_reward", "Rendezvous/SUM/num_goals", goal_reached)
 
@@ -457,7 +457,7 @@ class RendezvousTask(TaskCore):
         return (
             progress_rew * self._task_cfg.progress_weight
             + heading_rew * self._task_cfg.position_heading_weight
-            + target_heading_rew * self._task_cfg.position_heading_weight
+            + target_heading_rew * self._task_cfg.target_heading_weight
             + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
             # + boundary_rew * self._task_cfg.boundary_weight

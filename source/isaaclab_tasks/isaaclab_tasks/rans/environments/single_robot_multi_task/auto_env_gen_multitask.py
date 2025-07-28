@@ -80,7 +80,7 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     gen_space = 0
 
     # Multitask control
-    type_of_training = "padd" #hyper, padd
+    type_of_training = "hyper" #hyper, padd
 
 
 class MultiTaskEnv(DirectRLEnv):
@@ -177,7 +177,8 @@ class MultiTaskEnv(DirectRLEnv):
 
         self.num_tasks = len(self.tasks_cfgs)
         cfg.action_space = self.robot_cfg.action_space + max_action_space
-        cfg.observation_space = self.robot_cfg.observation_space + max_observation_space + self.num_tasks if cfg.type_of_training == "padd" else 0
+        base_observation_space = self.robot_cfg.observation_space + max_observation_space
+        cfg.observation_space = base_observation_space + (self.num_tasks if cfg.type_of_training == "padd" else 0)
         cfg.state_space = self.robot_cfg.state_space + max_state_space
         cfg.gen_space = self.robot_cfg.gen_space + max_gen_space
         return cfg

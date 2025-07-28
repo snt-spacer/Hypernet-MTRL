@@ -38,7 +38,7 @@ class ModularFreeflyerRobotCfg(RobotCoreCfg):
     z_lock_name = "z_lock_joint"
 
     rew_action_rate_scale = 0 #-0.12 / 8
-    rew_joint_accel_scale = 0 #-2.5e-6
+    rew_joint_accel_scale = -2.5e-6
 
     action_mode = "continuous"
 

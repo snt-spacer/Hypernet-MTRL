@@ -293,7 +293,7 @@ class GoToPoseTask(TaskCore):
             (position_rew) * (heading_rew) * self._task_cfg.pose_weight
             # + (heading_rew) * self._task_cfg.heading_weight
             # + progress_rew * self._task_cfg.progress_weight
-            # + linear_velocity_rew * self._task_cfg.linear_velocity_weight
+            + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
             # + boundary_rew * self._task_cfg.boundary_weight
             # + progress_rew * self._task_cfg.progress_weight

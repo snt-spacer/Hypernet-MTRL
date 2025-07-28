@@ -326,7 +326,7 @@ class GoToPositionTask(TaskCore):
             position_rew * self._task_cfg.position_weight
             # + progress_rew * self._task_cfg.progress_weight
             + heading_rew * self._task_cfg.heading_weight
-            # + linear_velocity_rew * self._task_cfg.linear_velocity_weight
+            + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
             # + boundary_rew * self._task_cfg.boundary_weight
         ) + self._robot.compute_rewards(env_ids=self._env_ids)
