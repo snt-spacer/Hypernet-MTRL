@@ -272,7 +272,7 @@ class MultiTaskEnv(DirectRLEnv):
 
         result = {
             "general_obs": general_obs_cat,
-            "task_obs": task_obs_cat
+            "track_obs": task_obs_cat
         }
         return {"policy": result}
 
