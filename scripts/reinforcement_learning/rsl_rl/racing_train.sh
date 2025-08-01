@@ -8,7 +8,7 @@ TASK="Isaac-RANS-Single-v0"
 ROBOT_NAME="Leatherback"
 TASK_NAME="RaceGates"
 ALGORITHM="ppo"
-TYPE_OF_TRAINING="padd"  # Options: "hyper" or "padd"
+TYPE_OF_TRAINING="no_padd"  # Options: "hyper" or "padd"
 FIXED_TRACK_ID=-1  # -1 means random track
 SAME_TRACK_FOR_ALL_ENVS= False  # If True, all environments will use the same
 

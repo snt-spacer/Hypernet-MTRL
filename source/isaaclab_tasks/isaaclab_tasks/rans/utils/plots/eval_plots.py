@@ -95,6 +95,22 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_13-12-31_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-9999",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_13-48-01_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1111",
         ],
+
+        # Baseline w/o track info 
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_16-10-49_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_16-45-52_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-37",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_17-20-36_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-456",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_17-55-38_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-789",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_18-30-49_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1337",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_19-06-02_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2048",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_19-41-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-3141",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_20-16-21_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5678",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_20-51-40_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-9999",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_21-26-32_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1111",
+        ],
+
+        # Expert TrackID 2 32,32
     ]
 
     plot_cfg = {
@@ -112,21 +128,23 @@ def main():
         "runs_names": [
             "Hypernetwork Gobs w/o Tinf 32,32",
             "Hypernetwork Gobs w Tinf 32,32",
-            "Baseline w/ track info in general obs",
+            "Baseline Gobs w/ Tinf",
+            "Baseline Gobs w/o Tinf",
+            "Expert TrackID 2 32,32",
             # "Expert 37",
             # "Expert 42",
             # "Memory 42",
             # "Memory -1",
             # "Baseline -1",
             # "Baseline 42",
-            "Expert TrackID 2 32,32",
-            "Baseline 32,32",
-            "Hypernetwork 32,32",
-            "Hypernetwork 64,64",
-            "Hypernetwork 64,32,64",
-            "Hypernetwork 32",
-            "Hypernetwork 512,128,64,32",
-            "Expert TrackID 1 32,32",
+            # "Expert TrackID 2 32,32",
+            # "Baseline 32,32",
+            # "Hypernetwork 32,32",
+            # "Hypernetwork 64,64",
+            # "Hypernetwork 64,32,64",
+            # "Hypernetwork 32",
+            # "Hypernetwork 512,128,64,32",
+            # "Expert TrackID 1 32,32",
         ],
         "zoom_in": False,
     }
