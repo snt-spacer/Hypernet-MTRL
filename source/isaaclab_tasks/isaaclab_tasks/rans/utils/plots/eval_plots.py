@@ -123,6 +123,20 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_20-36-24_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_21-24-55_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
         ],
+
+        # Hypernet 32x32 w/o hypernet init w Tinfo in Gobs
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_10-45-16_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_11-33-13_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_12-21-07_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_13-09-07_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_13-56-53_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_14-45-20_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_15-33-49_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_16-22-20_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_17-10-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-02_17-58-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
+        ],
     ]
 
     plot_cfg = {
@@ -143,6 +157,7 @@ def main():
             "Baseline Gobs w/ Tinf",
             "Baseline Gobs w/o Tinf",
             "Hypernet 64x64x64 w Tinfo in Gobs",
+            "Hypernet 32x32 w/o hypernet init w Tinfo in Gobs"
             # "Expert TrackID 2 32,32",
             # "Expert 37",
             # "Expert 42",
