@@ -120,7 +120,7 @@ class RaceGatesCfg(TaskCoreCfg):
     )
 
     # Type of training options: "hyper", "padd"
-    type_of_training: str = "no_padd"
+    type_of_training: str = "padd"
     
     # Spaces
     base_observation_space = 3 + 5 * num_subsequent_goals

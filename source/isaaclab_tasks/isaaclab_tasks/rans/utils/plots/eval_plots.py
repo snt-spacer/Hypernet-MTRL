@@ -70,15 +70,15 @@ def main():
 
         # Hypernetwork general obs w track info
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_20-41-40_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_21-29-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_20-41-40_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",2
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_21-29-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_22-17-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_23-05-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_23-53-53_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_23-05-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-30_23-53-53_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_00-41-57_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_01-30-11_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_01-30-11_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",2
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_02-17-57_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_03-05-57_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_03-05-57_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_03-53-55_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
         ],
 
