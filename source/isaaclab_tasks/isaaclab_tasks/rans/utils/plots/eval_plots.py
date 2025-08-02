@@ -110,7 +110,19 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-07-31_21-26-32_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1111",
         ],
 
-        # Expert TrackID 2 32,32
+        # Hypernet 64x64x64 w Tinfo in Gobs
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_14-07-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_14-55-56_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_15-44-38_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_16-32-57_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_17-21-33_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_18-10-18_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_18-59-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_19-47-38_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_20-36-24_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-01_21-24-55_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
+        ],
     ]
 
     plot_cfg = {
@@ -130,7 +142,8 @@ def main():
             "Hypernetwork Gobs w Tinf 32,32",
             "Baseline Gobs w/ Tinf",
             "Baseline Gobs w/o Tinf",
-            "Expert TrackID 2 32,32",
+            "Hypernet 64x64x64 w Tinfo in Gobs",
+            # "Expert TrackID 2 32,32",
             # "Expert 37",
             # "Expert 42",
             # "Memory 42",
