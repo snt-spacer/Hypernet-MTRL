@@ -30,7 +30,7 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         clip_actions_range=[-1, 1],
         use_embeddings=False,
         embeddings_size=32,
-        generator_size=(64, 64, 64, 128, 64, 64, 64),
+        generator_size=(64, 64, 64),
         num_memory_obs=4,
         network_type="hybrid", #pure, hybrid
     )
