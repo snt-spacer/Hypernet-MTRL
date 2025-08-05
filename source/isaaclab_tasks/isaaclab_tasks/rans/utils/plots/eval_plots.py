@@ -90,10 +90,10 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_13-08-34_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
             # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_14-09-09_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
             # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_15-09-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_16-10-07_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_17-26-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678", 
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_16-10-07_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_17-26-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678", 
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_18-27-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_19-27-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-04_19-27-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
         ],
 
         # Baseline w/ track info in general obs
