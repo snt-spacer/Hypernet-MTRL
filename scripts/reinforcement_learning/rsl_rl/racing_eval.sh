@@ -116,15 +116,43 @@ COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK
 # )
 
 # Hypernet 512x256x128x64x32 w Tinfo in Gobs
+# CHECKPOINTS=(
+#     "2025-08-02_23-23-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_3450.pt"
+#     "2025-08-03_00-14-14_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_3950.pt"
+#     "2025-08-03_01-05-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_2150.pt"
+#     "2025-08-03_01-55-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_1750.pt"
+#     "2025-08-03_02-45-59_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_2350.pt"
+#     "2025-08-03_03-36-49_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_3750.pt"
+#     "2025-08-03_04-27-50_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_3900.pt"
+#     "2025-08-03_07-00-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3750.pt"
+# )
+
+# Hypernet 32 w Tinfo in Gobs
+# CHECKPOINTS=(
+#     "2025-08-03_13-57-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_3300.pt"
+#     "2025-08-03_14-45-36_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_2000.pt"
+#     "2025-08-03_15-33-14_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_3200.pt"
+#     "2025-08-03_16-20-57_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_1600.pt"
+#     "2025-08-03_17-08-46_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_3750.pt"
+#     "2025-08-03_17-56-40_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_2600.pt"
+#     "2025-08-03_18-44-20_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_1300.pt"
+#     "2025-08-03_19-32-18_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678/model_3150.pt"
+#     "2025-08-03_20-19-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999/model_2800.pt"
+#     "2025-08-03_21-07-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3200.pt"
+# )
+
+# Hypernet Critic 32x32 Tinfo in Gobs
 CHECKPOINTS=(
-    "2025-08-02_23-23-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_3450.pt"
-    "2025-08-03_00-14-14_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_3950.pt"
-    "2025-08-03_01-05-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_2150.pt"
-    "2025-08-03_01-55-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_1750.pt"
-    "2025-08-03_02-45-59_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_2350.pt"
-    "2025-08-03_03-36-49_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_3750.pt"
-    "2025-08-03_04-27-50_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_3900.pt"
-    "2025-08-03_07-00-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3750.pt"
+    "2025-08-04_10-07-04_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_3550.pt"
+    "2025-08-04_11-07-35_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_1700.pt"
+    "2025-08-04_12-08-08_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_1700.pt"
+    "2025-08-04_13-08-34_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_3650.pt"
+    "2025-08-04_14-09-09_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_2950.pt"
+    "2025-08-04_15-09-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_1300.pt"
+    "2025-08-04_16-10-07_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_3300.pt"
+    "2025-08-04_17-26-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678/model_2500.pt" 
+    "2025-08-04_18-27-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999/model_3100.pt"
+    "2025-08-04_19-27-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_1450.pt"
 )
 
 # Function to run evaluation for a single checkpoint

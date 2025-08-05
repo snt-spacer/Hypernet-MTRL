@@ -30,7 +30,7 @@ class SingleRobotPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         clip_actions_range=[-1, 1],
         use_embeddings=True,
         embeddings_size=32,
-        generator_size=(512, 256, 128, 64, 32),
+        generator_size=(32, 32),
         num_memory_obs=39, #46 Two times the number of max_num_corners on the race_gates task (y,x of points) and 1 for orientation
         network_type="hybrid", #pure, hybrid
     )
