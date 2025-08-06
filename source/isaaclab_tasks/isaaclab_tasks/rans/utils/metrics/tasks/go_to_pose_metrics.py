@@ -37,6 +37,7 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
         final_cos = masked_cos[torch.arange(0, masked_cos.shape[0], device=masked_cos.device), self.last_true_index]
 
         angle_error = torch.arctan2(final_sin, final_cos)
+
         self.metrics["final_position_heading_error.rad"] = angle_error
 
     @BaseTaskMetrics.register
@@ -44,13 +45,15 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
         """ Difference between the target heading and the final heading of the robot. """
         print("[INFO][METRICS][TASK] Final orientation error")
 
-        masked_sin = self.trajectories['cos_target_heading_error'] * self.trajectories_masks
-        final_sin = masked_sin[torch.arange(0, masked_sin.shape[0], device=masked_sin.device), self.last_true_index]
+        masked_target_heading = self.trajectories['target_heading'] * self.trajectories_masks
+        masked_headings = self.trajectories['heading'] * self.trajectories_masks
 
-        masked_cos = self.trajectories['sin_target_heading_error'] * self.trajectories_masks
-        final_cos = masked_cos[torch.arange(0, masked_cos.shape[0], device=masked_cos.device), self.last_true_index]
+        final_target_heading = masked_target_heading[torch.arange(0, masked_target_heading.shape[0], device=masked_target_heading.device), self.last_true_index]
+        final_heading = masked_headings[torch.arange(0, masked_headings.shape[0], device=masked_headings.device), self.last_true_index]
 
-        angle_error = torch.arctan2(final_sin, final_cos)
+        heading_error = final_target_heading - final_heading
+        angle_error = torch.arctan2(torch.sin(heading_error), torch.cos(heading_error))  # Normalize the angle error to [-pi, pi]
+
         self.metrics["final_orientation_error.rad"] = angle_error
 
     @BaseTaskMetrics.register

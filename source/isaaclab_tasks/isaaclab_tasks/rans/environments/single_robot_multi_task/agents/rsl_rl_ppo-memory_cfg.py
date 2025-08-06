@@ -28,8 +28,8 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         activation="elu",
         clip_actions=True,
         clip_actions_range=[-1, 1],
-        use_embeddings=False,
-        embeddings_size=32,
+        use_embeddings=True,
+        embeddings_size=16,
         generator_size=(64, 64, 64),
         num_memory_obs=4,
         network_type="hybrid", #pure, hybrid
