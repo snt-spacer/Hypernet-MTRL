@@ -166,7 +166,7 @@ class BaseTaskPlots(AutoRegister):
         plt.tight_layout()
         if key_name == "faild_trajectories_mask":
             key_name = "trajectory_completition_comparison"
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.png")
         plt.savefig(save_path)
         plt.close()
 
@@ -228,7 +228,7 @@ class BaseTaskPlots(AutoRegister):
         ax.set_xticklabels(label_names, rotation=20, ha='right')
         ax.grid(True)
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.png")
         plt.savefig(save_path)
         plt.close()
 
@@ -270,7 +270,7 @@ class BaseTaskPlots(AutoRegister):
         ax.set_xticklabels(label_names, rotation=20, ha='right')
         ax.grid(True)
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_{key_name}.png")
         plt.savefig(save_path)
         plt.close()
 
@@ -357,7 +357,7 @@ class BaseTaskPlots(AutoRegister):
         # ax.axvline(0, color='gray', linestyle='--', linewidth=1)
         ax.set_aspect('equal', adjustable='box')
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_xy-trajectory-normalized.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_xy-trajectory-normalized.png")
         plt.savefig(save_path)
         plt.close(fig)
 
@@ -368,13 +368,13 @@ class BaseTaskPlots(AutoRegister):
             'Position Distance to Target Over Time', 'Step', 'Distance'
         )
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_position-distance-over-time.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_position-distance-over-time.png")
         plt.savefig(save_path)
         plt.close(fig2)
 
         # Position distance mean ± sd
         dist_col = 'position_distance'
-        self.plot_mean_sd(self.trajectories_to_plot, dist_col, os.path.join(self._save_plots_folder_path, f"{self.task_name}_position-distance-over-time-mean-sd.svg"), ylabel='Distance')
+        self.plot_mean_sd(self.trajectories_to_plot, dist_col, os.path.join(self._save_plots_folder_path, f"{self.task_name}_position-distance-over-time-mean-sd.png"), ylabel='Distance')
 
     def plot_linear_velocity_over_time(self):
         fig4, axs4 = plt.subplots(2, 1, figsize=(10,8), sharex=True)
@@ -389,7 +389,7 @@ class BaseTaskPlots(AutoRegister):
 
         axs4[-1].set_xlabel('Step') # Set x-label only on the last subplot for shared x-axis
         plt.tight_layout(rect=[0, 0, 0.9, 1]) # Adjust rect for legend
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_linear-velocities-over-time.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_linear-velocities-over-time.png")
         plt.savefig(save_path)
         plt.close(fig4)
 
@@ -407,7 +407,7 @@ class BaseTaskPlots(AutoRegister):
             axs7[i].legend()
         axs7[-1].set_xlabel('Step')
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_linear-velocities-over-time-mean-sd.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_linear-velocities-over-time-mean-sd.png")
         plt.savefig(save_path)
         plt.close(fig7)
 
@@ -419,11 +419,11 @@ class BaseTaskPlots(AutoRegister):
             'Angular Velocity Z Over Time', 'Step', 'Angular Velocity Z'
         )
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_angular-velocity-over-time.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_angular-velocity-over-time.png")
         plt.savefig(save_path)
         plt.close(fig6)
 
-        self.plot_mean_sd(self.trajectories_to_plot, 'angular_velocity_z', os.path.join(self._save_plots_folder_path, f"{self.task_name}_angular-velocity-over-time-mean-sd.svg"), ylabel='Angular Velocity Z')
+        self.plot_mean_sd(self.trajectories_to_plot, 'angular_velocity_z', os.path.join(self._save_plots_folder_path, f"{self.task_name}_angular-velocity-over-time-mean-sd.png"), ylabel='Angular Velocity Z')
 
     def plot_actions_over_time(self):
         action_cols = [col for col in self.trajectories_to_plot.columns if col.startswith('actions_')]
@@ -438,7 +438,7 @@ class BaseTaskPlots(AutoRegister):
             )
         axs5[-1].set_xlabel('Step')
         plt.tight_layout(rect=[0, 0, 0.9, 1]) # Adjust rect for legend
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_actions-over-time.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_actions-over-time.png")
         plt.savefig(save_path)
         plt.close(fig5)
 
@@ -456,7 +456,7 @@ class BaseTaskPlots(AutoRegister):
 
         axs4[-1].set_xlabel('Step') # Set x-label only on the last subplot for shared x-axis
         plt.tight_layout(rect=[0, 0, 0.9, 1]) # Adjust rect for legend
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_linear-velocities-error-over-time.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_linear-velocities-error-over-time.png")
         plt.savefig(save_path)
         plt.close(fig4)
 
@@ -467,7 +467,7 @@ class BaseTaskPlots(AutoRegister):
             'Error Angular Velocity Z Over Time', 'Step', 'Error Angular Velocity Z'
         )
         plt.tight_layout()
-        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_angular-velocity-error-over-time.svg")
+        save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_angular-velocity-error-over-time.png")
         plt.savefig(save_path)
         plt.close(fig6)
 
@@ -572,7 +572,8 @@ class BaseTaskPlots(AutoRegister):
             # ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
             
             plt.tight_layout()
-            save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates_{group_name}.svg")
+            group_name = group_name.replace(" ", "_")
+            save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates_{group_name}.png")
             plt.savefig(save_path, bbox_inches='tight')
             plt.close(fig)
 
@@ -698,7 +699,7 @@ class BaseTaskPlots(AutoRegister):
             ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
             
             plt.tight_layout()
-            save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates-mean-sd_{group_name}.svg")
+            save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates-mean-sd_{group_name}.png")
             plt.savefig(save_path, bbox_inches='tight')
             plt.close(fig)
     

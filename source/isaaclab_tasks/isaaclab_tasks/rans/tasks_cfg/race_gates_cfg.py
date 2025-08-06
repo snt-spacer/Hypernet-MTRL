@@ -67,14 +67,14 @@ class RaceGatesCfg(TaskCoreCfg):
     3. same_track_for_all_envs=False + fixed_track_id=N: Same track across envs, new track each reset"""
 
     # Goal spawn
-    max_num_corners: int = 13
-    """Maximal number of corners. Defaults to 13."""
+    max_num_corners: int = 35
+    """Maximal number of corners. Defaults to 35."""
     min_num_corners: int = 9
     """Minimal number of corners. Defaults to 9."""
     track_rejection_angle: float = (12.5 / 180.0) * math.pi
     """Angle in radians to reject tracks that have too sharp corners. Defaults to 12.5 degrees.
     sharp corners can lead to self-intersecting tracks."""
-    min_point_distance: float = 0.1
+    min_point_distance: float = 0.07
     """The minimum distance between the points sampled to create the track. Should be between 0 and 1. Smaller values can create more complex tracks."""
     scale: float = 20.0
     """Scale of the track. Defaults to 20.0."""
