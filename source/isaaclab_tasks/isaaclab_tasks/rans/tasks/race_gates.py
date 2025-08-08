@@ -249,6 +249,7 @@ class RaceGatesTask(TaskCore):
         self.scalar_logger.add_log("task_state", "MIN/num_tracks(resets)", "min")
         self.scalar_logger.add_log("task_state", "AVG/laps_completed", "mean")
         self.scalar_logger.add_log("task_state", "SUM/num_goals", "sum")
+        self.scalar_logger.add_log("task_state", "AVG/num_gates", "mean")
 
         self.scalar_logger.add_log("task_reward", "AVG/boundary", "mean")
         self.scalar_logger.add_log("task_reward", "AVG/heading", "mean")
@@ -396,8 +397,15 @@ class RaceGatesTask(TaskCore):
             dtype=torch.float32,
         )
         headings_with_padding[:, :num_goals] = normalized_headings
+        normalized_num_goals = (self._num_goals.float() - self._task_cfg.min_num_corners) / (self._task_cfg.max_num_corners - self._task_cfg.min_num_corners)
 
-        track_info = torch.concat((gates_positions, headings_with_padding), dim=-1) #TODO: test if this is good or position_i, headings_i instead is better 
+        # Reshape and concatenate gates positions and headings
+        gates_positions_reshaped = gates_positions.view(self._num_envs, self._task_cfg.max_num_corners, 2)
+        headings_with_padding_reshaped = headings_with_padding.view(self._num_envs, self._task_cfg.max_num_corners, 1)
+        gates_and_headings_combined = torch.cat((gates_positions_reshaped, headings_with_padding_reshaped), dim=-1)
+        flattened_gates_and_headings = gates_and_headings_combined.view(self._num_envs, -1)
+        
+        track_info = torch.concat((flattened_gates_and_headings, normalized_num_goals.unsqueeze(-1)), dim=-1)
         
         # combined_task_data = torch.concat((self._task_data, self._robot.get_observations(env_ids=self._env_ids), gates_positions), dim=-1)
 
@@ -501,6 +509,7 @@ class RaceGatesTask(TaskCore):
         self.scalar_logger.log("task_state", "MIN/num_tracks(resets)", self._num_resets_per_env)
         self.scalar_logger.log("task_state", "AVG/laps_completed", self._laps_completed)
         self.scalar_logger.log("task_state", "SUM/num_goals", goal_reached)
+        self.scalar_logger.log("task_state", "AVG/num_gates", torch.mean(self._num_goals.float()))
         
         self.scalar_logger.log("task_reward", "AVG/boundary", boundary_rew * self._task_cfg.boundary_weight)
         self.scalar_logger.log("task_reward", "AVG/heading", heading_rew * self._task_cfg.position_heading_weight)

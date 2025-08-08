@@ -74,6 +74,13 @@ class TrackGenerator:
         self._bernstein_2 = torch.tensor(bernstein(3, 2, t), device=self._device)
         self._bernstein_3 = torch.tensor(bernstein(3, 3, t), device=self._device)
 
+        import sys
+        current_limit = sys.getrecursionlimit()
+        print(f"Current recursion limit: {current_limit}")
+        new_limit = 5000
+        sys.setrecursionlimit(new_limit)
+        print(f"New recursion limit set to: {sys.getrecursionlimit()}")
+
     @staticmethod
     def ccw_sort(points: torch.Tensor):
         """Computes the mean of all the points, and orders them in the trigonometric direction around it.

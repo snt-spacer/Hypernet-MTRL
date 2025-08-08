@@ -51,13 +51,13 @@ class RaceGatesCfg(TaskCoreCfg):
     """Minimal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
     spawn_max_ang_vel: float = 0.0
     """Maximal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
-    spawn_at_random_gate: bool = False
-    fixed_track_id: int = 2
+    spawn_at_random_gate: bool = True
+    fixed_track_id: int = -1
     """Controls track generation across environments and resets:
     - If -1: Each environment gets a different random track every reset
     - If set to a specific number: All environments get the same track (but new track each reset)
     Combined with same_track_for_all_envs for full control over track behavior."""
-    same_track_for_all_envs: bool = True
+    same_track_for_all_envs: bool = False
     """Controls track persistence across resets:
     - If True: The same track is used for all environments and persists across resets
     - If False: New tracks are generated each reset (behavior depends on fixed_track_id)
@@ -67,23 +67,23 @@ class RaceGatesCfg(TaskCoreCfg):
     3. same_track_for_all_envs=False + fixed_track_id=N: Same track across envs, new track each reset"""
 
     # Goal spawn
-    max_num_corners: int = 35
-    """Maximal number of corners. Defaults to 35."""
-    min_num_corners: int = 9
+    max_num_corners: int = 40
+    """Maximal number of corners. Defaults to 40."""
+    min_num_corners: int = 4
     """Minimal number of corners. Defaults to 9."""
     track_rejection_angle: float = (12.5 / 180.0) * math.pi
     """Angle in radians to reject tracks that have too sharp corners. Defaults to 12.5 degrees.
     sharp corners can lead to self-intersecting tracks."""
     min_point_distance: float = 0.07
     """The minimum distance between the points sampled to create the track. Should be between 0 and 1. Smaller values can create more complex tracks."""
-    scale: float = 20.0
-    """Scale of the track. Defaults to 20.0."""
+    scale: float = 50.0
+    """Scale of the track. Defaults to 50.0."""
     rad: float = 0.2
     """A coefficient that affects the smoothness of the track. Defaults to 0.2."""
     edgy: float = 0.0
     """A coefficient that affects the edginess of the track. Defaults to 0.0."""
-    loop: bool = False
-    num_laps: int = 1
+    loop: bool = True
+    num_laps: int = 5
     gate_width: float = 0.75
     
 
