@@ -6,121 +6,75 @@ class RendezvousMetrics(BaseTaskMetrics, Registerable):
         super().__init__(env=env, folder_path=folder_path, physics_dt=physics_dt, step_dt=step_dt, task_name=task_name, task_index=task_index)
 
     @BaseTaskMetrics.register
-    def success_rate_weighted_by_path_length(self):
-        print("[INFO][METRICS][TASK] Success rate weighted by path length")
-        
-        # Check if required data is available
-        if 'target_positions' not in self.trajectories:
-            print("[WARNING] target_positions not found in trajectories, skipping success_rate_weighted_by_path_length")
-            return
+    def avg_orientation_error(self):
+        print("[INFO][METRICS][TASK] Average orientation error")
+        mean_avg_angle_errors = []
+        failed_trajectories = 0
+        for traj_idx, trajectory_target_index in enumerate(self.trajectories["target_index"]):
+            cut_idx = torch.where(trajectory_target_index > 6)[0]
+
+            if cut_idx.numel() > 1:
+                cut_idx = cut_idx[0].unsqueeze(-1)  # Use the first index if there are multiple 
+            if cut_idx.numel() == 0:
+                failed_trajectories += 1
+                continue  # Skip if no index found
+
+            diffs = torch.diff(trajectory_target_index[:cut_idx.item()])
+            increment_indices = torch.where(diffs > 0)[0] + 1
+            increment_indices = torch.cat([increment_indices, cut_idx])
+
+            headings = torch.tensor_split(self.trajectories["heading"][traj_idx].cpu(), increment_indices.cpu())
+            target_headings = self.trajectories["target_headings"][traj_idx]
+
+            avg_angle_errors = []
+            for segment_idx, (heading, target_heading) in enumerate(zip(headings, target_headings)):
+                heading_error = target_heading[segment_idx].repeat(heading.shape[0]).cpu() - heading
+                angle_error = torch.abs(torch.arctan2(torch.sin(heading_error), torch.cos(heading_error)))  # Normalize the angle error to [-pi, pi] and take the absolute value
+                avg_angle_errors.append(torch.mean(angle_error.float()))
             
-        if 'position' not in self.trajectories:
-            print("[WARNING] position not found in trajectories, skipping success_rate_weighted_by_path_length")
-            return
-            
-        if 'trajectory_completed' not in self.trajectories:
-            print("[WARNING] trajectory_completed not found in trajectories, skipping success_rate_weighted_by_path_length")
-            return
-        
-        try:
-            shortest_path_lenght = self.trajectory_shortest_distance(self.trajectories['target_positions'])
-            robot_distance_traveled = self.robot_distance_traveled(self.trajectories['position'][..., :2] * self.trajectories_masks.unsqueeze(-1))
-            trajectory_completed = (self.trajectories['trajectory_completed'] * self.trajectories_masks).sum(dim=1)
+            mean_avg_angle_errors.append(torch.mean(torch.stack(avg_angle_errors)))
 
-            self.metrics["spl.u"] = trajectory_completed * (shortest_path_lenght / torch.max(robot_distance_traveled, shortest_path_lenght))
-        except Exception as e:
-            print(f"[WARNING] Error in success_rate_weighted_by_path_length: {e}")
-            # Set a default value
-            self.metrics["spl.u"] = torch.zeros(self.trajectories_masks.shape[0], device=self.trajectories_masks.device)
+        for i in range(failed_trajectories):
+            mean_avg_angle_errors.append(torch.tensor(float('nan'), device=self.trajectories["target_index"].device))
+
+        self.metrics["mean_orientation_error.rad"] = torch.tensor(mean_avg_angle_errors, device=self.trajectories["target_index"].device)
+        self.env_info["failed_trajectories"] = torch.tensor(failed_trajectories, device=self.trajectories["target_index"].device)
 
     @BaseTaskMetrics.register
-    def orientation_error_following_path(self):
-        print("[INFO][METRICS][TASK] Orientation error following path")
-        
-        # Check if required data is available
-        if 'sin_target_heading_error' not in self.trajectories or 'cos_target_heading_error' not in self.trajectories:
-            print("[WARNING] sin_target_heading_error or cos_target_heading_error not found in trajectories, skipping orientation_error_following_path")
-            return
-        
-        try:
-            masked_sin = self.trajectories['sin_target_heading_error'] * self.trajectories_masks
-            masked_cos = self.trajectories['cos_target_heading_error'] * self.trajectories_masks
+    def avg_orientation_error_path(self):
+        """Calculate the average orientation error along the path after the robot arrived to the first marker."""
+        print("[INFO][METRICS][TASK] Average orientation error path")
+        mean_avg_angle_errors = []
+        failed_trajectories = 0
+        for traj_idx, trajectory_target_index in enumerate(self.trajectories["target_index"]):
+            cut_idx = torch.where(trajectory_target_index > 6)[0]
 
-            avg_sin = torch.sum(masked_sin, dim=1) / torch.sum(self.trajectories_masks, dim=1)
-            avg_cos = torch.sum(masked_cos, dim=1) / torch.sum(self.trajectories_masks, dim=1)
+            if cut_idx.numel() > 1:
+                cut_idx = cut_idx[0].unsqueeze(-1)  # Use the first index if there are multiple 
+            if cut_idx.numel() == 0:
+                failed_trajectories += 1
+                continue  # Skip if no index found
 
-            angle_error = torch.arctan2(avg_sin, avg_cos)
-            self.metrics["orientation_error_following_path.rad"] = angle_error
-        except Exception as e:
-            print(f"[WARNING] Error in orientation_error_following_path: {e}")
-            # Set a default value
-            self.metrics["orientation_error_following_path.rad"] = torch.zeros(self.trajectories_masks.shape[0], device=self.trajectories_masks.device)
+            diffs = torch.diff(trajectory_target_index[:cut_idx.item()])
+            increment_indices = torch.where(diffs > 0)[0] + 1
+            first_increment = increment_indices[0]
+            increment_indices = increment_indices[1:] - first_increment
+            increment_indices = torch.cat([increment_indices, cut_idx - first_increment])
 
-    @BaseTaskMetrics.register
-    def avg_time_to_reach_goal(self):
-        print("[INFO][METRICS][TASK] Time to reach goal")
+            headings = torch.tensor_split(self.trajectories["heading"][traj_idx][first_increment:].cpu(), increment_indices.cpu())
+            target_headings = self.trajectories["target_headings"][traj_idx][increment_indices[0]:]
 
+            avg_angle_errors = []
+            for segment_idx, (heading, target_heading) in enumerate(zip(headings, target_headings)):
+                heading_error = target_heading[segment_idx].repeat(heading.shape[0]).cpu() - heading
+                angle_error = torch.abs(torch.arctan2(torch.sin(heading_error), torch.cos(heading_error)))  # Normalize the angle error to [-pi, pi] and take the absolute value
+                avg_angle_errors.append(torch.mean(angle_error.float()))
 
-    @BaseTaskMetrics.register
-    def num_goals_reached_in_fixed_steps(self):
-        print("[INFO][METRICS][TASK] Number of goals reached in fixed steps")
+            if torch.any(torch.isnan(torch.stack(avg_angle_errors))):
+                breakpoint()
+            mean_avg_angle_errors.append(torch.mean(torch.stack(avg_angle_errors)))
 
-        fix_num_steps = self.trajectories['target_index'].shape[1] // 2 #TODO: Hardcoded
-        # fix_num_steps = torch.min(torch.sum(self.trajectories_masks.int(), dim=1))
-        masked_target_index = (self.trajectories['target_index'] * self.trajectories_masks)[:, :fix_num_steps]
-        max_target_index_idx = torch.argmax(masked_target_index, dim=1)
-        
-        env_idx = torch.arange(masked_target_index.shape[0], device=masked_target_index.device)
-        max_target_reached = masked_target_index[env_idx, max_target_index_idx]
+        for i in range(failed_trajectories):
+            mean_avg_angle_errors.append(torch.tensor(float('nan'), device=self.trajectories["target_index"].device))
 
-        self.metrics[f"num_goals_reached_in_{fix_num_steps}_steps.u"] = max_target_reached
-
-    @BaseTaskMetrics.register
-    def time_to_reach_goals(self):
-        print("[INFO][METRICS][TASK] Time to reach goals")
-
-        masked_target_index = self.trajectories['target_index'] * self.trajectories_masks
-        masked_num_goals = self.trajectories['num_goals'] * self.trajectories_masks
-
-        # Figure out number of goals per environment
-        max_val = max(0, masked_num_goals.max().item())
-        num_goals = max_val + 1  # From 0 to max_val
-
-        # Prepare the result tensor: one row per environment, one col per goal.
-        steps_per_goal = torch.full((masked_target_index.shape[0], num_goals), -1, 
-                                dtype=torch.long, device=masked_target_index.device)
-
-        # Identify where changes occur along the trajectory
-        changes = masked_target_index[:, 1:] != masked_target_index[:, :-1]
-
-        # Create tensors to track for each environment the last change step (starting at 0) and the number of goal changes recorded.
-        prev_steps   = torch.zeros(masked_target_index.shape[0], dtype=torch.long, 
-                                    device=masked_target_index.device)
-        goal_counter = torch.zeros(masked_target_index.shape[0], dtype=torch.long, 
-                                    device=masked_target_index.device)
-
-        # Get the indices and the time where changes occur.
-        env_idxs, traj_idxs = torch.where(changes)
-
-        env_idxs_list = env_idxs.tolist()
-        traj_idxs_list = traj_idxs.tolist()
-
-        for env_idx, traj_idx in zip(env_idxs_list, traj_idxs_list):
-            current_step = traj_idx + 1
-            delta = current_step - prev_steps[env_idx].item()
-            
-            # Get the next available goal index for this environment.
-            current_goal = goal_counter[env_idx].item()
-            if current_goal < num_goals:
-                # Record the delta for this change.
-                steps_per_goal[env_idx, current_goal] = delta
-                # Update the per–environment state.
-                goal_counter[env_idx] += 1
-                prev_steps[env_idx] = current_step
-        
-        valid_goals_mask = steps_per_goal > 0
-        steps_per_goal_time = steps_per_goal.clone().to(torch.float32)
-        steps_per_goal_time[valid_goals_mask] *= self.step_dt
-
-        for i in range(num_goals):
-            self.metrics[f"time_to_reach_goal_num_{i}.s"] = steps_per_goal_time[:, i]
+        self.metrics["mean_orientation_error_path.rad"] = torch.tensor(mean_avg_angle_errors, device=self.trajectories["target_index"].device)

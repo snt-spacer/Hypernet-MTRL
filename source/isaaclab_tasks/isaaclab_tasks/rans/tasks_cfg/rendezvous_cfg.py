@@ -72,7 +72,7 @@ class RendezvousCfg(TaskCoreCfg):
     min_num_goals: int = 6
     """Minimal number of goals. Defaults to 6."""
     loop: bool = True
-    """Whether the goals should loop or not. Defaults to True."""
+    """Whether the goals should loop or not. Defaults to False."""
     focus_point_distance_range: tuple[float, float] = (1.0, 10.0)
     """Range of distances for the focus point from the center of the circle. Defaults to (0.5, 1.0) m."""
     focus_point_angle_range: tuple[float, float] = (0.0, 2 * math.pi)
@@ -86,25 +86,28 @@ class RendezvousCfg(TaskCoreCfg):
     position_tolerance: float = 0.10
     """Tolerance for the position of the robot. Defaults to 1cm."""
     heading_tolerance: float = math.pi * 15.0 / 180.0
-    """Tolerance for the heading of the robot. Defaults to 10 degrees."""
+    """Tolerance for the heading of the robot. Defaults to 15 degrees."""
     maximum_robot_distance: float = 30.0
     """Maximal distance between the robot and the target position. Defaults to 10 m."""
 
     # Reward Would be good to have a config for each reward type
     position_heading_exponential_reward_coeff: float = 0.25
-    position_heading_weight: float = 0.1
-    target_heading_weight: float = 1.0
+    position_exponential_reward_coeff: float = 1.0
+    target_heading_exponential_reward_coeff: float = 1.0
     linear_velocity_min_value: float = 0.0
     linear_velocity_max_value: float = 0.45
     angular_velocity_min_value: float = 0.0
     angular_velocity_max_value: float = 0.9
     boundary_exponential_reward_coeff: float = 1.0
+
+    progress_weight: float = 1.0
+    position_heading_weight: float = 0.05
+    target_heading_weight: float = 1.0
     linear_velocity_weight: float = -0.00
     angular_velocity_weight: float = -0.05
     boundary_weight: float = -10.0
     time_penalty: float = -0.0
     reached_bonus: float = 10.0
-    progress_weight: float = 1.0
 
     # Randomization
     noisy_observation_cfg: NoisyObservationsCfg = NoisyObservationsCfg(

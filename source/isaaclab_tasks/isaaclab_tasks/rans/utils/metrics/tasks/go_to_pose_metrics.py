@@ -52,7 +52,7 @@ class GoToPoseMetrics(BaseTaskMetrics, Registerable):
         final_heading = masked_headings[torch.arange(0, masked_headings.shape[0], device=masked_headings.device), self.last_true_index]
 
         heading_error = final_target_heading - final_heading
-        angle_error = torch.arctan2(torch.sin(heading_error), torch.cos(heading_error))  # Normalize the angle error to [-pi, pi]
+        angle_error = torch.abs(torch.arctan2(torch.sin(heading_error), torch.cos(heading_error)))  # Normalize the angle error to [-pi, pi] and take the absolute value
 
         self.metrics["final_orientation_error.rad"] = angle_error
 

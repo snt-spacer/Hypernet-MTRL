@@ -351,11 +351,11 @@ class GoToPoseTask(TaskCore):
         self._position_dist = torch.linalg.norm(self._position_error, dim=-1)
         ones = torch.ones_like(self._goal_reached, dtype=torch.long)
         task_failed = torch.zeros_like(self._goal_reached, dtype=torch.long)
-        # task_failed = torch.where(
-        #     self._position_dist > self._task_cfg.maximum_robot_distance,
-        #     ones,
-        #     task_failed,
-        # )
+        task_failed = torch.where(
+            self._position_dist > self._task_cfg.maximum_robot_distance,
+            ones,
+            task_failed,
+        )
 
         task_completed = torch.zeros_like(self._goal_reached, dtype=torch.long)
         # task_completed = torch.where(
