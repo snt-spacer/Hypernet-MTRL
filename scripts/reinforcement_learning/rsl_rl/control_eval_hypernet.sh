@@ -152,7 +152,7 @@ runs_per_env=1
 
 
 # PROPER EVAL 
-# Hypernet Init 64x64x64
+# Hypernet Init 64x64x64 w Gobs Tinf
 MODEL_PATHS=(
     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-09_18-34-24_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_1750.pt
     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-09_19-36-10_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_700.pt
