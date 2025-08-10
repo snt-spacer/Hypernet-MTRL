@@ -144,6 +144,6 @@ class GoToPositionMetrics(BaseTaskMetrics, Registerable):
         final_ang_vel = masked_ang_vel[torch.arange(0, masked_ang_vel.shape[0], device=masked_ang_vel.device), self.last_true_index]
 
         # The final velocities are also the error in this case, as we want the robot to stop
-        self.metrics["final_linear_velocity_error_x.m/s"] = final_lin_vel_x
-        self.metrics["final_linear_velocity_error_y.m/s"] = final_lin_vel_y
-        self.metrics["final_angular_velocity_error.rad/s"] = final_ang_vel
+        self.metrics["final_linear_velocity_error_y.m/s"] = torch.abs(final_lin_vel_y)
+        self.metrics["final_linear_velocity_error_x.m/s"] = torch.abs(final_lin_vel_x)
+        self.metrics["final_angular_velocity_error.rad/s"] = torch.abs(final_ang_vel)
