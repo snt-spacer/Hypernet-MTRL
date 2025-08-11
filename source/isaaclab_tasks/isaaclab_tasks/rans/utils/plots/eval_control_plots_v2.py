@@ -2581,6 +2581,76 @@ def main():
                 },
             ]
         },
+
+        # Hypernet Critic Init 64x64x64 w Gobs Tinf
+        {
+            "group_name": "Hypernet Critic Init 64x64x64_GoToPosition",
+            "task_name": "GoToPosition",
+            "robot_name": "ModularFreeflyer",
+            "runs": [
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-4_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/extracted_trajectories_GoToPosition.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/env_info.yaml",
+                },
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition_ModularFreeflyer_r-0_seed-9_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/extracted_trajectories_GoToPosition.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/env_info.yaml",
+                }
+            ]
+        },
+        {
+            "group_name": "Hypernet Critic Init 64x64x64_GoToPose",
+            "task_name": "GoToPose",
+            "robot_name": "ModularFreeflyer",
+            "runs": [
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPose_ModularFreeflyer_r-0_seed-4_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/extracted_trajectories_GoToPose.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/env_info.yaml",
+                },
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPose_ModularFreeflyer_r-0_seed-9_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/extracted_trajectories_GoToPose.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/env_info.yaml",
+                }
+            ]
+        },
+        {
+            "group_name": "Hypernet Critic Init 64x64x64_TrackVelocities",
+            "task_name": "TrackVelocities",
+            "robot_name": "ModularFreeflyer",
+            "runs": [
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/2025-08-11_01-33-49_rsl-rl_ppo-memory_TrackVelocities_ModularFreeflyer_r-0_seed-4_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/extracted_trajectories_TrackVelocities.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/env_info.yaml",
+                },
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/2025-08-11_06-36-22_rsl-rl_ppo-memory_TrackVelocities_ModularFreeflyer_r-0_seed-9_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/extracted_trajectories_TrackVelocities.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/env_info.yaml",
+                }
+            ]
+        },
+        {
+            "group_name": "Hypernet Critic Init 64x64x64_Rendezvous",
+            "task_name": "Rendezvous",
+            "robot_name": "ModularFreeflyer",
+            "runs": [
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/2025-08-11_01-33-49_rsl-rl_ppo-memory_Rendezvous_ModularFreeflyer_r-0_seed-4_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/extracted_trajectories_Rendezvous.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_01-33-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/metrics/env_info.yaml",
+                },
+                {
+                    "metrics_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/2025-08-11_06-36-22_rsl-rl_ppo-memory_Rendezvous_ModularFreeflyer_r-0_seed-9_metrics.csv",
+                    "trajectories_csv": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/extracted_trajectories_Rendezvous.csv",
+                    "env_info_yaml": "/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_06-36-22_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/metrics/env_info.yaml",
+                }
+            ]
+        }
         
     ]
 
