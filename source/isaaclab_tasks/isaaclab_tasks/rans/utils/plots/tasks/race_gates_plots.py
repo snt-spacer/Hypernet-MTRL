@@ -36,4 +36,4 @@ class RaceGatesPlots(BaseTaskPlots, Registerable):
             self.plot_trajectory_completed_successfully(label_to_plot)
             
         self.plot_trajectory_with_targets()
-        self.plot_trajectory_with_targets_mean_sd()
+        # self.plot_trajectory_with_targets_mean_sd()

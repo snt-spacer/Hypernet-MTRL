@@ -51,13 +51,13 @@ class RaceGatesCfg(TaskCoreCfg):
     """Minimal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
     spawn_max_ang_vel: float = 0.0
     """Maximal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
-    spawn_at_random_gate: bool = True
-    fixed_track_id: int = -1
+    spawn_at_random_gate: bool = False
+    fixed_track_id: int = 0
     """Controls track generation across environments and resets:
     - If -1: Each environment gets a different random track every reset
     - If set to a specific number: All environments get the same track (but new track each reset)
     Combined with same_track_for_all_envs for full control over track behavior."""
-    same_track_for_all_envs: bool = False
+    same_track_for_all_envs: bool = True
     """Controls track persistence across resets:
     - If True: The same track is used for all environments and persists across resets
     - If False: New tracks are generated each reset (behavior depends on fixed_track_id)
@@ -82,8 +82,8 @@ class RaceGatesCfg(TaskCoreCfg):
     """A coefficient that affects the smoothness of the track. Defaults to 0.2."""
     edgy: float = 0.0
     """A coefficient that affects the edginess of the track. Defaults to 0.0."""
-    loop: bool = True
-    num_laps: int = 5
+    loop: bool = False
+    num_laps: int = 1
     gate_width: float = 0.75
     
 
@@ -92,7 +92,7 @@ class RaceGatesCfg(TaskCoreCfg):
     """Number of subsequent goals available in the observation. Defaults to 2."""
 
     # Tolerance
-    maximum_robot_distance: float = 30.0
+    maximum_robot_distance: float = 70.0
     """Maximal distance between the robot and the target position. Defaults to 10 m."""
 
     # Reward Would be good to have a config for each reward type

@@ -376,31 +376,36 @@ class RaceGatesTask(TaskCore):
             randomizer.observations(observations=self._task_data)
         
         # Gates positions normalization & padding
-        num_goals = int(self._num_goals[0].item()) + 1    
-        points = self._target_positions[:, :num_goals] - self._env_origins[:, :2].unsqueeze(1)
-        normalized_points = points / (self._task_cfg.scale)
+        max_actual_goals = int(torch.max(self._num_goals).item()) + 1
+        # Initialize with zeros for all environments
         points_with_padding = torch.zeros(
             (self._num_envs, self._task_cfg.max_num_corners, 2),
             device=self._device,
             dtype=torch.float32,
         )
-        points_with_padding[:, :num_goals] = normalized_points
-        gates_positions = points_with_padding.view(self._num_envs, -1)
-
-        # Gates headings normalization & padding
-        headings = self._target_heading[:, :num_goals]
-        normalized_headings = torch.atan2(torch.sin(headings), torch.cos(headings)) # Normalize headings to [-π, π] range
-        normalized_headings = normalized_headings / math.pi  # Normalize to [-1, 1]:
         headings_with_padding = torch.zeros(
             (self._num_envs, self._task_cfg.max_num_corners),
             device=self._device,
             dtype=torch.float32,
         )
-        headings_with_padding[:, :num_goals] = normalized_headings
+
+        # Fill in the actual points and headings for each environment
+        for env_idx in range(self._num_envs):
+            num_goals_env = int(self._num_goals[env_idx].item()) + 1
+            if num_goals_env > 0:
+                points = self._target_positions[env_idx, :num_goals_env] - self._env_origins[env_idx, :2].unsqueeze(0)
+                normalized_points = points / self._task_cfg.scale
+                points_with_padding[env_idx, :num_goals_env] = normalized_points
+                
+                headings = self._target_heading[env_idx, :num_goals_env]
+                normalized_headings = torch.atan2(torch.sin(headings), torch.cos(headings)) / math.pi
+                headings_with_padding[env_idx, :num_goals_env] = normalized_headings
+        
+        gates_positions = points_with_padding.view(self._num_envs, -1)
         normalized_num_goals = (self._num_goals.float() - self._task_cfg.min_num_corners) / (self._task_cfg.max_num_corners - self._task_cfg.min_num_corners)
 
         # Reshape and concatenate gates positions and headings
-        gates_positions_reshaped = gates_positions.view(self._num_envs, self._task_cfg.max_num_corners, 2)
+        gates_positions_reshaped = points_with_padding
         headings_with_padding_reshaped = headings_with_padding.view(self._num_envs, self._task_cfg.max_num_corners, 1)
         gates_and_headings_combined = torch.cat((gates_positions_reshaped, headings_with_padding_reshaped), dim=-1)
         flattened_gates_and_headings = gates_and_headings_combined.view(self._num_envs, -1)
@@ -688,7 +693,12 @@ class RaceGatesTask(TaskCore):
             # Per-env random tracks
             num_goals = len(env_ids)
             if self.num_generations < 1:
-                self.points, self.tangents, self.num_goals = self._track_generator.generate_tracks_points_non_fixed_points(env_ids)
+                if self._task_cfg.fixed_track_id == 0:
+                    # BCN track
+                    print("Generating BCN track for all environments")
+                    self.points, self.tangents, self.num_goals = self._track_generator.generate_bcn_track(env_ids)
+                else:
+                    self.points, self.tangents, self.num_goals = self._track_generator.generate_tracks_points_non_fixed_points(env_ids)
             self._target_positions[env_ids] = self.points[env_ids] + self._env_origins[env_ids, :2].unsqueeze(1)
             self._target_heading[env_ids] = self.tangents[env_ids]
             self._target_rotations[env_ids, :, 0, 0] = torch.cos(self.tangents[env_ids])
@@ -703,7 +713,7 @@ class RaceGatesTask(TaskCore):
             else:
                 self._target_index[env_ids] = 0
 
-            self.num_generations +=1
+            self.num_generations += 1
         else:
             # Per-env random tracks
             num_goals = len(env_ids)

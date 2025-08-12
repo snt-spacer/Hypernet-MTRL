@@ -473,8 +473,113 @@ class BaseTaskPlots(AutoRegister):
 
     # ----------------------------- RaceGatesPlots -----------------------------
 
+    # def plot_trajectory_with_targets(self):
+    #     """Plot robot trajectory with race gates marked for each group/run."""
+        
+    #     # Create separate plots for each group
+    #     for group_key, group_trajectory_dfs in self._trajectories_dfs.items():
+    #         if not group_trajectory_dfs:  # Skip if no data
+    #             continue
+                
+    #         # Concatenate all trajectories for this group
+    #         group_trajectories = pd.concat(group_trajectory_dfs, ignore_index=True)
+            
+    #         if group_trajectories.empty:
+    #             continue
+                
+    #         fig, ax = plt.subplots(figsize=(12, 10))
+            
+    #         # Plot robot trajectories for this group with reduced opacity
+    #         for trajectory_name, group in group_trajectories.groupby('trajectory'):
+    #             hex_color = self.trajectory_color_map_hex[trajectory_name]
+    #             ax.plot(group['position_x'], group['position_y'], 
+    #                    color=hex_color, alpha=self.ALPHA_VALUE, linewidth=2,
+    #                    label=f'Robot Trajectory {trajectory_name}', zorder=1)
+            
+    #         # Extract and plot gates (use first trajectory from group for gate positions)
+    #         first_trajectory = group_trajectories[group_trajectories['trajectory'] == group_trajectories['trajectory'].iloc[0]]
+    #         if not first_trajectory.empty:
+    #             first_row = first_trajectory.iloc[0]
+                
+    #             # Extract target positions (gates) - they come in pairs (x, y)
+    #             # target_positions_0, target_positions_1 = gate 0 (x, y)
+    #             # target_positions_2, target_positions_3 = gate 1 (x, y), etc.
+    #             gate_positions = []
+    #             gate_headings = []
+                
+    #             # Find how many gates we have by checking target_positions columns
+    #             target_pos_cols = [col for col in group_trajectories.columns if col.startswith('target_positions_')]
+    #             target_heading_cols = [col for col in group_trajectories.columns if col.startswith('target_headings_')]
+                
+    #             num_gates = len(target_pos_cols) // 2  # Divide by 2 since each gate has x,y
+                
+    #             for i in range(num_gates):
+    #                 x_col = f'target_positions_{i*2}'
+    #                 y_col = f'target_positions_{i*2+1}'
+    #                 heading_col = f'target_headings_{i}'
+                    
+    #                 if x_col in first_row and y_col in first_row:
+    #                     gate_x = first_row[x_col]
+    #                     gate_y = first_row[y_col]
+    #                     gate_heading = first_row[heading_col] if heading_col in first_row else 0
+                        
+    #                     # Only add gates with non-zero positions (assuming zero means no gate)
+    #                     if gate_x != 0 or gate_y != 0:
+    #                         gate_positions.append((gate_x, gate_y))
+    #                         gate_headings.append(gate_heading)
+                
+    #             # Remove duplicate gates (e.g., if last gate is same as first gate)
+    #             if len(gate_positions) > 1 and gate_positions[-1] == gate_positions[0]:
+    #                 gate_positions = gate_positions[:-1]
+    #                 gate_headings = gate_headings[:-1]
+                
+    #             # Plot gates as rotated rectangles
+    #             if gate_positions:
+    #                 for i, ((gx, gy), heading) in enumerate(zip(gate_positions, gate_headings)):
+    #                     # Create rotated rectangle for gate
+    #                     from matplotlib.patches import Rectangle
+    #                     from matplotlib.transforms import Affine2D
+                        
+    #                     # Gate dimensions
+    #                     gate_width = 0.2  # Width of the gate
+    #                     gate_height = 1.0  # Thickness of the gate
+                        
+    #                     # Create rectangle centered at origin
+    #                     rect = Rectangle((-gate_width/2, -gate_height/2), gate_width, gate_height,
+    #                                    facecolor='red', edgecolor='black', alpha=0.9, linewidth=2)
+                        
+    #                     # Apply rotation and translation
+    #                     t = Affine2D().rotate(heading).translate(gx, gy) + ax.transData
+    #                     rect.set_transform(t)
+    #                     ax.add_patch(rect)
+                        
+    #                     # Add gate numbers (starting from 1) with higher zorder to ensure they're on top
+    #                     ax.annotate(f'{i+1}', (gx, gy), xytext=(5, 5), 
+    #                                textcoords='offset points', fontsize=10, 
+    #                                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9),
+    #                                zorder=10)
+                    
+    #                 # Add legend entry for gates
+    #                 dummy_rect = Rectangle((0, 0), 0, 0, facecolor='red', edgecolor='black', alpha=0.8, label='Race Gates')
+            
+    #         # Extract group name for title
+    #         group_name = group_key.split("_")[-1]  # Get the run name
+    #         ax.set_title(f'Robot Trajectories with Race Gates - {group_name}')
+    #         ax.set_xlabel('X Position (m)')
+    #         ax.set_ylabel('Y Position (m)')
+    #         ax.set_aspect('equal', adjustable='box')
+    #         ax.grid(True, alpha=0.3)
+    #         # ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+            
+    #         plt.tight_layout()
+    #         group_name = group_name.replace(" ", "_")
+    #         save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates_{group_name}.png")
+    #         plt.savefig(save_path, bbox_inches='tight')
+    #         plt.close(fig)
+
+
     def plot_trajectory_with_targets(self):
-        """Plot robot trajectory with race gates marked for each group/run."""
+        """Plot robot trajectory with race gates marked for each group/run, normalized to track center."""
         
         # Create separate plots for each group
         for group_key, group_trajectory_dfs in self._trajectories_dfs.items():
@@ -486,24 +591,35 @@ class BaseTaskPlots(AutoRegister):
             
             if group_trajectories.empty:
                 continue
-                
+            
+            # Normalize positions relative to track center (like in plot_xy_trajectories_0_centered)
+            group_trajectories = group_trajectories.copy()
+            
+            # Calculate track center for each trajectory (using first gate as reference)
+            group_trajectories['track_center_x'] = group_trajectories.groupby('trajectory')['target_positions_0'].transform('first')
+            group_trajectories['track_center_y'] = group_trajectories.groupby('trajectory')['target_positions_1'].transform('first')
+            
+            # Normalize robot positions
+            group_trajectories['norm_position_x'] = group_trajectories['position_x'] - group_trajectories['track_center_x']
+            group_trajectories['norm_position_y'] = group_trajectories['position_y'] - group_trajectories['track_center_y']
+            
             fig, ax = plt.subplots(figsize=(12, 10))
             
             # Plot robot trajectories for this group with reduced opacity
             for trajectory_name, group in group_trajectories.groupby('trajectory'):
                 hex_color = self.trajectory_color_map_hex[trajectory_name]
-                ax.plot(group['position_x'], group['position_y'], 
-                       color=hex_color, alpha=self.ALPHA_VALUE, linewidth=2,
-                       label=f'Robot Trajectory {trajectory_name}', zorder=1)
+                ax.plot(group['norm_position_x'], group['norm_position_y'], 
+                    color=hex_color, alpha=self.ALPHA_VALUE, linewidth=2,
+                    label=f'Robot Trajectory {trajectory_name}', zorder=1)
             
             # Extract and plot gates (use first trajectory from group for gate positions)
             first_trajectory = group_trajectories[group_trajectories['trajectory'] == group_trajectories['trajectory'].iloc[0]]
             if not first_trajectory.empty:
                 first_row = first_trajectory.iloc[0]
+                track_center_x = first_row['track_center_x']
+                track_center_y = first_row['track_center_y']
                 
                 # Extract target positions (gates) - they come in pairs (x, y)
-                # target_positions_0, target_positions_1 = gate 0 (x, y)
-                # target_positions_2, target_positions_3 = gate 1 (x, y), etc.
                 gate_positions = []
                 gate_headings = []
                 
@@ -519,14 +635,13 @@ class BaseTaskPlots(AutoRegister):
                     heading_col = f'target_headings_{i}'
                     
                     if x_col in first_row and y_col in first_row:
-                        gate_x = first_row[x_col]
-                        gate_y = first_row[y_col]
+                        gate_x = first_row[x_col] - track_center_x  # Normalize gate position
+                        gate_y = first_row[y_col] - track_center_y  # Normalize gate position
                         gate_heading = first_row[heading_col] if heading_col in first_row else 0
                         
-                        # Only add gates with non-zero positions (assuming zero means no gate)
-                        if gate_x != 0 or gate_y != 0:
-                            gate_positions.append((gate_x, gate_y))
-                            gate_headings.append(gate_heading)
+                        # Only add gates with positions (after normalization, center gate will be at 0,0)
+                        gate_positions.append((gate_x, gate_y))
+                        gate_headings.append(gate_heading)
                 
                 # Remove duplicate gates (e.g., if last gate is same as first gate)
                 if len(gate_positions) > 1 and gate_positions[-1] == gate_positions[0]:
@@ -546,7 +661,7 @@ class BaseTaskPlots(AutoRegister):
                         
                         # Create rectangle centered at origin
                         rect = Rectangle((-gate_width/2, -gate_height/2), gate_width, gate_height,
-                                       facecolor='red', edgecolor='black', alpha=0.9, linewidth=2)
+                                    facecolor='red', edgecolor='black', alpha=0.9, linewidth=2)
                         
                         # Apply rotation and translation
                         t = Affine2D().rotate(heading).translate(gx, gy) + ax.transData
@@ -555,151 +670,154 @@ class BaseTaskPlots(AutoRegister):
                         
                         # Add gate numbers (starting from 1) with higher zorder to ensure they're on top
                         ax.annotate(f'{i+1}', (gx, gy), xytext=(5, 5), 
-                                   textcoords='offset points', fontsize=10, 
-                                   bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9),
-                                   zorder=10)
+                                textcoords='offset points', fontsize=10, 
+                                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9),
+                                zorder=10)
                     
                     # Add legend entry for gates
                     dummy_rect = Rectangle((0, 0), 0, 0, facecolor='red', edgecolor='black', alpha=0.8, label='Race Gates')
             
             # Extract group name for title
             group_name = group_key.split("_")[-1]  # Get the run name
-            ax.set_title(f'Robot Trajectories with Race Gates - {group_name}')
-            ax.set_xlabel('X Position (m)')
-            ax.set_ylabel('Y Position (m)')
+            ax.set_title(f'Robot Trajectories with Race Gates (Normalized) - {group_name}')
+            ax.set_xlabel('Normalized X Position (m)')
+            ax.set_ylabel('Normalized Y Position (m)')
             ax.set_aspect('equal', adjustable='box')
             ax.grid(True, alpha=0.3)
-            # ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+            
+            # Add reference lines at origin (track center)
+            ax.axhline(0, color='gray', linestyle='--', linewidth=1, alpha=0.5)
+            ax.axvline(0, color='gray', linestyle='--', linewidth=1, alpha=0.5)
             
             plt.tight_layout()
             group_name = group_name.replace(" ", "_")
-            save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates_{group_name}.png")
+            save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates-normalized_{group_name}.png")
             plt.savefig(save_path, bbox_inches='tight')
             plt.close(fig)
 
-    def plot_trajectory_with_targets_mean_sd(self):
-        """Plot mean and standard deviation of robot trajectories with race gates for each group/run."""
+    # def plot_trajectory_with_targets_mean_sd(self):
+    #     """Plot mean and standard deviation of robot trajectories with race gates for each group/run."""
         
-        # Create separate plots for each group
-        for group_key, group_trajectory_dfs in self._trajectories_dfs.items():
-            if not group_trajectory_dfs:  # Skip if no data
-                continue
+    #     # Create separate plots for each group
+    #     for group_key, group_trajectory_dfs in self._trajectories_dfs.items():
+    #         if not group_trajectory_dfs:  # Skip if no data
+    #             continue
                 
-            # Concatenate all trajectories for this group
-            group_trajectories = pd.concat(group_trajectory_dfs, ignore_index=True)
+    #         # Concatenate all trajectories for this group
+    #         group_trajectories = pd.concat(group_trajectory_dfs, ignore_index=True)
             
-            if group_trajectories.empty:
-                continue
+    #         if group_trajectories.empty:
+    #             continue
                 
-            fig, ax = plt.subplots(figsize=(12, 10))
+    #         fig, ax = plt.subplots(figsize=(12, 10))
             
-            # Calculate mean and std for trajectory positions at each step
-            grouped_by_step = group_trajectories.groupby('step')
-            mean_x = grouped_by_step['position_x'].mean()
-            mean_y = grouped_by_step['position_y'].mean()
-            std_x = grouped_by_step['position_x'].std()
-            std_y = grouped_by_step['position_y'].std()
+    #         # Calculate mean and std for trajectory positions at each step
+    #         grouped_by_step = group_trajectories.groupby('step')
+    #         mean_x = grouped_by_step['position_x'].mean()
+    #         mean_y = grouped_by_step['position_y'].mean()
+    #         std_x = grouped_by_step['position_x'].std()
+    #         std_y = grouped_by_step['position_y'].std()
             
-            # Plot mean trajectory
-            ax.plot(mean_x, mean_y, color='blue', linewidth=3, alpha=0.8, label='Mean Trajectory')
+    #         # Plot mean trajectory
+    #         ax.plot(mean_x, mean_y, color='blue', linewidth=3, alpha=0.8, label='Mean Trajectory')
             
-            # Plot confidence ellipses at regular intervals
-            steps_to_plot = mean_x.index[::max(1, len(mean_x)//20)]  # Plot ~20 ellipses
+    #         # Plot confidence ellipses at regular intervals
+    #         steps_to_plot = mean_x.index[::max(1, len(mean_x)//20)]  # Plot ~20 ellipses
             
-            for step in steps_to_plot:
-                if step in mean_x.index and step in std_x.index:
-                    center_x, center_y = mean_x[step], mean_y[step]
-                    std_x_val, std_y_val = std_x[step], std_y[step]
+    #         for step in steps_to_plot:
+    #             if step in mean_x.index and step in std_x.index:
+    #                 center_x, center_y = mean_x[step], mean_y[step]
+    #                 std_x_val, std_y_val = std_x[step], std_y[step]
                     
-                    # Skip if std is NaN (only one trajectory)
-                    if pd.isna(std_x_val) or pd.isna(std_y_val):
-                        continue
+    #                 # Skip if std is NaN (only one trajectory)
+    #                 if pd.isna(std_x_val) or pd.isna(std_y_val):
+    #                     continue
                     
-                    # Create confidence ellipse (1 standard deviation)
-                    from matplotlib.patches import Ellipse
-                    ellipse = Ellipse((center_x, center_y), 
-                                    width=2*std_x_val, height=2*std_y_val,
-                                    alpha=0.3, facecolor='lightblue', 
-                                    edgecolor='blue', linewidth=0.5)
-                    ax.add_patch(ellipse)
+    #                 # Create confidence ellipse (1 standard deviation)
+    #                 from matplotlib.patches import Ellipse
+    #                 ellipse = Ellipse((center_x, center_y), 
+    #                                 width=2*std_x_val, height=2*std_y_val,
+    #                                 alpha=0.3, facecolor='lightblue', 
+    #                                 edgecolor='blue', linewidth=0.5)
+    #                 ax.add_patch(ellipse)
             
-            # Add a legend entry for the confidence region
-            ax.scatter([], [], alpha=0.3, facecolor='lightblue', 
-                      edgecolor='blue', s=100, label='±1 SD Region')
+    #         # Add a legend entry for the confidence region
+    #         ax.scatter([], [], alpha=0.3, facecolor='lightblue', 
+    #                   edgecolor='blue', s=100, label='±1 SD Region')
             
-            # Extract and plot gates (use first trajectory from group for gate positions)
-            first_trajectory = group_trajectories[group_trajectories['trajectory'] == group_trajectories['trajectory'].iloc[0]]
-            if not first_trajectory.empty:
-                first_row = first_trajectory.iloc[0]
+    #         # Extract and plot gates (use first trajectory from group for gate positions)
+    #         first_trajectory = group_trajectories[group_trajectories['trajectory'] == group_trajectories['trajectory'].iloc[0]]
+    #         if not first_trajectory.empty:
+    #             first_row = first_trajectory.iloc[0]
                 
-                # Extract gate positions
-                gate_positions = []
-                gate_headings = []
+    #             # Extract gate positions
+    #             gate_positions = []
+    #             gate_headings = []
                 
-                target_pos_cols = [col for col in group_trajectories.columns if col.startswith('target_positions_')]
-                target_heading_cols = [col for col in group_trajectories.columns if col.startswith('target_headings_')]
+    #             target_pos_cols = [col for col in group_trajectories.columns if col.startswith('target_positions_')]
+    #             target_heading_cols = [col for col in group_trajectories.columns if col.startswith('target_headings_')]
                 
-                num_gates = len(target_pos_cols) // 2
+    #             num_gates = len(target_pos_cols) // 2
                 
-                for i in range(num_gates):
-                    x_col = f'target_positions_{i*2}'
-                    y_col = f'target_positions_{i*2+1}'
-                    heading_col = f'target_headings_{i}'
+    #             for i in range(num_gates):
+    #                 x_col = f'target_positions_{i*2}'
+    #                 y_col = f'target_positions_{i*2+1}'
+    #                 heading_col = f'target_headings_{i}'
                     
-                    if x_col in first_row and y_col in first_row:
-                        gate_x = first_row[x_col]
-                        gate_y = first_row[y_col]
-                        gate_heading = first_row[heading_col] if heading_col in first_row else 0
+    #                 if x_col in first_row and y_col in first_row:
+    #                     gate_x = first_row[x_col]
+    #                     gate_y = first_row[y_col]
+    #                     gate_heading = first_row[heading_col] if heading_col in first_row else 0
                         
-                        if gate_x != 0 or gate_y != 0:
-                            gate_positions.append((gate_x, gate_y))
-                            gate_headings.append(gate_heading)
+    #                     if gate_x != 0 or gate_y != 0:
+    #                         gate_positions.append((gate_x, gate_y))
+    #                         gate_headings.append(gate_heading)
                 
-                # Remove duplicate gates (e.g., if last gate is same as first gate)
-                if len(gate_positions) > 1 and gate_positions[-1] == gate_positions[0]:
-                    gate_positions = gate_positions[:-1]
-                    gate_headings = gate_headings[:-1]
+    #             # Remove duplicate gates (e.g., if last gate is same as first gate)
+    #             if len(gate_positions) > 1 and gate_positions[-1] == gate_positions[0]:
+    #                 gate_positions = gate_positions[:-1]
+    #                 gate_headings = gate_headings[:-1]
                 
-                # Plot gates as rotated rectangles
-                if gate_positions:
-                    for i, ((gx, gy), heading) in enumerate(zip(gate_positions, gate_headings)):
-                        # Create rotated rectangle for gate
-                        from matplotlib.patches import Rectangle
-                        from matplotlib.transforms import Affine2D
+    #             # Plot gates as rotated rectangles
+    #             if gate_positions:
+    #                 for i, ((gx, gy), heading) in enumerate(zip(gate_positions, gate_headings)):
+    #                     # Create rotated rectangle for gate
+    #                     from matplotlib.patches import Rectangle
+    #                     from matplotlib.transforms import Affine2D
                         
-                        # Gate dimensions
-                        gate_width = 0.2  # Width of the gate
-                        gate_height = 1.0  # Thickness of the gate
+    #                     # Gate dimensions
+    #                     gate_width = 0.2  # Width of the gate
+    #                     gate_height = 1.0  # Thickness of the gate
                         
-                        # Create rectangle centered at origin
-                        rect = Rectangle((-gate_width/2, -gate_height/2), gate_width, gate_height,
-                                       facecolor='red', edgecolor='black', alpha=0.8, linewidth=2)
+    #                     # Create rectangle centered at origin
+    #                     rect = Rectangle((-gate_width/2, -gate_height/2), gate_width, gate_height,
+    #                                    facecolor='red', edgecolor='black', alpha=0.8, linewidth=2)
                         
-                        # Apply rotation and translation
-                        t = Affine2D().rotate(heading).translate(gx, gy) + ax.transData
-                        rect.set_transform(t)
-                        ax.add_patch(rect)
+    #                     # Apply rotation and translation
+    #                     t = Affine2D().rotate(heading).translate(gx, gy) + ax.transData
+    #                     rect.set_transform(t)
+    #                     ax.add_patch(rect)
                         
-                        # Add gate numbers (starting from 1)
-                        ax.annotate(f'{i+1}', (gx, gy), xytext=(5, 5), 
-                                   textcoords='offset points', fontsize=10, 
-                                   bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9),
-                                   zorder=15)
+    #                     # Add gate numbers (starting from 1)
+    #                     ax.annotate(f'{i+1}', (gx, gy), xytext=(5, 5), 
+    #                                textcoords='offset points', fontsize=10, 
+    #                                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9),
+    #                                zorder=15)
                     
-                    # Add legend entry for gates
-                    dummy_rect = Rectangle((0, 0), 0, 0, facecolor='red', edgecolor='black', alpha=0.8, label='Race Gates')
+    #                 # Add legend entry for gates
+    #                 dummy_rect = Rectangle((0, 0), 0, 0, facecolor='red', edgecolor='black', alpha=0.8, label='Race Gates')
             
-            # Extract group name for title
-            group_name = group_key.split("_")[-1]  # Get the run name
-            ax.set_title(f'Mean Trajectory with ±1 SD - {group_name}')
-            ax.set_xlabel('X Position (m)')
-            ax.set_ylabel('Y Position (m)')
-            ax.set_aspect('equal', adjustable='box')
-            ax.grid(True, alpha=0.3)
-            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    #         # Extract group name for title
+    #         group_name = group_key.split("_")[-1]  # Get the run name
+    #         ax.set_title(f'Mean Trajectory with ±1 SD - {group_name}')
+    #         ax.set_xlabel('X Position (m)')
+    #         ax.set_ylabel('Y Position (m)')
+    #         ax.set_aspect('equal', adjustable='box')
+    #         ax.grid(True, alpha=0.3)
+    #         ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
             
-            plt.tight_layout()
-            save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates-mean-sd_{group_name}.png")
-            plt.savefig(save_path, bbox_inches='tight')
-            plt.close(fig)
+    #         plt.tight_layout()
+    #         save_path = os.path.join(self._save_plots_folder_path, f"{self.task_name}_trajectory-with-gates-mean-sd_{group_name}.png")
+    #         plt.savefig(save_path, bbox_inches='tight')
+    #         plt.close(fig)
     

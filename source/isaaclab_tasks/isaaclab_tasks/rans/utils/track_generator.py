@@ -553,3 +553,156 @@ class TrackGenerator:
             )
 
         return prev_points, tangents, num_points_per_track
+
+    def bcn_points(self):
+        # Barcelona track (complex, 34 points)
+        barcelona_points = torch.tensor(
+            [
+                [ 2.12, -0.75],
+                [-0.50, -0.75],
+                [-0.62, -0.53],
+                [-0.98, -0.37],
+                [-1.19, -0.22],
+                [-1.45,  0.08],
+                [-1.52,  0.33],
+                [-1.34,  0.75],
+                [-1.00,  0.98],
+                [-0.19,  0.98], #10
+                [-0.06,  0.75],
+                [-0.26,  0.51],
+                [-0.77,  0.50],
+                [-1.02,  0.37],
+                [-0.92,  0.14],
+                [-0.61, -0.05],
+                [-0.26, -0.05],
+                [-0.11,  0.15],
+                [ 0.12,  0.73],
+                [ 0.61,  0.74], #20
+                [ 1.71, -0.03],
+                [ 1.86,  0.09],
+                [ 1.75,  0.30],
+                [ 1.60,  0.50],
+                [ 1.25,  0.68],
+                [ 1.07,  0.88],
+                [ 1.28,  0.99],
+                [ 1.73,  0.95],
+                [ 2.14,  0.88],
+                [ 2.25,  0.61], #30
+                [ 2.03,  0.36],
+                [ 2.39,  0.19],
+                [ 2.53, -0.14],
+                [ 2.45, -0.47],
+            ],
+            dtype=torch.float32,
+            device=self._device,
+        )
+        
+        # Option 2: Intermediate complexity track (10 points, closer to training range)
+        # barcelona_points = torch.tensor(
+        #     [
+        #         [1.0, 0.0],
+        #         [0.8, 0.6],
+        #         [0.3, 1.0],
+        #         [-0.3, 0.9],
+        #         [-0.8, 0.5],
+        #         [-1.0, 0.0],
+        #         [-0.7, -0.7],
+        #         [-0.2, -1.0],
+        #         [0.4, -0.8],
+        #         [0.9, -0.3],
+        #     ],
+        #     dtype=torch.float32,
+        #     device=self._device,
+        # )
+
+        # Option 3: Easy complexity track (4 points, closer to training range)
+        # barcelona_points = torch.tensor(
+        #     [
+        #         [1.0, 1.0],
+        #         [1.0, -1.0],
+        #         [-1.0, -1.0],
+        #         [-1.0, 1.0],
+        #     ],
+        #     dtype=torch.float32,
+        #     device=self._device,
+        # )
+        
+        # Center the track around (0,0) and then scale
+        min_coords, _ = torch.min(barcelona_points, dim=0)
+        max_coords, _ = torch.max(barcelona_points, dim=0)
+        center = (min_coords + max_coords) / 2
+        barcelona_points_centered = barcelona_points - center
+
+        # Normalize to approximately fit in a [-0.5, 0.5] square for better scaling consistency
+        max_dim = torch.max(max_coords - min_coords)
+        barcelona_points_normalized = barcelona_points_centered / max_dim
+
+        return barcelona_points_normalized * self._scale
+
+
+    def generate_bcn_track(
+        self,
+        ids: torch.Tensor,
+        prev_points: torch.Tensor | None = None,
+        prev_ids: torch.Tensor | None = None,
+        og_ids: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
+        """Generate random tracks but only return the points.
+        Unlike generate_tracks_points, this function will prune a random number of points from the input points tensor.
+
+        Args:
+            num_tracks: The number of tracks to generate.
+            prev_points: The previous points to append the new points to.
+
+        Returns:
+            A tuple containing the points, the tangents, and the number of points per track.
+            The points are a 3D tensor of shape [num_tracks, num_points, 2].
+            The tangents are a 2D tensor of shape [num_tracks, num_points].
+            The number of points per track is a 1D tensor of shape [num_tracks]."""
+        # Generate an ordered set of ids
+        if prev_ids is None:
+            prev_ids = torch.arange(0, len(ids), device=self._device)
+            og_ids = ids.clone()
+
+        # Generate Barcelona track points
+        bcn_points = self.bcn_points()  # Shape: [34, 2]
+
+        # Pad to max_num_points if needed
+        if bcn_points.shape[0] < self._max_num_points:
+            padding_needed = self._max_num_points - bcn_points.shape[0]
+            padding = torch.zeros((padding_needed, 2), device=self._device, dtype=torch.float32)
+            # Set padding points to the first point to close the loop properly
+            padding[:] = bcn_points[0:1]
+            points = torch.cat([bcn_points, padding], dim=0)
+        else:
+            points = bcn_points[:self._max_num_points]
+
+        points = points.unsqueeze(0).expand(len(ids), -1, -1)  # Expand to match the number of ids
+
+        # Calculate tangents directly using the established points
+        points_for_tangents = points[:, :bcn_points.shape[0], :]  # Use only actual track points
+        
+        # Skip ccw_sort since Barcelona points are already in correct order
+        # Add the first point to the end to close the loop
+        points_closed = torch.cat([points_for_tangents, points_for_tangents[:, 0, :].unsqueeze(1)], dim=1)
+        # Compute the difference between the points
+        dist = torch.diff(points_closed, dim=1)
+        # Compute the angle between the points
+        ang = torch.arctan2(dist[:, :, 1], dist[:, :, 0])
+        # Make sure the angles are in the range [0, 2*pi]
+        ang = self.cast_to_0_2pi(ang)
+        # Compute the angle of the tangents
+        ang1 = ang
+        ang2 = torch.roll(ang, 1, dims=1)
+        tangents = self._p * ang1 + (1 - self._p) * ang2 + (torch.abs(ang2 - ang1) > np.pi) * np.pi
+
+        # Pad tangents to match max_num_points
+        if tangents.shape[1] < self._max_num_points:
+            padding_needed = self._max_num_points - tangents.shape[1]
+            # Expand the first tangent angle to pad
+            tangent_padding = tangents[:, :1].expand(-1, padding_needed)
+            tangents = torch.cat([tangents, tangent_padding], dim=1)
+        
+        num_points_per_track = torch.tensor([bcn_points.shape[0]] * points.shape[0], device=self._device)
+
+        return points, tangents, num_points_per_track

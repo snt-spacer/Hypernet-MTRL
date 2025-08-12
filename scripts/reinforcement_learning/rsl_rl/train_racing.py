@@ -68,6 +68,10 @@ def modify_racing_config():
                 new_content.append(f"    same_track_for_all_envs: bool = {args_cli.same_track_for_all_envs}\n")
             elif "type_of_training:" in line:
                 new_content.append(f"    type_of_training: str = \"{args_cli.type_of_training}\"\n")
+            elif "max_num_corners:" in line:
+                new_content.append("    max_num_corners: int = 40\n")
+            elif "min_num_corners:" in line:
+                new_content.append("    min_num_corners: int = 4\n")
             else:
                 new_content.append(line)
     with open(eval_racing_cfg_path, 'w') as file:
