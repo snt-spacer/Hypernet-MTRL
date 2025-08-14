@@ -178,7 +178,7 @@ class MultiTaskEnv(DirectRLEnv):
         self.num_tasks = len(self.tasks_cfgs)
         cfg.action_space = self.robot_cfg.action_space + max_action_space
         base_observation_space = self.robot_cfg.observation_space + max_observation_space
-        cfg.observation_space = base_observation_space + self.num_tasks #(self.num_tasks if cfg.type_of_training == "padd" else 0)
+        cfg.observation_space = base_observation_space + (self.num_tasks if cfg.type_of_training == "padd" else 0)
         cfg.state_space = self.robot_cfg.state_space + max_state_space
         cfg.gen_space = self.robot_cfg.gen_space + max_gen_space
         return cfg
@@ -234,41 +234,41 @@ class MultiTaskEnv(DirectRLEnv):
 
     def _get_observations(self) -> dict:
         # Each task_api.get_observations() returns a tuple: (general_obs, task_obs)
-        # if self.cfg.type_of_training == "hyper":
-        #     general_obs_list = []
-        #     task_obs_list = []
-        #     for task_api in self.tasks_apis:
-        #         general_obs, task_obs = task_api.get_observations()
-        #         general_obs_list.append(general_obs)
-        #         task_obs_list.append(task_obs)
+        if self.cfg.type_of_training != "padd":
+            general_obs_list = []
+            task_obs_list = []
+            for task_api in self.tasks_apis:
+                general_obs, task_obs = task_api.get_observations()
+                general_obs_list.append(general_obs)
+                task_obs_list.append(task_obs)
 
-        #     padded_general_obs = []
-        #     for i, t in enumerate(general_obs_list):
-        #         pad_width = self.cfg.observation_space - t.shape[1]
-        #         padded = F.pad(t, (0, pad_width))
-        #         padded_general_obs.append(padded)
+            padded_general_obs = []
+            for i, t in enumerate(general_obs_list):
+                pad_width = self.cfg.observation_space - t.shape[1]
+                padded = F.pad(t, (0, pad_width))
+                padded_general_obs.append(padded)
 
-        #     # Concatenate along the batch (env) dimension
-        #     general_obs_cat = torch.cat(padded_general_obs, dim=0).type(torch.float32)
-        #     task_obs_cat = torch.cat(task_obs_list, dim=0).type(torch.float32)
+            # Concatenate along the batch (env) dimension
+            general_obs_cat = torch.cat(padded_general_obs, dim=0).type(torch.float32)
+            task_obs_cat = torch.cat(task_obs_list, dim=0).type(torch.float32)
 
-        # else:
-        general_obs_list = []
-        task_obs_list = []
-        for task_api in self.tasks_apis:
-            general_obs, task_obs = task_api.get_observations()
-            general_obs_list.append(general_obs)
-            task_obs_list.append(task_obs)
+        else:
+            general_obs_list = []
+            task_obs_list = []
+            for task_api in self.tasks_apis:
+                general_obs, task_obs = task_api.get_observations()
+                general_obs_list.append(general_obs)
+                task_obs_list.append(task_obs)
 
-        padded_tensors = []
-        for i, t in enumerate(general_obs_list):
-            pad_width = self.cfg.observation_space - t.shape[1]
-            padded = F.pad(t, (0, pad_width))
-            padded[:, -self.num_tasks:] = F.one_hot(torch.tensor([i], device=self.device), num_classes=self.num_tasks).squeeze(0)
-            padded_tensors.append(padded)
+            padded_tensors = []
+            for i, t in enumerate(general_obs_list):
+                pad_width = self.cfg.observation_space - t.shape[1]
+                padded = F.pad(t, (0, pad_width))
+                padded[:, -self.num_tasks:] = F.one_hot(torch.tensor([i], device=self.device), num_classes=self.num_tasks).squeeze(0)
+                padded_tensors.append(padded)
 
-        general_obs_cat = torch.cat(padded_tensors, dim=0).type(torch.float32)
-        task_obs_cat = torch.cat(task_obs_list, dim=0).type(torch.float32)
+            general_obs_cat = torch.cat(padded_tensors, dim=0).type(torch.float32)
+            task_obs_cat = torch.cat(task_obs_list, dim=0).type(torch.float32)
 
         result = {
             "general_obs": general_obs_cat,

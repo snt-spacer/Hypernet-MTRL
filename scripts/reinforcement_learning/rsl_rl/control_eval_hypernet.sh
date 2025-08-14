@@ -172,17 +172,44 @@ runs_per_env=1
 # )
 
 # Hypernet Critic Emb 32x32 w Gobs Tinf
+# MODEL_PATHS=(
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_10-01-14_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_1950.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_11-09-48_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_2650.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_12-18-36_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-3/model_3000.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_13-27-58_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/model_3500.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_14-37-12_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-5/model_3300.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_15-46-33_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-6/model_2300.pt #MNG 700
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_16-56-16_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-7/model_2050.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_18-05-29_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-8/model_2650.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_19-14-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/model_2850.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_20-23-46_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-10/model_1150.pt
+# )
+
+# Hypernet Critic Emb 32x32 w/o Gobs Tinf
+# MODEL_PATHS=(
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_09-00-04_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_2950.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_10-11-51_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_3600.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_11-23-25_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-3/model_3700.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_12-32-30_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/model_1100.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_13-40-54_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-5/model_1550.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_14-49-26_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-6/model_1250.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_15-57-56_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-7/model_900.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_17-06-02_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-8/model_1300.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_18-13-50_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/model_2150.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_19-21-53_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-10/model_900.pt 
+# )
+
+# Hypernet Critic Emb 64x64x64 w/o Gobs Tinf
 MODEL_PATHS=(
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_10-01-14_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_1950.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_11-09-48_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_2650.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_12-18-36_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-3/model_3000.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_13-27-58_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/model_3500.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_14-37-12_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-5/model_3300.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_15-46-33_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-6/model_2300.pt #MNG 700
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_16-56-16_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-7/model_2050.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_18-05-29_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-8/model_2650.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_19-14-49_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/model_2850.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-11_20-23-46_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-10/model_1150.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_21-50-52_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_200.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-13_23-00-04_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_200.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-14_00-09-18_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-3/model_200.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-14_01-18-02_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/model_1500.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-14_02-26-08_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-5/model_350.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-14_03-34-58_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-6/model_150.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-14_05-52-47_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-8/model_250.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-14_07-03-02_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-9/model_200.pt
+    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-14_08-12-01_rsl-rl_ppo-memory_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-10/model_200.pt   
 )
 
 
