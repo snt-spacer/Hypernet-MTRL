@@ -206,6 +206,20 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_15-14-05_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_19-10-52_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
         ],
+
+        # Baseline 32x32 Gobs w Tinf
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-12_11-23-04_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-13_08-16-46_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-37",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-13_15-13-54_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-456",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-13_22-12-09_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-789",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-14_05-03-03_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1337",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-14_12-12-19_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2048",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-14_19-12-24_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-3141",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-15_02-08-00_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5678",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-15_08-57-27_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-9999",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-15_15-48-19_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1111",
+        ],
     ]
 
     plot_cfg = {
@@ -244,7 +258,8 @@ def main():
         ],
         "runs_names": [
             "Hypernet 32x32 Tinfo in Gobs",
-            
+            "Baseline 32x32 Gobs w Tinf",
+
             # "Hypernetwork 32x32 w/o Tinf in Gobs",
             # "Hypernetwork 32x32 w Tinf in Gobs",
             # "Hypernet Critic 32x32 w Tinfo in Gobs",
