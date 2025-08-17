@@ -17,7 +17,7 @@ SAME_TRACK_FOR_ALL_ENVS= False  # If True, all environments will use the same
 COMMON_ARGS="--task=${TASK} --headless env.robot_name=${ROBOT_NAME} env.task_name=${TASK_NAME} --algorithm=${ALGORITHM} --type_of_training=${TYPE_OF_TRAINING} --fixed_track_id=${FIXED_TRACK_ID} --same_track_for_all_envs=${SAME_TRACK_FOR_ALL_ENVS}"
 
 # Array of seeds for training (10 seeds)
-SEEDS=(5678 9999 1111)
+SEEDS=(42 37 456 789 1337 2048 3141 5678 9999 1111)
 # SEEDS=(42)
 
 # Function to run training for a single seed
