@@ -194,7 +194,7 @@ def main():
         # ],
 
         # MAX GATES 40
-        # Hypernet 32x32 Tinfo in Gobs
+        # Hypernet 32x32 w Tinfo in Gobs
         [
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_08-42-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
             # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_12-38-13_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
@@ -219,6 +219,20 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-15_02-08-00_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5678",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-15_08-57-27_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-9999",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-15_15-48-19_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1111",
+        ],
+
+        # Hypernetwork 128x256x128x64x32 w/o Tinf in Gobs
+        [
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_18-57-30_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_09-01-10_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_14-21-32_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_18-59-39_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_00-22-35_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_19-07-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_00-34-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_19-13-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_02-36-33_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_09-22-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
         ],
     ]
 
@@ -257,8 +271,9 @@ def main():
             "#87CEEB",  # Sky blue
         ],
         "runs_names": [
-            "Hypernet 32x32 Tinfo in Gobs",
-            "Baseline 32x32 Gobs w Tinf",
+            "Hypernet 32x32 w Tinfo in Gobs",
+            "Baseline 32x32 w Tinfo in Gobs",
+            "Hypernet 128x256x128x64x32 w-o Tinfo in Gobs",
 
             # "Hypernetwork 32x32 w/o Tinf in Gobs",
             # "Hypernetwork 32x32 w Tinf in Gobs",
