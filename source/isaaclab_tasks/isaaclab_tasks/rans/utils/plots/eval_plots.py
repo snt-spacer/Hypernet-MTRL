@@ -195,17 +195,17 @@ def main():
 
         # MAX GATES 40
         # Hypernet 32x32 w Tinfo in Gobs
-        [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_08-42-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_12-38-13_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_20-13-24_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_23-57-09_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_03-51-29_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_07-32-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_11-20-15_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_15-14-05_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_19-10-52_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
-        ],
+        # [
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_08-42-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_12-38-13_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_20-13-24_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-08_23-57-09_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_03-51-29_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_07-32-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_11-20-15_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_15-14-05_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-09_19-10-52_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
+        # ],
 
         # Baseline 32x32 Gobs w Tinf
         [
@@ -222,17 +222,31 @@ def main():
         ],
 
         # Hypernetwork 128x256x128x64x32 w/o Tinf in Gobs
+        # [
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_18-57-30_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_09-01-10_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_14-21-32_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_18-59-39_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_00-22-35_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_19-07-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_00-34-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_19-13-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_02-36-33_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_09-22-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
+        # ],
+
+        # Hypernet 32x32 w/o Tinfo in Gobs
         [
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_18-57-30_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_09-01-10_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_14-21-32_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_18-59-39_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_00-22-35_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_19-07-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_00-34-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-16_19-13-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678",
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_02-36-33_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999",
-            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_09-22-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111",
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_22-19-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42", #NG
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-18_03-26-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37", #SLOW
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-18_11-48-12_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456", #SLOW
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-18_08-02-45_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789", #SLOW
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_22-17-55_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337", #VG
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-18_03-33-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048", #VG no touch
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_22-15-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-314", #NG
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-18_03-33-06_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678", #G
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-17_22-08-59_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999", #G
+            # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-18_04-47-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111", #SLOW
         ],
     ]
 
@@ -271,9 +285,10 @@ def main():
             "#87CEEB",  # Sky blue
         ],
         "runs_names": [
-            "Hypernet 32x32 w Tinfo in Gobs",
+            # "Hypernet 32x32 w Tinfo in Gobs",
             "Baseline 32x32 w Tinfo in Gobs",
-            "Hypernet 128x256x128x64x32 w-o Tinfo in Gobs",
+            # "Hypernet 128x256x128x64x32 w-o Tinfo in Gobs",
+            "Hypernet 32x32 w-o Tinfo in Gobs",
 
             # "Hypernetwork 32x32 w/o Tinf in Gobs",
             # "Hypernetwork 32x32 w Tinf in Gobs",

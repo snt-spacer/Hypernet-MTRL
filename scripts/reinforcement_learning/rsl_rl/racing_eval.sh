@@ -184,7 +184,7 @@ COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK
 #     2025-08-09_19-10-52_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_350.pt #750
 # )
 
-# Baseline 32x32 Gobs w Tinf
+# Baseline 32x32 Tinfo in Gobs
 # CHECKPOINTS=(
 #     2025-08-12_11-23-04_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42/model_3999.pt
 #     2025-08-13_08-16-46_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-37/model_3800.pt
@@ -199,17 +199,31 @@ COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK
 # )
 
 # Hypernet 128x256x128x64x32 w/o Tinfo in Gobs
+# CHECKPOINTS=(
+#     # 2025-08-16_18-57-30_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_2200.pt
+#     2025-08-17_09-01-10_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_2250.pt
+#     # 2025-08-17_14-21-32_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_1250.pt #NG
+#     # 2025-08-16_18-59-39_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_3250.pt #NG
+#     # 2025-08-17_00-22-35_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_2900.pt #NG
+#     # 2025-08-16_19-07-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_3200.pt #NG
+#     # 2025-08-17_00-34-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_3350.pt #NG
+#     # 2025-08-16_19-13-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678/model_250.pt
+#     2025-08-17_02-36-33_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999/model_2250.pt
+#     2025-08-17_09-22-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3950.pt
+# )
+
+# Hypernet 32x32 w/o Tinfo in Gobs
 CHECKPOINTS=(
-    # 2025-08-16_18-57-30_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_2200.pt
-    2025-08-17_09-01-10_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_2250.pt
-    # 2025-08-17_14-21-32_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_1250.pt #NG
-    # 2025-08-16_18-59-39_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_3250.pt #NG
-    # 2025-08-17_00-22-35_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_2900.pt #NG
-    # 2025-08-16_19-07-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_3200.pt #NG
-    # 2025-08-17_00-34-54_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_3350.pt #NG
-    # 2025-08-16_19-13-31_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678/model_250.pt
-    2025-08-17_02-36-33_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999/model_2250.pt
-    2025-08-17_09-22-19_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3950.pt
+# 2025-08-17_22-19-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_3999.pt #NG
+# 2025-08-18_03-26-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_1450.pt #SLOW
+# 2025-08-18_11-48-12_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_2000.pt #SLOW
+2025-08-18_08-02-45_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_3550.pt #SLOW
+2025-08-17_22-17-55_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_1100.pt
+# 2025-08-18_03-33-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_3850.pt #VG no touch
+# 2025-08-17_22-15-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_550.pt #NG
+2025-08-18_03-33-06_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678/model_1650.pt #G
+2025-08-17_22-08-59_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999/model_3200.pt #G
+# 2025-08-18_04-47-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3200.pt #SLOW
 )
 
 # Function to run evaluation for a single checkpoint
@@ -229,6 +243,7 @@ run_evaluation() {
     echo "----------------------------------------"
 }
 
+START_TIME=$(date +%s)
 # Main execution: iterate through all checkpoints
 echo "Starting racing evaluation for ${#CHECKPOINTS[@]} checkpoints..."
 echo "Task: ${TASK}"
@@ -241,3 +256,6 @@ for checkpoint in "${CHECKPOINTS[@]}"; do
 done
 
 echo "All evaluations completed!"
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+echo "Script execution time: ${DURATION} seconds"
