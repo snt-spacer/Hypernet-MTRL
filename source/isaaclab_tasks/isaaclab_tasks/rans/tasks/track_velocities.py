@@ -565,4 +565,4 @@ class TrackVelocitiesTask(TaskCore):
         marker_scale[:, 0] = self._robot.root_com_ang_vel_w[self._env_ids, -1] * self._task_cfg.visualization_angular_velocity_scale
         self.robot_angvel_visualizer.visualize(marker_pos, marker_orientation, marker_scale)
 
-        self._robot.update_robot_visualization()
+        # self._robot.update_robot_visualization()

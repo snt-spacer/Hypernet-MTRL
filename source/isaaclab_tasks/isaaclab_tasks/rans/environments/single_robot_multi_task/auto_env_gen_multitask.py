@@ -28,8 +28,8 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     decimation = 12
     episode_length_s = 60.0
 
-    robot_name = "Leatherback"
-    tasks_names = ["RaceGates"]
+    robot_name = "ModularFreeflyer"
+    tasks_names = ["GoToPosition", "GoToPose", "TrackVelocities", "Rendezvous"]
 
     # scene
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=10.0, replicate_physics=True)
@@ -352,8 +352,12 @@ class MultiTaskEnv(DirectRLEnv):
         if debug_vis:
             for task_api in self.tasks_apis:
                 task_api.create_task_visualization()
+            
+            self.robot_api.create_robot_visualization()
 
     def _debug_vis_callback(self, event) -> None:
         if self.cfg.debug_vis:
             for task_api in self.tasks_apis:
                 task_api.update_task_visualization()
+
+            self.robot_api.update_robot_visualization()

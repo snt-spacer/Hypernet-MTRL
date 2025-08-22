@@ -28,7 +28,7 @@ class ModularFreeflyerRobotCfg(RobotCoreCfg):
     robot_name: str = "ModularFreeflyer"
 
     robot_cfg: ArticulationCfg = MODULAR_FREEFLYER_2D_CFG.replace(prim_path="/World/envs/env_.*/Robot")
-    marker_height = 0.75
+    marker_height = 1.0
     is_reaction_wheel = False
     num_thrusters = 8
 
