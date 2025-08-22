@@ -223,6 +223,7 @@ class RendezvousTask(TaskCore):
         self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/position_orientation", "mean")
         self.scalar_logger.add_log("task_reward", "Rendezvous/AVG/position_rew", "mean")
         self.scalar_logger.add_log("task_reward", "Rendezvous/SUM/num_goals", "sum")
+        self.scalar_logger.add_log("task_reward", "Rendezvous/EMA/action_rate_at_target", "mean")
 
     def get_observations(self) -> torch.Tensor:
         """
@@ -458,6 +459,13 @@ class RendezvousTask(TaskCore):
         self.scalar_logger.log("task_reward", "Rendezvous/AVG/position_rew", position_rew)
         self.scalar_logger.log("task_reward", "Rendezvous/SUM/num_goals", goal_reached)
 
+        # position_tracking_precision = 1.0 - torch.tanh(self._position_dist / self._task_cfg.position_tolerance)
+        # action_rate = self._robot.action_rate[self._env_ids]
+        # reward_action_rate_at_target = (
+        #     self._task_cfg.weight_action_rate_at_target * position_tracking_precision * (1.0 - torch.tanh(action_rate / self._task_cfg.tanh_std_action_rate_at_target))
+        # )
+        # self.scalar_logger.log("task_reward", "Rendezvous/EMA/action_rate_at_target", reward_action_rate_at_target)
+
         # Return the reward by combining the different components and adding the robot rewards
         return (
             # (progress_rew) * (heading_to_target_rew) * self._task_cfg.progress_weight
@@ -466,6 +474,7 @@ class RendezvousTask(TaskCore):
             # + heading_to_target_rew * self._task_cfg.target_heading_weight
             + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
+            # + reward_action_rate_at_target
             # + boundary_rew * self._task_cfg.boundary_weight
             + self._task_cfg.time_penalty
             + self._task_cfg.reached_bonus * goal_reached

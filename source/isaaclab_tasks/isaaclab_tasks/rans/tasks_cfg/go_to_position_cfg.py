@@ -64,6 +64,8 @@ class GoToPositionCfg(TaskCoreCfg):
     linear_velocity_weight: float = -0.05
     angular_velocity_weight: float = -0.05
     boundary_weight: float = -10.0
+    weight_action_rate_at_target: float = 1.0
+    tanh_std_action_rate_at_target: float = 0.2
 
     min_heading_dist_scaler: float = 0.5
     max_heading_dist_scaler: float = 2.5

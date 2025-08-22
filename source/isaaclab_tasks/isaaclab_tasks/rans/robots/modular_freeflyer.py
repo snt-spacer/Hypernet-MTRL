@@ -132,6 +132,8 @@ class ModularFreeflyerRobot(RobotCore):
             device=self._device,
             dtype=torch.float32,
         )
+        self.action_rate = torch.zeros((self._num_envs), device=self._device, dtype=torch.float32)
+        self.joint_accelerations = torch.zeros((self._num_envs), device=self._device, dtype=torch.float32)
 
 
     def run_setup(self, robot: Articulation) -> None:
@@ -172,18 +174,18 @@ class ModularFreeflyerRobot(RobotCore):
         # TODO: DT should be factored in?
 
         # Compute
-        action_rate = torch.sum(torch.square(self._unaltered_actions - self._previous_unaltered_actions), dim=1)
-        joint_accelerations = torch.sum(torch.square(self.joint_acc), dim=1)
+        self.action_rate = torch.sum(torch.square(self._unaltered_actions - self._previous_unaltered_actions), dim=1)
+        self.joint_accelerations = torch.sum(torch.square(self.joint_acc), dim=1)
 
         # Log data
-        self.scalar_logger.log("robot_state", "AVG/action_rate", action_rate)
-        self.scalar_logger.log("robot_state", "AVG/joint_acceleration", joint_accelerations)
-        self.scalar_logger.log("robot_reward", "AVG/action_rate", action_rate * self._robot_cfg.rew_joint_accel_scale)
-        self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", joint_accelerations * self._robot_cfg.rew_joint_accel_scale)
+        self.scalar_logger.log("robot_state", "AVG/action_rate", self.action_rate)
+        self.scalar_logger.log("robot_state", "AVG/joint_acceleration", self.joint_accelerations)
+        self.scalar_logger.log("robot_reward", "AVG/action_rate", self.action_rate * self._robot_cfg.rew_action_rate_scale)
+        self.scalar_logger.log("robot_reward", "AVG/joint_acceleration", self.joint_accelerations * self._robot_cfg.rew_joint_accel_scale)
 
         return (
-            action_rate[env_ids] * self._robot_cfg.rew_action_rate_scale
-            + joint_accelerations[env_ids] * self._robot_cfg.rew_joint_accel_scale
+            self.action_rate[env_ids] * self._robot_cfg.rew_action_rate_scale
+            + self.joint_accelerations[env_ids] * self._robot_cfg.rew_joint_accel_scale
         )
 
     def get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:

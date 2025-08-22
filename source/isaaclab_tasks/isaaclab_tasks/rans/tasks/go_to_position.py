@@ -161,6 +161,7 @@ class GoToPositionTask(TaskCore):
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/linear_velocity", "mean")
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/angular_velocity", "mean")
         self.scalar_logger.add_log("task_reward", "GoToPosition/AVG/boundary", "mean")
+        self.scalar_logger.add_log("task_reward", "GoToPosition/EMA/action_rate_at_target", "ema")
         self.scalar_logger.set_ema_coeff(self._task_cfg.ema_coeff)
 
     def get_observations(self) -> torch.Tensor:
@@ -321,6 +322,15 @@ class GoToPositionTask(TaskCore):
         self.scalar_logger.log("task_reward", "GoToPosition/AVG/linear_velocity", linear_velocity_rew * self._task_cfg.linear_velocity_weight)
         self.scalar_logger.log("task_reward", "GoToPosition/AVG/angular_velocity", angular_velocity_rew * self._task_cfg.angular_velocity_weight)
         self.scalar_logger.log("task_reward", "GoToPosition/AVG/boundary", boundary_rew * self._task_cfg.boundary_weight)
+
+        position_tracking_precision = 1.0 - torch.tanh(self._position_dist / self._task_cfg.position_tolerance)
+        action_rate = self._robot.action_rate[self._env_ids]
+        reward_action_rate_at_target = (
+            self._task_cfg.weight_action_rate_at_target * position_tracking_precision * (1.0 - torch.tanh(action_rate / self._task_cfg.tanh_std_action_rate_at_target))
+        )
+        self.scalar_logger.log("task_reward", "GoToPosition/EMA/action_rate_at_target", reward_action_rate_at_target)
+
+
         # Return the reward by combining the different components and adding the robot rewards
         return (
             position_rew * self._task_cfg.position_weight
@@ -328,6 +338,7 @@ class GoToPositionTask(TaskCore):
             + heading_rew * self._task_cfg.heading_weight
             + linear_velocity_rew * self._task_cfg.linear_velocity_weight
             + angular_velocity_rew * self._task_cfg.angular_velocity_weight
+            + reward_action_rate_at_target
             # + boundary_rew * self._task_cfg.boundary_weight
         ) + self._robot.compute_rewards(env_ids=self._env_ids)
 

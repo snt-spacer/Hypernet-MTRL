@@ -55,6 +55,7 @@ class TrackVelocitiesCfg(TaskCoreCfg):
     angular_velocity_tolerance: float = 0.01
     maximum_robot_distance: float = 1000.0  # should be plenty enough not to reset
     resample_after_steps_in_tolerance: int = 50
+    mean_velocity_tolerance: float = 0.01
 
     # Reward Would be good to have a config for each reward type
     lin_vel_exponential_reward_coeff: float = 0.5
@@ -63,6 +64,8 @@ class TrackVelocitiesCfg(TaskCoreCfg):
     linear_velocity_weight: float = 0.5
     lateral_velocity_weight: float = 0.5
     angular_velocity_weight: float = 1.0
+    tanh_std_action_rate_at_target: float = 0.2
+    weight_action_rate_at_target: float = 1.0
 
     # Visualization
     visualization_linear_velocity_scale: float = 1.0
