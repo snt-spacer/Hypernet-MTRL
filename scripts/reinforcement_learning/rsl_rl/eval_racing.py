@@ -51,6 +51,12 @@ parser.add_argument(
     help="The track ID to use for the evaluation. If set to -1, a random track will be generated.",
 )
 parser.add_argument(
+    "--custom_track_id",
+    type=int,
+    default=0,
+    help="The custom track ID to use for the evaluation. Default to 0 (bcn track).",
+)
+parser.add_argument(
     "--num_laps",
     type=int,
     default=1,
@@ -94,6 +100,8 @@ def modify_racing_config():
                 new_content.append("    spawn_at_random_gate: bool = False\n")
             elif "same_track_for_all_envs:" in line:
                 new_content.append(f"    same_track_for_all_envs: bool = {args_cli.same_track_for_all_envs}\n")
+            elif "custom_track_id:" in line:
+                new_content.append(f"    custom_track_id: int = {args_cli.custom_track_id}\n")
             else:
                 new_content.append(line)
     with open(eval_racing_cfg_path, 'w') as file:

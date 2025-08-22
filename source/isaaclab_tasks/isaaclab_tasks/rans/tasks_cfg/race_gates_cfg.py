@@ -85,7 +85,9 @@ class RaceGatesCfg(TaskCoreCfg):
     loop: bool = False
     num_laps: int = 1
     gate_width: float = 0.75
-    
+
+    custom_track_id: int = 10
+    """The custom track ID to use for the evaluation. Default to 0 (bcn track)."""
 
     # Observation
     num_subsequent_goals: int = 3

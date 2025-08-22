@@ -639,13 +639,70 @@ class TrackGenerator:
 
         return barcelona_points_normalized * self._scale
 
+    def ten_points_track(self):
+        # Option 2: Intermediate complexity track (10 points, closer to training range)
+        track_points = torch.tensor(
+            [
+                [1.0, 0.0],
+                [0.8, 0.6],
+                [0.3, 1.0],
+                [-0.3, 0.9],
+                [-0.8, 0.5],
+                [-1.0, 0.0],
+                [-0.7, -0.7],
+                [-0.2, -1.0],
+                [0.4, -0.8],
+                [0.9, -0.3],
+            ],
+            dtype=torch.float32,
+            device=self._device,
+        )
 
-    def generate_bcn_track(
+        # Center the track around (0,0) and then scale
+        min_coords, _ = torch.min(track_points, dim=0)
+        max_coords, _ = torch.max(track_points, dim=0)
+        center = (min_coords + max_coords) / 2
+        track_points_centered = track_points - center
+
+        # Normalize to approximately fit in a [-0.5, 0.5] square for better scaling consistency
+        max_dim = torch.max(max_coords - min_coords)
+        track_points_normalized = track_points_centered / max_dim
+
+        return track_points_normalized * self._scale
+
+    def four_points_track(self):
+        # Option 3: Easy complexity track (4 points, closer to training range)
+        track_points = torch.tensor(
+            [
+                [1.0, 1.0],
+                [1.0, -1.0],
+                [-1.0, -1.0],
+                [-1.0, 1.0],
+            ],
+            dtype=torch.float32,
+            device=self._device,
+        )
+
+        # Center the track around (0,0) and then scale
+        min_coords, _ = torch.min(track_points, dim=0)
+        max_coords, _ = torch.max(track_points, dim=0)
+        center = (min_coords + max_coords) / 2
+        track_points_centered = track_points - center
+
+        # Normalize to approximately fit in a [-0.5, 0.5] square for better scaling consistency
+        max_dim = torch.max(max_coords - min_coords)
+        track_points_normalized = track_points_centered / max_dim
+
+        return track_points_normalized * self._scale
+
+
+    def generate_custom_track(
         self,
         ids: torch.Tensor,
         prev_points: torch.Tensor | None = None,
         prev_ids: torch.Tensor | None = None,
         og_ids: torch.Tensor | None = None,
+        custom_track_id: int = 0,
     ) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
         """Generate random tracks but only return the points.
         Unlike generate_tracks_points, this function will prune a random number of points from the input points tensor.
@@ -664,23 +721,28 @@ class TrackGenerator:
             prev_ids = torch.arange(0, len(ids), device=self._device)
             og_ids = ids.clone()
 
-        # Generate Barcelona track points
-        bcn_points = self.bcn_points()  # Shape: [34, 2]
+        if custom_track_id == 0:
+            # Generate Barcelona track points
+            track_points = self.bcn_points()  # Shape: [34, 2]
+        elif custom_track_id == 10:
+            track_points = self.ten_points_track()  # Shape: [10, 2]
+        else:
+            track_points = self.four_points_track()  # Shape: [4, 2]
 
         # Pad to max_num_points if needed
-        if bcn_points.shape[0] < self._max_num_points:
-            padding_needed = self._max_num_points - bcn_points.shape[0]
+        if track_points.shape[0] < self._max_num_points:
+            padding_needed = self._max_num_points - track_points.shape[0]
             padding = torch.zeros((padding_needed, 2), device=self._device, dtype=torch.float32)
             # Set padding points to the first point to close the loop properly
-            padding[:] = bcn_points[0:1]
-            points = torch.cat([bcn_points, padding], dim=0)
+            padding[:] = track_points[0:1]
+            points = torch.cat([track_points, padding], dim=0)
         else:
-            points = bcn_points[:self._max_num_points]
+            points = track_points[:self._max_num_points]
 
         points = points.unsqueeze(0).expand(len(ids), -1, -1)  # Expand to match the number of ids
 
         # Calculate tangents directly using the established points
-        points_for_tangents = points[:, :bcn_points.shape[0], :]  # Use only actual track points
+        points_for_tangents = points[:, :track_points.shape[0], :]  # Use only actual track points
         
         # Skip ccw_sort since Barcelona points are already in correct order
         # Add the first point to the end to close the loop
@@ -703,6 +765,6 @@ class TrackGenerator:
             tangent_padding = tangents[:, :1].expand(-1, padding_needed)
             tangents = torch.cat([tangents, tangent_padding], dim=1)
         
-        num_points_per_track = torch.tensor([bcn_points.shape[0]] * points.shape[0], device=self._device)
+        num_points_per_track = torch.tensor([track_points.shape[0]] * points.shape[0], device=self._device)
 
         return points, tangents, num_points_per_track
