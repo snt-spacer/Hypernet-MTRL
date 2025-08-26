@@ -12,6 +12,17 @@ from isaaclab.app import AppLauncher
 import cli_args  # isort: skip
 import os
 
+# Helper function for boolean argument parsing
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
@@ -64,9 +75,15 @@ parser.add_argument(
 )
 parser.add_argument(
     "--same_track_for_all_envs",
-    type=bool,
+    type=str2bool,
     default=True,
     help="If True, all environments will use the same track. If False, each environment will use a different track.",
+)
+parser.add_argument(
+    "--eval_seed",
+    type=int,
+    default=37,
+    help="The seed to use for the evaluation. Default is 37.",
 )
 
 
@@ -104,6 +121,7 @@ def modify_racing_config():
                 new_content.append(f"    custom_track_id: int = {args_cli.custom_track_id}\n")
             else:
                 new_content.append(line)
+
     with open(eval_racing_cfg_path, 'w') as file:
         file.writelines(new_content)
 
@@ -191,7 +209,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     log_dir = os.path.dirname(resume_path)
 
-    env_cfg.seed = agent_cfg.seed
+    env_cfg.seed = args_cli.eval_seed #agent_cfg.seed
     env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device
     env_cfg.episode_length_s = 120 * args_cli.num_laps
 

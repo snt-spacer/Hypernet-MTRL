@@ -5,12 +5,14 @@
 SCRIPT_PATH="./scripts/reinforcement_learning/rsl_rl/eval_racing.py"
 TASK="Isaac-RANS-Single-v0"
 NUM_ENVS=4096
-TRACK_ID=0 # 0 is custom track
-CUSTOM_TRACK_ID=10 # 0 BCN, 10 points, 4 points
+TRACK_ID=-1 # 0 is custom track
+EVAL_SEED=42
+CUSTOM_TRACK_ID=11 # 0 BCN, 10 points, 4 points, 11 alphapilot
 BASE_LOG_DIR="logs/rsl_rl/multitask_racing_baseline_noTrackInfo"
+same_track_for_all_envs="False"
 
 # Common arguments that apply to all evaluations
-COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK_ID} --custom_track_id=${CUSTOM_TRACK_ID}"
+COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK_ID} --custom_track_id=${CUSTOM_TRACK_ID} --same_track_for_all_envs=${same_track_for_all_envs} --eval_seed=${EVAL_SEED}"
 
 # Array of checkpoint paths (relative to BASE_LOG_DIR)
 # CHECKPOINTS=(
@@ -186,18 +188,18 @@ COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK
 # )
 
 # Baseline 32x32 Tinfo in Gobs
-# CHECKPOINTS=(
-#     2025-08-12_11-23-04_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42/model_3999.pt
-#     2025-08-13_08-16-46_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-37/model_3800.pt
-#     2025-08-13_15-13-54_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-456/model_2900.pt
-#     2025-08-13_22-12-09_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-789/model_3999.pt
-#     2025-08-14_05-03-03_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1337/model_3999.pt
-#     2025-08-14_12-12-19_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2048/model_3800.pt
-#     2025-08-14_19-12-24_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-3141/model_3800.pt
-#     2025-08-15_02-08-00_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5678/model_3999.pt
-#     2025-08-15_08-57-27_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-9999/model_3999.pt
-#     2025-08-15_15-48-19_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1111/model_3999.pt
-# )
+CHECKPOINTS=(
+    # 2025-08-12_11-23-04_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4d2/model_3999.pt
+    # 2025-08-13_08-16-46_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-37d/model_3800.pt
+    2025-08-13_15-13-54_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-456/model_2900.pt
+    2025-08-13_22-12-09_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-789/model_3999.pt
+    2025-08-14_05-03-03_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1337/model_3999.pt
+    # 2025-08-14_12-12-19_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-204d8/model_3800.pt
+    2025-08-14_19-12-24_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-3141/model_3800.pt
+    # 2025-08-15_02-08-00_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-56d78/model_3999.pt
+    # 2025-08-15_08-57-27_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-99d99/model_3999.pt
+    # 2025-08-15_15-48-19_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-11d11/model_3999.pt
+)
 
 # Hypernet 128x256x128x64x32 w/o Tinfo in Gobs
 # CHECKPOINTS=(
@@ -214,17 +216,27 @@ COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK
 # )
 
 # Hypernet 32x32 w/o Tinfo in Gobs
+# CHECKPOINTS=(
+# # 2025-08-17_22-19-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_3999.pt #NG
+# # 2025-08-18_03-26-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_1450.pt #SLOW
+# # 2025-08-18_11-48-12_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_2000.pt #SLOW
+# # 2025-08-18_08-02-45_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_3550.pt #SLOW
+# 2025-08-17_22-17-55_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_1100.pt
+# 2025-08-18_03-33-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_3850.pt #VG no touch
+# # 2025-08-17_22-15-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_550.pt #NG
+# 2025-08-18_03-33-06_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678/model_1650.pt #G
+# 2025-08-17_22-08-59_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999/model_3200.pt #G
+# # 2025-08-18_04-47-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3200.pt #SLOW
+# )
+
+# Hypernet Critic L 32x32 w/o Tinfo in Gobs
 CHECKPOINTS=(
-# 2025-08-17_22-19-27_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_3999.pt #NG
-# 2025-08-18_03-26-03_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_1450.pt #SLOW
-# 2025-08-18_11-48-12_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_2000.pt #SLOW
-# 2025-08-18_08-02-45_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_3550.pt #SLOW
-2025-08-17_22-17-55_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_1100.pt
-2025-08-18_03-33-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2048/model_3850.pt #VG no touch
-# 2025-08-17_22-15-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_550.pt #NG
-2025-08-18_03-33-06_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5678/model_1650.pt #G
-2025-08-17_22-08-59_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-9999/model_3200.pt #G
-# 2025-08-18_04-47-00_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1111/model_3200.pt #SLOW
+# 2025-08-22_07-51-39_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-42/model_2300.pt #1800
+# 2025-08-22_16-43-30_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-37/model_1050.pt
+2025-08-22_23-24-43_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-456/model_2550.pt
+2025-08-22_07-58-45_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-789/model_2600.pt
+2025-08-22_16-27-44_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1337/model_2650.pt
+2025-08-22_08-11-21_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_1250.pt
 )
 
 # Function to run evaluation for a single checkpoint

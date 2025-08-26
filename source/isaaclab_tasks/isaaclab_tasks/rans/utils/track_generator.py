@@ -695,6 +695,37 @@ class TrackGenerator:
 
         return track_points_normalized * self._scale
 
+    def alphapilot_track(self):
+        
+        track_points = torch.tensor(
+            [
+                [-1.50, -0.63],
+                [-0.44, -0.55],
+                [ 1.10,  0.03],
+                [ 2.02, -0.26],
+                [ 1.57, -0.42],
+                [ 0.56, -0.50],
+                [-0.94, -0.21],
+                [-1.43,  0.03],
+                [-1.13,  0.30],
+                [-0.12,  0.28],
+                [ 2.04,  0.26]
+            ],
+            dtype=torch.float32,
+            device=self._device,
+        )
+
+        # Center the track around (0,0) and then scale
+        min_coords, _ = torch.min(track_points, dim=0)
+        max_coords, _ = torch.max(track_points, dim=0)
+        center = (min_coords + max_coords) / 2
+        track_points_centered = track_points - center
+
+        # Normalize to approximately fit in a [-0.5, 0.5] square for better scaling consistency
+        max_dim = torch.max(max_coords - min_coords)
+        track_points_normalized = track_points_centered / max_dim
+
+        return track_points_normalized * self._scale
 
     def generate_custom_track(
         self,
@@ -726,6 +757,8 @@ class TrackGenerator:
             track_points = self.bcn_points()  # Shape: [34, 2]
         elif custom_track_id == 10:
             track_points = self.ten_points_track()  # Shape: [10, 2]
+        elif custom_track_id == 11:
+            track_points = self.alphapilot_track()
         else:
             track_points = self.four_points_track()  # Shape: [4, 2]
 
