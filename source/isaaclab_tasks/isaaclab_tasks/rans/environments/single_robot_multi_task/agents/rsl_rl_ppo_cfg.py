@@ -24,7 +24,7 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
         actor_hidden_dims=[32, 32],
-        critic_hidden_dims=[32, 32],
+        critic_hidden_dims=[256, 256],
         activation="elu",
         clip_actions=True,
         clip_actions_range=[-1, 1],

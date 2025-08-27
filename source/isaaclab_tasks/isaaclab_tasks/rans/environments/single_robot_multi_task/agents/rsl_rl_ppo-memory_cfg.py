@@ -24,13 +24,13 @@ class SingleRobotMultiTaskPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     policy = RslRlPpoActorCriticMemoryCfg(
         init_noise_std=1.0,
         actor_hidden_dims=[32, 32],
-        critic_hidden_dims=[32, 32],
-        activation="elu",
+        critic_hidden_dims=[256, 256],
+        activation="tanh",
         clip_actions=True,
         clip_actions_range=[-1, 1],
         use_embeddings=True,
         embeddings_size=4,
-        generator_size=(32, 32),
+        generator_size=(64, 64),
         num_memory_obs=4,
         network_type="hybrid", #pure, hybrid
     )

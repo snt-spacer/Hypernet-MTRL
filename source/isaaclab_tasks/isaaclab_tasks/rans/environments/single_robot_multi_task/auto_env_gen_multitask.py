@@ -29,7 +29,7 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     episode_length_s = 60.0
 
     robot_name = "ModularFreeflyer"
-    tasks_names = ["GoToPosition", "GoToPose", "TrackVelocities", "Rendezvous"]
+    tasks_names = ["GoToPosition"]
 
     # scene
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=10.0, replicate_physics=True)
@@ -80,7 +80,7 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     gen_space = 0
 
     # Multitask control
-    type_of_training = "hyper" #hyper, padd
+    type_of_training = "padd" #hyper, padd
 
 
 class MultiTaskEnv(DirectRLEnv):
