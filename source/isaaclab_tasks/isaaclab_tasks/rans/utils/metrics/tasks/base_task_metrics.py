@@ -122,10 +122,10 @@ class BaseTaskMetrics(AutoRegister):
         self.reached_threshold_mask = pos_reached_threshold_mask & heading_reached_threshold
 
         # First index where the threshold is reached
-        len_trajec = self.trajectories['position_distance'].shape[1] 
+        len_trajec = self.trajectories_masks.sum(dim=-1) #self.trajectories['position_distance'].shape[1] 
         reached_idx = torch.argmax(self.reached_threshold_mask.int(), dim=1)
         all_false = ~torch.any(self.reached_threshold_mask, dim=1) # argmax returns 0 if all values are false
-        reached_idx[all_false] = len_trajec
+        reached_idx[all_false] = len_trajec[all_false]
 
         return reached_idx
 

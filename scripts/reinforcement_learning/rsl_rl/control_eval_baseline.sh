@@ -43,12 +43,21 @@ runs_per_env=1
 # )
 
 # Baseline L 32x32 w Tinf in Gobs
+# MODEL_PATHS=(
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_13-56-13_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_14-50-46_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_15-46-04_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-3/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_16-40-36_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/model_3999.pt
+#     /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_17-35-32_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-5/model_3999.pt
+# )
+
+# Baseline L 32x32 w Tinf in Gobs (tanh C 256) 
 MODEL_PATHS=(
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_13-56-13_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_3999.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_14-50-46_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_3999.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_15-46-04_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-3/model_3999.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_16-40-36_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/model_3999.pt
-    /workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-22_17-35-32_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-5/model_3999.pt
+/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-27_09-00-16_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-1/model_3000.pt
+/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-27_09-55-55_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-2/model_3999.pt
+/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-27_10-51-46_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-3/model_3999.pt
+/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-27_11-48-03_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-4/model_3999.pt
+/workspace/isaaclab/logs/rsl_rl/multitask_memory_control/2025-08-27_12-43-08_rsl-rl_ppo_GoToPosition-GoToPose-TrackVelocities-Rendezvous_ModularFreeflyer_r-0_seed-5/model_3999.pt
 )
 
 # Check if model paths are provided
@@ -99,7 +108,7 @@ do
         --algorithm="${algorithm}" \
         --runs_per_env="${runs_per_env}" \
         env.robot_name="${robot}" \
-        env.tasks_names="[${EVAL_TASKS_NAMES}]" >> "$EVALUATION_LOG_FILE" 2>&1
+        env.tasks_names="[${EVAL_TASKS_NAMES}]" #>> "$EVALUATION_LOG_FILE" 2>&1
 
     # Check if the evaluation command executed successfully
     if [ $? -eq 0 ]; then
