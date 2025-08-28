@@ -4,7 +4,7 @@
 # Common evaluation parameters
 SCRIPT_PATH="./scripts/reinforcement_learning/rsl_rl/eval_racing.py"
 TASK="Isaac-RANS-Single-v0"
-NUM_ENVS=64
+NUM_ENVS=4096
 TRACK_ID=0 # 0 is custom track, -1 for random
 EVAL_SEED=42
 CUSTOM_TRACK_ID=0 # 0 BCN, 10 points, 4 points, 11 alphapilot
@@ -12,7 +12,7 @@ BASE_LOG_DIR="logs/rsl_rl/multitask_racing_baseline_noTrackInfo"
 same_track_for_all_envs="True"
 
 # Common arguments that apply to all evaluations
-COMMON_ARGS="--task=${TASK} --num_envs=${NUM_ENVS} --track_id=${TRACK_ID} --custom_track_id=${CUSTOM_TRACK_ID} --same_track_for_all_envs=${same_track_for_all_envs} --eval_seed=${EVAL_SEED}"
+COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK_ID} --custom_track_id=${CUSTOM_TRACK_ID} --same_track_for_all_envs=${same_track_for_all_envs} --eval_seed=${EVAL_SEED}"
 
 # Array of checkpoint paths (relative to BASE_LOG_DIR)
 # CHECKPOINTS=(
