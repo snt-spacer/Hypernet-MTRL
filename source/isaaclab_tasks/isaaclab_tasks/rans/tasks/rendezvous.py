@@ -92,6 +92,7 @@ class RendezvousTask(TaskCore):
             "sin_heading_to_subsequent_goals_error",
             "cos_target_heading_to_subsequent_goals_error",
             "sin_target_heading_to_subsequent_goals_error",
+            "total_goals_reached"
         ]
     
     @property
@@ -112,6 +113,7 @@ class RendezvousTask(TaskCore):
             "sin_heading_to_subsequent_goals_error": [f".sin(heading)_sub_goal_{i}.u" for i in range(self._task_cfg.num_subsequent_goals - 1)],
             "cos_target_heading_to_subsequent_goals_error": [f".cos(target_heading)_sub_goal_{i}.u" for i in range(self._task_cfg.num_subsequent_goals - 1)],
             "sin_target_heading_to_subsequent_goals_error": [f".sin(target_heading)_sub_goal_{i}.u" for i in range(self._task_cfg.num_subsequent_goals - 1)],
+            "total_goals_reached": [".u"]
         }
     
     @property
@@ -173,6 +175,7 @@ class RendezvousTask(TaskCore):
             "sin_heading_to_subsequent_goals_error": reshaped_sin_heading_to_subsequent_goals_error,
             "cos_target_heading_to_subsequent_goals_error": reshaped_cos_target_heading_to_subsequent_goals_error,
             "sin_target_heading_to_subsequent_goals_error": reshaped_sin_target_heading_to_subsequent_goals_error,
+            "total_goals_reached": self.total_goals_reached,
         }
 
     def initialize_buffers(self, env_ids: torch.Tensor | None = None) -> None:
@@ -201,6 +204,7 @@ class RendezvousTask(TaskCore):
         self._num_goals = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
         self._ALL_INDICES = torch.arange(self._num_envs, dtype=torch.long, device=self._device)
         self.initial_velocity = torch.zeros((self._num_envs, 6), device=self._device, dtype=torch.float32)
+        self.total_goals_reached = torch.zeros((self._num_envs,), device=self._device, dtype=torch.long)
 
     def create_logs(self) -> None:
         """
@@ -441,6 +445,7 @@ class RendezvousTask(TaskCore):
         self._target_index = self._target_index + goal_reached
         # Check if the trajectory is completed
         self._trajectory_completed = self._target_index > self._num_goals
+        self.total_goals_reached += goal_reached
         # To avoid out of bounds errors, set the target index to 0 if the trajectory is completed
         # If the task loops, then the target index is set to 0 which will make the robot go back to the first goal
         # The episode termination is handled in the get_dones method (looping or not)
@@ -921,6 +926,6 @@ class RendezvousTask(TaskCore):
 
         # Update the robot visualization. TODO Ideally we should lift the diamond a bit.
         self._robot_marker_pos[:, :2] = self._robot.root_link_pos_w[self._env_ids, :2]
-        self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w)
+        self.robot_pos_visualizer.visualize(self._robot_marker_pos, self._robot.root_link_quat_w[self._env_ids])
 
         self._robot.update_robot_visualization()

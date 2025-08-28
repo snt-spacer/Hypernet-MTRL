@@ -4426,9 +4426,9 @@ def main():
             ]
         },
 
-        # Hypernet Critic L Emb 64x64 w/o Tinf in Gobs (tanh, 256C)
+        # Hypernet Critic L Emb 64x64 w Tinf in Gobs (tanh, 256C)
         {
-            "group_name": "Hypernet Critic L Emb 64x64 w/o Tinf in Gobs (tanh, 256C) GoToPosition",
+            "group_name": "Hypernet Critic L Emb 64x64 w Tinf in Gobs (tanh, 256C) GoToPosition",
             "task_name": "GoToPosition",
             "robot_name": "ModularFreeflyer",
             "runs": [
@@ -4460,7 +4460,7 @@ def main():
             ]
         },
         {
-            "group_name": "Hypernet Critic L Emb 64x64 w/o Tinf in Gobs (tanh, 256C) GoToPose",
+            "group_name": "Hypernet Critic L Emb 64x64 w Tinf in Gobs (tanh, 256C) GoToPose",
             "task_name": "GoToPose",
             "robot_name": "ModularFreeflyer",
             "runs": [
@@ -4492,7 +4492,7 @@ def main():
             ]
         },
         {
-            "group_name": "Hypernet Critic L Emb 64x64 w/o Tinf in Gobs (tanh, 256C) TrackVelocities",
+            "group_name": "Hypernet Critic L Emb 64x64 w Tinf in Gobs (tanh, 256C) TrackVelocities",
             "task_name": "TrackVelocities",
             "robot_name": "ModularFreeflyer",
             "runs": [
@@ -4524,7 +4524,7 @@ def main():
             ]
         },
         {
-            "group_name": "Hypernet Critic L Emb 64x64 w/o Tinf in Gobs (tanh, 256C) Rendezvous",
+            "group_name": "Hypernet Critic L Emb 64x64 w Tinf in Gobs (tanh, 256C) Rendezvous",
             "task_name": "Rendezvous",
             "robot_name": "ModularFreeflyer",
             "runs": [
@@ -4854,7 +4854,7 @@ def main():
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/plots/orbital_control" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/multiTask_scripts_plus_summaries/plots" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 

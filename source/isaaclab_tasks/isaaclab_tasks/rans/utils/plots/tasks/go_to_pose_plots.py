@@ -56,7 +56,6 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
         # for label_to_plot in self.labels_dots:
         #     self.dotplot(label_to_plot)
 
-
         if len(self._trajectories_dfs) > 0:
             self.plot_xy_trajectories_0_centered()
             self.plot_position_distance_over_time()
