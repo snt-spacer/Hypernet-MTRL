@@ -52,12 +52,12 @@ class RaceGatesCfg(TaskCoreCfg):
     spawn_max_ang_vel: float = 0.0
     """Maximal angular velocity when spawned in rad/s. Defaults to 0.0 rad/s."""
     spawn_at_random_gate: bool = False
-    fixed_track_id: int = -1
+    fixed_track_id: int = 0
     """Controls track generation across environments and resets:
     - If -1: Each environment gets a different random track every reset
     - If set to a specific number: All environments get the same track (but new track each reset)
     Combined with same_track_for_all_envs for full control over track behavior."""
-    same_track_for_all_envs: bool = False
+    same_track_for_all_envs: bool = True
     """Controls track persistence across resets:
     - If True: The same track is used for all environments and persists across resets
     - If False: New tracks are generated each reset (behavior depends on fixed_track_id)
@@ -86,7 +86,7 @@ class RaceGatesCfg(TaskCoreCfg):
     num_laps: int = 1
     gate_width: float = 0.75
 
-    custom_track_id: int = 11
+    custom_track_id: int = 0
     """The custom track ID to use for the evaluation. Default to 0 (bcn track)."""
 
     # Observation

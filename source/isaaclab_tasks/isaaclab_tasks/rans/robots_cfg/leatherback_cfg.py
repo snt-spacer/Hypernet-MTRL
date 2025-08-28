@@ -47,7 +47,7 @@ class LeatherbackRobotCfg(RobotCoreCfg):
 
     steering_scale = math.pi / 4.0
     """Multiplier for the steering position. The action is in the range [-1, 1]"""
-    throttle_scale = 60.0
+    throttle_scale = 120.0
     """Multiplier for the throttle velocity. The action is in the range [-1, 1] and the radius of the wheel is 0.06m"""
 
     # Randomization
