@@ -83,7 +83,7 @@ class RendezvousCfg(TaskCoreCfg):
     """Number of subsequent goals available in the observation. Defaults to 2."""
 
     # Tolerance
-    position_tolerance: float = 0.01
+    position_tolerance: float = 0.03
     """Tolerance for the position of the robot. Defaults to 1cm."""
     heading_tolerance: float = math.pi * 15.0 / 180.0
     """Tolerance for the heading of the robot. Defaults to 15 degrees."""

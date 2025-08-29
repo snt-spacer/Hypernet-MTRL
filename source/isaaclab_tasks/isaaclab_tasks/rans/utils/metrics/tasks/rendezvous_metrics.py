@@ -66,14 +66,14 @@ class RendezvousMetrics(BaseTaskMetrics, Registerable):
 
         # Store results in metrics dictionary
         self.metrics["mean_orientation_error.rad"] = torch.tensor(mean_avg_angle_errors, device=self.trajectories["target_index"].device)
-        self.env_info["failed_trajectories"] = torch.tensor(failed_trajectories, device=self.trajectories["target_index"].device)
+        self.env_info["failed_trajectories"] = failed_trajectories
 
         
 
     @BaseTaskMetrics.register
     def sr_num_gates(self):
         num_successful_trajectories = torch.sum(self.trajectories['total_goals_reached'][:,-1] >= self.trajectories['num_goals'][:, 0])
-        self.env_info["sr_num_gates"] = 100 * (num_successful_trajectories / self.trajectories['num_goals'].shape[0]) 
+        self.env_info["sr_num_gates"] = 100 * (num_successful_trajectories / self.trajectories['num_goals'].shape[0]).item()
 
     @BaseTaskMetrics.register
     def avg_orientation_error_path(self):

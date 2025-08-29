@@ -108,7 +108,7 @@ do
         --algorithm="${algorithm}" \
         --runs_per_env="${runs_per_env}" \
         env.robot_name="${robot}" \
-        env.tasks_names="[${EVAL_TASKS_NAMES}]" #>> "$EVALUATION_LOG_FILE" 2>&1
+        env.tasks_names="[${EVAL_TASKS_NAMES}]" >> "$EVALUATION_LOG_FILE" 2>&1
 
     # Check if the evaluation command executed successfully
     if [ $? -eq 0 ]; then
