@@ -10,7 +10,7 @@ TASK_NAME="RaceGates"
 ALGORITHM="ppo-memory"
 TYPE_OF_TRAINING="hyper"  # Options: "hyper" or "padd"
 FIXED_TRACK_ID=-1  # -1 means random track
-SAME_TRACK_FOR_ALL_ENVS= False  # If True, all environments will use the same
+SAME_TRACK_FOR_ALL_ENVS="False"  # If True, all environments will use the same
 
 
 # Common arguments that apply to all training runs

@@ -673,9 +673,6 @@ class BaseTaskPlots(AutoRegister):
                                 textcoords='offset points', fontsize=10, 
                                 bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9),
                                 zorder=10)
-                    
-                    # Add legend entry for gates
-                    dummy_rect = Rectangle((0, 0), 0, 0, facecolor='red', edgecolor='black', alpha=0.8, label='Race Gates')
             
             # Extract group name for title
             group_name = group_key.split("_")[-1]  # Get the run name

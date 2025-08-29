@@ -16,6 +16,17 @@ from isaaclab.app import AppLauncher
 import cli_args  # isort: skip
 import os
 
+# Helper function for boolean argument parsing
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
@@ -33,7 +44,7 @@ parser.add_argument(
 )
 parser.add_argument("--run_num",type=int,default=0,help="The run number for the current experiment.")
 parser.add_argument("--fixed_track_id",type=int,default=-1,help="The fixed track id for the racing task. -1 means random track.")
-parser.add_argument("--same_track_for_all_envs",type=bool,default=False,help="If True, all environments will use the same track. If False, each environment will use a different track.")
+parser.add_argument("--same_track_for_all_envs",type=str2bool,default=False,help="If True, all environments will use the same track. If False, each environment will use a different track.")
 parser.add_argument(
     "--type_of_training",
     type=str,

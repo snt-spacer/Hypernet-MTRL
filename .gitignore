@@ -70,3 +70,5 @@ multitask*/
 *.zip
 
 source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots
+source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/*.png
+source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/*.svg

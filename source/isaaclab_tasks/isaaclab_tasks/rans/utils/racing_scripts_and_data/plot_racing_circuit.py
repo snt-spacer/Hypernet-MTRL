@@ -1,92 +1,93 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.patches as patches
+import matplotlib.transforms as transforms
+import matplotlib.ticker as ticker
 import numpy as np
 
-def plot_trajectories_and_gates(csv_file, trajectory_ids=None):
-    """
-    Reads trajectory data from a CSV file, plots specified trajectories,
-    and visualizes the race gates.
+def truncate_formatter(x, pos):
+    return f"{int(x * 100) / 100:.2f}"
 
-    Args:
-        csv_file (str): Path to the CSV file containing trajectory data.
-        trajectory_ids (list or None): A list of trajectory IDs to plot. 
-                                      If None, all trajectories will be plotted.
-    """
-    try:
-        # Load the CSV file into a pandas DataFrame
-        df = pd.read_csv(csv_file)
-        print("Data loaded successfully.")
-    except FileNotFoundError:
-        print(f"Error: The file '{csv_file}' was not found.")
-        return
-    except Exception as e:
-        print(f"An error occurred while reading the file: {e}")
-        return
+# Load the dataset
+df = pd.read_csv("source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/extracted_trajectories_RaceGates.csv")
+print("File loaded successfully.")
 
-    # Extract the gate positions. The column names follow a specific pattern:
-    # 'target_positions_{gate_id * 6}', 'target_positions_{gate_id * 6 + 1}', ..., 'target_positions_{gate_id * 6 + 5}'
-    # We can identify these by their name format.
-    gate_columns = [col for col in df.columns if col.startswith('target_positions_')]
-    num_gates = len(gate_columns) // 6
-    print(f"Found {num_gates} gates in the data.")
+# Select the first trajectory
+trajectory_0 = df[df['trajectory'] == 0].copy()
 
-    # Create a figure and a 3D axes object for plotting
-    fig = plt.figure(figsize=(12, 9))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.set_title("Drone Trajectories and Race Gates")
-    ax.set_xlabel("X Position (meters)")
-    ax.set_ylabel("Y Position (meters)")
-    ax.set_zlabel("Z Position (meters)")
-    ax.set_aspect('equal', adjustable='box')
+# --- Data Extraction ---
+# Extract car's position
+car_x = trajectory_0['position_x']
+car_y = trajectory_0['position_y']
+car_z = trajectory_0['position_z']
 
-    # Get a list of unique trajectory IDs
-    unique_trajectories = df['trajectory'].unique()
-    
-    # Determine which trajectories to plot
-    if trajectory_ids is None:
-        trajectories_to_plot = unique_trajectories
-    else:
-        # Filter for the specified trajectory IDs
-        trajectories_to_plot = [tid for tid in trajectory_ids if tid in unique_trajectories]
-        if not trajectories_to_plot:
-            print(f"Warning: No valid trajectories found for IDs {trajectory_ids}.")
-            return
+# Calculate velocity magnitude
+velocity_magnitude = np.sqrt(
+    trajectory_0['linear_velocity_x']**2 +
+    trajectory_0['linear_velocity_y']**2
+)
+trajectory_0['velocity_magnitude'] = velocity_magnitude
 
-    # Plot each specified trajectory
-    print("Plotting trajectories...")
-    for tid in trajectories_to_plot:
-        trajectory_data = df[df['trajectory'] == tid]
-        x_positions = trajectory_data['step'].values
-        y_positions = trajectory_data['target_positions_0'].values
-        z_positions = trajectory_data['target_positions_1'].values
-        
-        ax.plot(x_positions, y_positions, z_positions, label=f'Trajectory {tid}', linewidth=2)
-        ax.scatter(x_positions, y_positions, z_positions, s=20)
-    
-    # Plot the gates and their IDs
-    print("Plotting gates...")
-    gate_colors = plt.cm.get_cmap('viridis', num_gates)
-    for i in range(num_gates):
-        # The first row of the CSV seems to contain the gate positions
-        gate_x = df.loc[0, f'target_positions_{i * 6}']
-        gate_y = df.loc[0, f'target_positions_{i * 6 + 1}']
-        gate_z = df.loc[0, f'target_positions_{i * 6 + 2}']
-        
-        # Plot the gate location
-        ax.scatter(gate_x, gate_y, gate_z, color=gate_colors(i), marker='^', s=100, label=f'Gate {i}', edgecolor='black', linewidth=1)
-        
-        # Add a text label for the gate ID
-        ax.text(gate_x, gate_y, gate_z, str(i), fontsize=12, ha='center', va='center', color='white', fontweight='bold')
+# Extract gate data from the first row of the trajectory
+gate_data = trajectory_0.iloc[0]
+num_goals = int(gate_data['num_goals'])
 
-    # Add a legend and display the plot
-    ax.legend(loc='upper right')
-    plt.tight_layout()
-    # plt.show()
-    plt.savefig("racing_circuit_plot.png")
+# Extract gate center positions (assuming X, Y pairs)
+gate_x = [gate_data[f'target_positions_{i}'] for i in range(0, 2 * num_goals, 2)]
+gate_y = [gate_data[f'target_positions_{i}'] for i in range(1, 2 * num_goals, 2)]
 
-if __name__ == '__main__':
-    # Define the path to your CSV file
-    csv_file_path = 'extracted_trajectories_RaceGates.csv'
-    
-    plot_trajectories_and_gates(csv_file_path)
+gate_headings = [gate_data[f'target_headings_{i}'] for i in range(0, num_goals)]
+
+# Function to plot gates
+def plot_gates(ax, num_goals, gate_x, gate_y, gate_headings):
+    gate_width = 0.5
+    gate_height = 1.0
+    for i in range(num_goals):
+        center_x, center_y = gate_x[i], gate_y[i]
+        heading = gate_headings[i]
+        rect = patches.Rectangle(
+            (-gate_width / 2, -gate_height / 2), gate_width, gate_height,
+            linewidth=1, edgecolor='r', facecolor='none', label='Race Gate' if i == 0 else "", zorder=4
+        )
+        transform = transforms.Affine2D().rotate(heading).translate(center_x, center_y)
+        rect.set_transform(transform + ax.transData)
+        ax.add_patch(rect)
+        ax.text(center_x, center_y + 0.8, str(i), fontsize=9, ha='center', va='bottom', color='red', zorder=4)
+
+# --- Plot 1: Velocity Magnitude ---
+fig_2d_vel, ax_2d_vel = plt.subplots(figsize=(15, 8))
+plot_gates(ax_2d_vel, num_goals, gate_x, gate_y, gate_headings)
+
+sc_vel = ax_2d_vel.scatter(car_x, car_y, c=trajectory_0['velocity_magnitude'], cmap='viridis', s=10, zorder=3)
+cbar_vel = fig_2d_vel.colorbar(sc_vel, ax=ax_2d_vel, fraction=0.046, pad=0.04)
+cbar_vel.set_label('Velocity Magnitude (m/s)')
+
+ax_2d_vel.set_xlabel('X Position (m)')
+ax_2d_vel.set_ylabel('Y Position (m)')
+ax_2d_vel.set_title('2D Race Track and Car Trajectory (Trajectory 0) - Velocity')
+ax_2d_vel.legend(['Race Gates'])
+ax_2d_vel.grid(True)
+ax_2d_vel.set_aspect('equal', adjustable='box')
+plt.tight_layout()
+plt.savefig('source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/racing_circuit_plot_velocity.svg')
+print("Velocity plot saved successfully.")
+
+
+# --- Plot 2: Throttle Value ---
+fig_2d_thr, ax_2d_thr = plt.subplots(figsize=(15, 8))
+plot_gates(ax_2d_thr, num_goals, gate_x, gate_y, gate_headings)
+
+sc_thr = ax_2d_thr.scatter(car_x, car_y, c=trajectory_0['throttle_0'], cmap='viridis', s=10, zorder=3)
+cbar_thr = fig_2d_thr.colorbar(sc_thr, ax=ax_2d_thr, fraction=0.046, pad=0.04)
+cbar_thr.set_label('Throttle Value')
+cbar_thr.ax.yaxis.set_major_formatter(ticker.FuncFormatter(truncate_formatter))
+
+ax_2d_thr.set_xlabel('X Position (m)')
+ax_2d_thr.set_ylabel('Y Position (m)')
+ax_2d_thr.set_title('2D Race Track and Car Trajectory (Trajectory 0) - Throttle')
+ax_2d_thr.legend(['Race Gates'])
+ax_2d_thr.grid(True)
+ax_2d_thr.set_aspect('equal', adjustable='box')
+plt.tight_layout()
+plt.savefig('source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/racing_circuit_plot_throttle.svg')
+print("Throttle plot saved successfully.")
