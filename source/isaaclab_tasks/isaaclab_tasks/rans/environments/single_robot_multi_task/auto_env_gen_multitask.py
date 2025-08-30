@@ -80,7 +80,7 @@ class MultiTaskEnvCfg(DirectRLEnvCfg):
     gen_space = 0
 
     # Multitask control
-    type_of_training = "hyper" #hyper, padd
+    type_of_training = "padd" #hyper, padd
 
 
 class MultiTaskEnv(DirectRLEnv):

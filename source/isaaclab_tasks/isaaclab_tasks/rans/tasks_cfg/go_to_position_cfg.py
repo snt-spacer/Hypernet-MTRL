@@ -29,12 +29,12 @@ class GoToPositionCfg(TaskCoreCfg):
     Defaults to pi rad."""
     spawn_min_lin_vel: float = 0.0
     """Minimal linear velocity at spawn pose in m/s. Defaults to 0.0 m/s."""
-    spawn_max_lin_vel: float = 0.0
-    """Maximal linear velocity at spawn pose in m/s. Defaults to 0.0 m/s."""
+    spawn_max_lin_vel: float = 0.75
+    """Maximal linear velocity at spawn pose in m/s. Defaults to 0.75 m/s."""
     spawn_min_ang_vel: float = 0.0
     """Minimal angular velocity at spawn in rad/s. Defaults to 0.0 rad/s."""
-    spawn_max_ang_vel: float = 0.0
-    """Maximal angular velocity at spawn in rad/s. Defaults to 0.0 rad/s."""
+    spawn_max_ang_vel: float = 0.45
+    """Maximal angular velocity at spawn in rad/s. Defaults to 0.2 rad/s."""
 
     # Goal spawn
     goal_max_dist_from_origin: float = 0.0
