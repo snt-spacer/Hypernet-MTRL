@@ -18,7 +18,7 @@ COMMON_ARGS="--task=${TASK} --headless env.robot_name=${ROBOT_NAME} env.task_nam
 
 # Array of seeds for training (10 seeds)
 # SEEDS=(42 37 456 789 1337 2048 3141 5678 9999 1111)
-SEEDS=(1 2 3 4 5)
+SEEDS=(2 3 4 5)
 # SEEDS=(42)
 
 # Function to run training for a single seed

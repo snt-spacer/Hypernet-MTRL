@@ -239,6 +239,17 @@ CHECKPOINTS=(
 2025-08-22_08-11-21_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-3141/model_1250.pt
 )
 
+######################################################################################
+# VANILLA 2.0 Throttle Scale 120
+######################################################################################
+# Hypernet Critic L 32x32 w/o Tinfo in Gobs (C 256 tanh)
+CHECKPOINTS=(
+2025-08-29_16-32-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1/model_3800.pt
+2025-08-30_17-09-52_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2/model_3700.pt
+2025-08-31_15-28-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-4/model_2850.pt
+2025-08-31_22-09-24_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5/model_3999.pt
+)
+
 # Function to run evaluation for a single checkpoint
 run_evaluation() {
     local checkpoint_path="$1"
