@@ -7,8 +7,8 @@ SCRIPT_PATH="scripts/reinforcement_learning/rsl_rl/train_racing.py"
 TASK="Isaac-RANS-Single-v0"
 ROBOT_NAME="Leatherback"
 TASK_NAME="RaceGates"
-ALGORITHM="ppo-memory"
-TYPE_OF_TRAINING="hyper"  # Options: "hyper" or "padd"
+ALGORITHM="ppo"
+TYPE_OF_TRAINING="padd"  # Options: "hyper" or "padd"
 FIXED_TRACK_ID=-1  # -1 means random track
 SAME_TRACK_FOR_ALL_ENVS="False"  # If True, all environments will use the same
 
@@ -18,7 +18,7 @@ COMMON_ARGS="--task=${TASK} --headless env.robot_name=${ROBOT_NAME} env.task_nam
 
 # Array of seeds for training (10 seeds)
 # SEEDS=(42 37 456 789 1337 2048 3141 5678 9999 1111)
-SEEDS=(2 3 4 5)
+SEEDS=(1 2 3 4 5)
 # SEEDS=(42)
 
 # Function to run training for a single seed
@@ -31,11 +31,11 @@ run_training() {
     ./isaaclab.sh -p ${SCRIPT_PATH} ${COMMON_ARGS} --seed=${seed}
     
     # Check if the command was successful
-    if [ $? -eq 0 ]; then
-        echo "✓ Training completed successfully for seed: ${seed}"
-    else
-        echo "✗ Training failed for seed: ${seed}"
-    fi
+    # if [ $? -eq 0 ]; then
+    #     echo "✓ Training completed successfully for seed: ${seed}"
+    # else
+    #     echo "✗ Training failed for seed: ${seed}"
+    # fi
     echo "========================================"
 }
 
