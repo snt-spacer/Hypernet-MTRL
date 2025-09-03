@@ -694,9 +694,7 @@ class RaceGatesTask(TaskCore):
             num_goals = len(env_ids)
             if self.num_generations < 1:
                 if self._task_cfg.fixed_track_id == 0:
-                    # BCN track
-                    print("Generating BCN track for all environments")
-                    breakpoint()
+                    # Custom track
                     self.points, self.tangents, self.num_goals = self._track_generator.generate_custom_track(env_ids, custom_track_id=self._task_cfg.custom_track_id)
                 else:
                     self.points, self.tangents, self.num_goals = self._track_generator.generate_tracks_points_non_fixed_points(env_ids)

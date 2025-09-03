@@ -9,7 +9,7 @@ ROBOT_NAME="Leatherback"
 TASK_NAME="RaceGates"
 ALGORITHM="ppo"
 TYPE_OF_TRAINING="padd"  # Options: "hyper" or "padd"
-TRACK_ID=0 # 0 is custom track, -1 for random
+FIXED_TRACK_ID=0 # 0 is custom track, -1 for random
 CUSTOM_TRACK_ID=0 # 0 BCN, 1 JPN, 2 Monza, 10 points, 4 points, 11 alphapilot
 SAME_TRACK_FOR_ALL_ENVS="True"  # If True, all environments will use the same
 

@@ -556,6 +556,7 @@ class TrackGenerator:
 
     def bcn_points(self):
         # Barcelona track (complex, 34 points)
+        print("Generating BCN track for all environments")
         barcelona_points = torch.tensor(
             [
                 [ 2.12, -0.75],
@@ -728,6 +729,7 @@ class TrackGenerator:
         return track_points_normalized * self._scale
 
     def jpn_suzuka_track(self):
+        print("Generating JPN Suzuka track for all environments")
         track_points = torch.tensor(
             [
                 [0.37, -0.27],
@@ -780,6 +782,7 @@ class TrackGenerator:
         return track_points_normalized * self._scale
 
     def monza_track(self):
+        print("Generating MONZA track for all environments")
         track_points = torch.tensor(
             [
                 [2.41, -0.72],
