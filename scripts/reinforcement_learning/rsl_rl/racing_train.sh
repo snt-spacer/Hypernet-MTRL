@@ -9,12 +9,13 @@ ROBOT_NAME="Leatherback"
 TASK_NAME="RaceGates"
 ALGORITHM="ppo"
 TYPE_OF_TRAINING="padd"  # Options: "hyper" or "padd"
-FIXED_TRACK_ID=-1  # -1 means random track
-SAME_TRACK_FOR_ALL_ENVS="False"  # If True, all environments will use the same
+TRACK_ID=0 # 0 is custom track, -1 for random
+CUSTOM_TRACK_ID=0 # 0 BCN, 1 JPN, 2 Monza, 10 points, 4 points, 11 alphapilot
+SAME_TRACK_FOR_ALL_ENVS="True"  # If True, all environments will use the same
 
 
 # Common arguments that apply to all training runs
-COMMON_ARGS="--task=${TASK} --headless env.robot_name=${ROBOT_NAME} env.task_name=${TASK_NAME} --algorithm=${ALGORITHM} --type_of_training=${TYPE_OF_TRAINING} --fixed_track_id=${FIXED_TRACK_ID} --same_track_for_all_envs=${SAME_TRACK_FOR_ALL_ENVS}"
+COMMON_ARGS="--task=${TASK} --headless env.robot_name=${ROBOT_NAME} env.task_name=${TASK_NAME} --algorithm=${ALGORITHM} --type_of_training=${TYPE_OF_TRAINING} --fixed_track_id=${FIXED_TRACK_ID} --same_track_for_all_envs=${SAME_TRACK_FOR_ALL_ENVS} --custom_track_id=${CUSTOM_TRACK_ID}"
 
 # Array of seeds for training (10 seeds)
 # SEEDS=(42 37 456 789 1337 2048 3141 5678 9999 1111)

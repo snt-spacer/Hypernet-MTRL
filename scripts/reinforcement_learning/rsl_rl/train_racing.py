@@ -51,6 +51,12 @@ parser.add_argument(
     default="padd",
     help="The type of training to use. Options: 'hyper' or 'padd'.",
 )
+parser.add_argument(
+    "--custom_track_id",
+    type=int,
+    default=0,
+    help="The custom track ID to use for the evaluation. Default to 0 (bcn track).",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -83,6 +89,8 @@ def modify_racing_config():
                 new_content.append("    max_num_corners: int = 40\n")
             elif "min_num_corners:" in line:
                 new_content.append("    min_num_corners: int = 4\n")
+            elif "custom_track_id:" in line:
+                new_content.append(f"    custom_track_id: int = {args_cli.custom_track_id}\n")
             else:
                 new_content.append(line)
     with open(eval_racing_cfg_path, 'w') as file:
