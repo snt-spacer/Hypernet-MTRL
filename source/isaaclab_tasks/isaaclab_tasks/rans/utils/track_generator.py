@@ -727,6 +727,100 @@ class TrackGenerator:
 
         return track_points_normalized * self._scale
 
+    def jpn_suzuka_track(self):
+        track_points = torch.tensor(
+            [
+                [0.37, -0.27],
+                [-1.17, -0.75],
+                [-1.41, -0.67],
+                [-1.46, -0.39],
+                [-1.18, -0.25],
+                [-0.73, -0.34],
+                [-0.53, -0.16],
+                [-0.94, 0.63],
+                [-0.90, 0.88],
+                [-0.58, 0.82],
+                [0.25, -0.68],
+                [0.53, -0.78],
+                [0.76, -0.63],
+                [0.89, 0.23],
+                [1.13, 0.29],
+                [1.36, 0.21],
+                [1.44, 0.08],
+                [1.56, 0.03],
+                [1.73, 0.10],
+                [1.87, 0.08],
+                [1.96, -0.08],
+                [2.07, -0.13],
+                [2.23, -0.07],
+                [2.62, -0.12],
+                [2.82, 0.07],
+                [2.88, 0.37],
+                [2.69, 0.58],
+                [0.94, 0.92],
+                [0.72, 0.69],
+                [0.82, 0.51],
+                [0.56, -0.00],
+                [0.37, -0.27],
+            ],
+            dtype=torch.float32,
+            device=self._device,
+        )
+
+        # Center the track around (0,0) and then scale
+        min_coords, _ = torch.min(track_points, dim=0)
+        max_coords, _ = torch.max(track_points, dim=0)
+        center = (min_coords + max_coords) / 2
+        track_points_centered = track_points - center
+
+        # Normalize to approximately fit in a [-0.5, 0.5] square for better scaling consistency
+        max_dim = torch.max(max_coords - min_coords)
+        track_points_normalized = track_points_centered / max_dim
+
+        return track_points_normalized * self._scale
+
+    def monza_track(self):
+        track_points = torch.tensor(
+            [
+                [2.41, -0.72],
+                [2.79, -0.67],
+                [3.17, -0.62],
+                [3.28, -0.45],
+                [3.14, -0.35],
+                [0.80, -0.35],
+                [0.55, -0.29],
+                [0.20, -0.33],
+                [-0.75, 0.84],
+                [-0.92, 0.93],
+                [-1.53, 0.93],
+                [-1.63, 0.81],
+                [-1.49, 0.47],
+                [-1.34, 0.39],
+                [-1.34, -0.20],
+                [-1.17, -0.54],
+                [-0.88, -0.69],
+                [-0.60, -0.72],
+                [-0.02, -0.57],
+                [-0.20, -0.71],
+                [-0.01, -0.76],
+                [2.41, -0.72],
+            ],
+            dtype=torch.float32,
+            device=self._device,
+        )
+
+        # Center the track around (0,0) and then scale
+        min_coords, _ = torch.min(track_points, dim=0)
+        max_coords, _ = torch.max(track_points, dim=0)
+        center = (min_coords + max_coords) / 2
+        track_points_centered = track_points - center
+
+        # Normalize to approximately fit in a [-0.5, 0.5] square for better scaling consistency
+        max_dim = torch.max(max_coords - min_coords)
+        track_points_normalized = track_points_centered / max_dim
+
+        return track_points_normalized * self._scale
+
     def generate_custom_track(
         self,
         ids: torch.Tensor,
@@ -747,6 +841,7 @@ class TrackGenerator:
             The points are a 3D tensor of shape [num_tracks, num_points, 2].
             The tangents are a 2D tensor of shape [num_tracks, num_points].
             The number of points per track is a 1D tensor of shape [num_tracks]."""
+        
         # Generate an ordered set of ids
         if prev_ids is None:
             prev_ids = torch.arange(0, len(ids), device=self._device)
@@ -755,6 +850,10 @@ class TrackGenerator:
         if custom_track_id == 0:
             # Generate Barcelona track points
             track_points = self.bcn_points()  # Shape: [34, 2]
+        elif custom_track_id == 1:
+            track_points = self.jpn_suzuka_track()
+        elif custom_track_id == 2:
+            track_points = self.monza_track()
         elif custom_track_id == 10:
             track_points = self.ten_points_track()  # Shape: [10, 2]
         elif custom_track_id == 11:

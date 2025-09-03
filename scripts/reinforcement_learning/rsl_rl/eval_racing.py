@@ -462,7 +462,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 wandb.log({f"metrics/task_{i}_{task_name}": wandb.Table(dataframe=df)})
     else:
         # Single task metrics calculation
-        data = {k: torch.stack(v, dim=0) for k, v in data.items()}
+        data = {k: torch.stack([t.cpu() for t in v], dim=0) for k, v in data.items()} # Running Cuda out of memory on smaller gpus
+        data = {k: v.cuda() for k, v in data.items()}
+        # data = {k: torch.stack(v, dim=0) for k, v in data.items()}
         eval_metrics.calculate_metrics(data=data)
         # Save extracted trajectories
         eval_metrics.save_extracted_trajectories_to_csv()

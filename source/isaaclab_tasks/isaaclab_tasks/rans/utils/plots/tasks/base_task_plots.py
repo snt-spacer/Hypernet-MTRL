@@ -232,6 +232,17 @@ class BaseTaskPlots(AutoRegister):
         plt.savefig(save_path)
         plt.close()
 
+        # Append mean and sd to a summary file
+        summary_file_path = os.path.join(self._save_plots_folder_path, "metrics_summary.txt")
+        with open(summary_file_path, "a") as f:
+            f.write(f"Task: {self.task_name}, Key: {key_to_plot}, Title: {y_label}\n")
+            for i, (group_key, group_values) in enumerate(zip(label_names, data_to_plot)):
+                mean_val = group_values.mean()
+                std_val = group_values.std()
+                median_val = group_values.median()
+                f.write(f"Group: {group_key} \nMean: {mean_val:.5f}, SD: {std_val:.5f}, Median: {median_val:.5f}\n")
+            f.write("\n")
+
     def dotplot(self, key_to_plot: str):
         key_name, units = key_to_plot.split(".")
 

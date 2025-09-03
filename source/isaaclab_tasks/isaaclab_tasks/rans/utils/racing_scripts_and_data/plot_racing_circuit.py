@@ -9,11 +9,13 @@ def truncate_formatter(x, pos):
     return f"{int(x * 100) / 100:.2f}"
 
 # Load the dataset
-df = pd.read_csv("source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/extracted_trajectories_RaceGates.csv")
+file_path = "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-08-29_16-32-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1/metrics/extracted_trajectories_RaceGates.csv"
+# file_path = "source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/extracted_trajectories_RaceGates.csv"
+df = pd.read_csv(file_path)
 print("File loaded successfully.")
 
 # Select the first trajectory
-trajectory_0 = df[df['trajectory'] == 0].copy()
+trajectory_0 = df[df['trajectory'] == 6].copy()
 
 # --- Data Extraction ---
 # Extract car's position
@@ -69,7 +71,7 @@ ax_2d_vel.legend(['Race Gates'])
 ax_2d_vel.grid(True)
 ax_2d_vel.set_aspect('equal', adjustable='box')
 plt.tight_layout()
-plt.savefig('source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/racing_circuit_plot_velocity.svg')
+plt.savefig('source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/racing_circuit_plot_velocity.png')
 print("Velocity plot saved successfully.")
 
 
@@ -89,5 +91,5 @@ ax_2d_thr.legend(['Race Gates'])
 ax_2d_thr.grid(True)
 ax_2d_thr.set_aspect('equal', adjustable='box')
 plt.tight_layout()
-plt.savefig('source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/racing_circuit_plot_throttle.svg')
+plt.savefig('source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/racing_circuit_plot_throttle.png')
 print("Throttle plot saved successfully.")
