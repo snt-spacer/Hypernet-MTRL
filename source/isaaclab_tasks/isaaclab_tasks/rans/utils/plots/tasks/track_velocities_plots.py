@@ -19,15 +19,15 @@ class TrackVelocitiesPlots(BaseTaskPlots, Registerable):
                 keys_set.update(
                     key for key in df.columns if key.startswith("angular_velocity_error")
                 )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("overshoot_linear_velocity")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("overshoot_lateral_velocity")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("overshoot_angular_velocity")
-                )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("overshoot_linear_velocity")
+                # )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("overshoot_lateral_velocity")
+                # )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("overshoot_angular_velocity")
+                # )
 
         self.labels_to_plot = list(keys_set)
 
@@ -35,9 +35,9 @@ class TrackVelocitiesPlots(BaseTaskPlots, Registerable):
         for label_to_plot in self.labels_to_plot:
             self.boxplot(label_to_plot)
 
-        if len(self._trajectories_dfs) > 0:
-            self.plot_linear_velocity_over_time()
-            self.plot_angular_velocity_over_time()
-            self.plot_linear_velocity_error_over_time()
-            self.plot_angular_velocity_error_over_time()
-            self.plot_actions_over_time()
+        # if len(self._trajectories_dfs) > 0:
+        #     self.plot_linear_velocity_over_time()
+        #     self.plot_angular_velocity_over_time()
+        #     self.plot_linear_velocity_error_over_time()
+        #     self.plot_angular_velocity_error_over_time()
+        #     self.plot_actions_over_time()

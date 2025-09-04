@@ -19,7 +19,7 @@ class GoToPositionCfg(TaskCoreCfg):
     # Initial conditions
     spawn_min_dist: float = 0.5
     """Minimal distance between the spawn pose and the target pose in m. Defaults to 0.5 m."""
-    spawn_max_dist: float = 5.0
+    spawn_max_dist: float = 10.0
     """Maximal distance between the spawn pose and the target pose in m. Defaults to 5.0 m."""
     spawn_min_heading_dist: float = 0.0
     """Minimal angle between the spawn orientation and the angle required to be looking at the target in rad.
@@ -29,11 +29,11 @@ class GoToPositionCfg(TaskCoreCfg):
     Defaults to pi rad."""
     spawn_min_lin_vel: float = 0.0
     """Minimal linear velocity at spawn pose in m/s. Defaults to 0.0 m/s."""
-    spawn_max_lin_vel: float = 0.75
+    spawn_max_lin_vel: float = 10.0
     """Maximal linear velocity at spawn pose in m/s. Defaults to 0.75 m/s."""
     spawn_min_ang_vel: float = 0.0
     """Minimal angular velocity at spawn in rad/s. Defaults to 0.0 rad/s."""
-    spawn_max_ang_vel: float = 0.45
+    spawn_max_ang_vel: float = 6.28
     """Maximal angular velocity at spawn in rad/s. Defaults to 0.2 rad/s."""
 
     # Goal spawn
@@ -43,7 +43,7 @@ class GoToPositionCfg(TaskCoreCfg):
     # Tolerance
     position_tolerance: float = 0.01
     """Tolerance for the position of the robot. Defaults to 1cm."""
-    maximum_robot_distance: float = 15.0
+    maximum_robot_distance: float = 25.0
     """Maximal distance between the robot and the target pose. Defaults to 15 m."""
     reset_after_n_steps_in_tolerance: int = 100
     """Reset the environment after n steps in tolerance. Defaults to 100 steps."""

@@ -11,33 +11,33 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
         keys_set = set()
         for group_dfs in dfs.values():
             for df in group_dfs:
-                keys_set.update(
-                    key for key in df.columns if "_steps_jerk" in key
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("time_to_reach_position_threshold")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("num_steps_position_overshoot")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("overshoot_distance_error")
-                )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("trajectory_efficiency")
-                )
+                # keys_set.update(
+                #     key for key in df.columns if "_steps_jerk" in key
+                # )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("time_to_reach_position_threshold")
+                # )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("num_steps_position_overshoot")
+                # )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("overshoot_distance_error")
+                # )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("trajectory_efficiency")
+                # )
                 keys_set.update(
                     key for key in df.columns if key.startswith("final_position_distance")
                 )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("final_position_heading_error")
-                )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("final_position_heading_error")
+                # )
                 keys_set.update(
                     key for key in df.columns if key.startswith("final_orientation_error")
                 )
-                keys_set.update(
-                    key for key in df.columns if key.startswith("success_rate")
-                )
+                # keys_set.update(
+                #     key for key in df.columns if key.startswith("success_rate")
+                # )
         self.labels_box_plot = list(keys_set)
 
         # # Dot plots
@@ -56,9 +56,9 @@ class GoToPosePlots(BaseTaskPlots, Registerable):
         # for label_to_plot in self.labels_dots:
         #     self.dotplot(label_to_plot)
 
-        if len(self._trajectories_dfs) > 0:
-            self.plot_xy_trajectories_0_centered()
-            self.plot_position_distance_over_time()
-            self.plot_linear_velocity_over_time()
-            self.plot_angular_velocity_over_time()
-            self.plot_actions_over_time()
+        # if len(self._trajectories_dfs) > 0:
+        #     self.plot_xy_trajectories_0_centered()
+        #     self.plot_position_distance_over_time()
+        #     self.plot_linear_velocity_over_time()
+        #     self.plot_angular_velocity_over_time()
+        #     self.plot_actions_over_time()

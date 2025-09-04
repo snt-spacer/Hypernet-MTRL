@@ -43,9 +43,9 @@ class GoThroughPositionsCfg(TaskCoreCfg):
     """Minimal distance between the goals. Defaults to 1.0 m."""
     goal_max_dist: float = 5.0
     """Maximal distance between the goals. Defaults to 5.0 m."""
-    max_num_goals: int = 10
+    max_num_goals: int = 15
     """Maximal number of goals. Defaults to 10."""
-    min_num_goals: int = 6
+    min_num_goals: int = 3
     """Minimal number of goals. Defaults to 6."""
     loop: bool = True
     """Whether the goals should loop or not. Defaults to True."""

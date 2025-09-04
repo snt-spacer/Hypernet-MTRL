@@ -22,3 +22,23 @@ class RendezvousPlots(BaseTaskPlots, Registerable):
     def plot(self):
         for label_to_plot in self.labels_to_plot:
             self.boxplot(label_to_plot)
+
+        self.rendezvous_sr()
+
+
+    def rendezvous_sr(self):
+        for key, value in self._env_info.items():
+            failed_trajectories_list = [item['failed_trajectories'] for item in value]
+            sr_num_gates_list = [item['sr_num_gates'] for item in value]
+            
+            # Calculate the mean for failed_trajectories
+            mean_failed_trajectories = sum(failed_trajectories_list) / len(failed_trajectories_list)
+            
+            # Calculate the mean for sr_num_gates
+            mean_sr_num_gates = sum(sr_num_gates_list) / len(sr_num_gates_list)
+            
+            # Print the results for the current key, formatted to two decimal places
+            print(f"Key: {key}")
+            # print(f"  Mean of failed_trajectories: {mean_failed_trajectories:.2f}")
+            print(f"  Mean of SR: {mean_sr_num_gates:.2f}")
+            print("-" * 20)

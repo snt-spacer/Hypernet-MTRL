@@ -324,6 +324,12 @@ do
     echo "Starting evaluation for Model: $model_path" | tee -a "$EVALUATION_LOG_FILE"
     echo "Evaluating all tasks simultaneously: [${EVAL_TASKS_NAMES}]" | tee -a "$EVALUATION_LOG_FILE"
 
+    # Remove all csv files from previous runs from the metrics folder
+    # experiment_dir_name=$(basename "$(dirname "${model_path}")")
+    experiment_path=$(dirname "${model_path}")
+    echo "Removing previous CSV files from: ${experiment_path}/metrics"
+    rm -rf "${experiment_path}/metrics"
+
     # Execute the evaluation script for all tasks at once
     ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/eval_control.py \
         --task=Isaac-RANS-MultiTask-v0 \
@@ -333,7 +339,7 @@ do
         --algorithm="${algorithm}" \
         --runs_per_env="${runs_per_env}" \
         env.robot_name="${robot}" \
-        env.tasks_names="[${EVAL_TASKS_NAMES}]" >> "$EVALUATION_LOG_FILE" 2>&1
+        env.tasks_names="[${EVAL_TASKS_NAMES}]" #>> "$EVALUATION_LOG_FILE" 2>&1
 
     # Check if the evaluation command executed successfully
     if [ $? -eq 0 ]; then
