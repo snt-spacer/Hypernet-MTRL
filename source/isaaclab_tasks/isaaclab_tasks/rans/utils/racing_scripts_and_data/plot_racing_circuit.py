@@ -15,7 +15,7 @@ df = pd.read_csv(file_path)
 print("File loaded successfully.")
 
 # Select the first trajectory
-trajectory_0 = df[df['trajectory'] == 6].copy()
+trajectory_0 = df[df['trajectory'] == 20].copy()
 
 # --- Data Extraction ---
 # Extract car's position

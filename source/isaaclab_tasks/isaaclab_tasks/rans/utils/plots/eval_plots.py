@@ -277,6 +277,13 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-01_12-45-50_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-01_21-55-27_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
         ],
+        # Expert BCN
+        # [
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_18-46-06_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_21-57-25_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_18-53-51_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4",
+        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_22-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
+        # ],
 
     ]
 
@@ -317,6 +324,7 @@ def main():
         "runs_names": [
             "Hypernet Critic L Th 120 32x32 w-o Tinfo in Gobs",
             "Baseline Th 32x32 w Tinfo in Gobs",
+            "Expert BCN",
             
             # "Hypernet 32x32 w Tinfo in Gobs",
             # "Baseline 32x32 w Tinfo in Gobs",
@@ -355,7 +363,7 @@ def main():
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots_v0" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 
