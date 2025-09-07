@@ -285,6 +285,11 @@ def main():
         #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_22-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
         # ],
 
+        # Baseline-finetuned BCN
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-06_20-55-38_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+        ],
+
     ]
 
     plot_cfg = {
@@ -324,7 +329,8 @@ def main():
         "runs_names": [
             "Hypernet Critic L Th 120 32x32 w-o Tinfo in Gobs",
             "Baseline Th 32x32 w Tinfo in Gobs",
-            "Expert BCN",
+            # "Expert BCN",
+            "Baseline-finetuned BCN",
             
             # "Hypernet 32x32 w Tinfo in Gobs",
             # "Baseline 32x32 w Tinfo in Gobs",
@@ -363,7 +369,7 @@ def main():
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots_v0" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots_finetuned" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 

@@ -7,7 +7,7 @@ TASK="Isaac-RANS-Single-v0"
 NUM_ENVS=500
 TRACK_ID=0 # 0 is custom track, -1 for random
 EVAL_SEED=42
-CUSTOM_TRACK_ID=2 # 0 BCN, 1 JPN, 2 Monza, 10 points, 4 points, 11 alphapilot
+CUSTOM_TRACK_ID=0 # 0 BCN, 1 JPN, 2 Monza, 10 points, 4 points, 11 alphapilot
 BASE_LOG_DIR="logs/rsl_rl/multitask_racing_baseline_noTrackInfo"
 same_track_for_all_envs="True"
 
@@ -243,12 +243,12 @@ COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK
 # VANILLA 2.0 Throttle Scale 120
 ######################################################################################
 # Hypernet Critic L 32x32 w/o Tinfo in Gobs (C 256 tanh)
-CHECKPOINTS=(
-2025-08-29_16-32-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1/model_3800.pt
-# 2025-08-30_17-09-52_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2/model_3700.pt
-# 2025-08-31_15-28-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-4/model_2850.pt
-# 2025-08-31_22-09-24_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5/model_3999.pt
-)
+# CHECKPOINTS=(
+# 2025-08-29_16-32-48_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-1/model_3800.pt
+# # 2025-08-30_17-09-52_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-2/model_3700.pt
+# # 2025-08-31_15-28-42_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-4/model_2850.pt
+# # 2025-08-31_22-09-24_rsl-rl_ppo-memory_RaceGates_Leatherback_r-0_seed-5/model_3999.pt
+# )
 # # Baseline L 32x32 w Tinfo in Gobs  (C 256 tanh)
 # CHECKPOINTS=(
 # 2025-09-01_12-23-52_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_2000.pt
@@ -265,6 +265,11 @@ CHECKPOINTS=(
 # # 2025-09-03_18-53-51_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4/model_33000.pt
 # # 2025-09-03_22-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5/model_3750.pt
 # )
+
+# Baseline-finetuned BCN L 32x32 w Tinfo in Gobs  (C 256 tanh)
+CHECKPOINTS=(
+2025-09-06_20-55-38_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42/model_2100.pt
+)
 
 # Function to run evaluation for a single checkpoint
 run_evaluation() {

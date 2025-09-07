@@ -11,8 +11,8 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 16
-    max_iterations = 4000
-    save_interval = 50
+    max_iterations = 300
+    save_interval = 10
     experiment_name = "multitask_racing_baseline_noTrackInfo"
     logger = "wandb"
     wandb_kwargs = {
@@ -20,6 +20,9 @@ class SinglePPORunnerCfg(RslRlOnPolicyRunnerCfg):
         "entity": "spacer-rl",
         "group": "zeroG",
     }
+    resume = True
+    load_run = "2025-09-01_12-23-52_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1"
+    load_checkpoint = "model_2000.pt"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
