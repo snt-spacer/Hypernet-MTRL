@@ -19,7 +19,7 @@ def modify_racing_rsl_rl_config():
             if "resume" in line:
                 new_content.append("    resume = True\n")
             elif "max_iterations" in line:
-                new_content.append(f"    max_iterations = 300\n")
+                new_content.append(f"    max_iterations = 1000\n")
             elif "save_interval" in line:
                 new_content.append(f"    save_interval = 10\n")
             elif "load_run" in line:

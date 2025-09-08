@@ -278,17 +278,36 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-01_21-55-27_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
         ],
         # Expert BCN
-        # [
-        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_18-46-06_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
-        #     "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_21-57-25_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2",
-        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_18-53-51_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4",
-        #     # "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_22-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
-        # ],
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_18-46-06_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_21-57-25_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_18-53-51_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-03_22-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
+        ],
 
         # Baseline-finetuned BCN
         [
-            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-06_20-55-38_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_12-54-46_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_13-41-57_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_14-28-38_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_15-15-22_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
         ],
+
+        # Baseline-finetuned JPN
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_19-30-32_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_20-16-43_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_21-02-57_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_21-49-22_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+        ],
+
+        # Baseline-finetuned ITL
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_19-31-54_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_20-20-30_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_21-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_21-54-00_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+        ]
 
     ]
 
@@ -329,8 +348,9 @@ def main():
         "runs_names": [
             "Hypernet Critic L Th 120 32x32 w-o Tinfo in Gobs",
             "Baseline Th 32x32 w Tinfo in Gobs",
-            # "Expert BCN",
+            "Expert BCN",
             "Baseline-finetuned BCN",
+            "Baseline-finetuned JPN",
             
             # "Hypernet 32x32 w Tinfo in Gobs",
             # "Baseline 32x32 w Tinfo in Gobs",
@@ -369,7 +389,7 @@ def main():
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots_finetuned" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots_finetuned_itl" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 
@@ -392,33 +412,28 @@ def main():
         list_of_tasks.append(task_name)
         
         for folder_path in group:
-            try:
-                # Load metrics CSV
-                experiment_name = glob.glob(os.path.join(folder_path, "metrics", "*_metrics.csv"))[0]
-                metrics_file_path = os.path.join(folder_path, "metrics", experiment_name)
-                df = pd.read_csv(metrics_file_path)
-                dfs[group_key].append(df)
-                labels[group_key].append(experiment_name.split("/")[-1])
+            # Load metrics CSV
+            experiment_name = glob.glob(os.path.join(folder_path, "metrics", "*_metrics.csv"))[0]
+            metrics_file_path = os.path.join(folder_path, "metrics", experiment_name)
+            df = pd.read_csv(metrics_file_path)
+            dfs[group_key].append(df)
+            labels[group_key].append(experiment_name.split("/")[-1])
 
-                # Load trajectories CSV
-                trajectories_pattern = os.path.join(folder_path, "metrics", f"extracted_trajectories_{task_name}.csv")
-                trajectories_files = glob.glob(trajectories_pattern)
-                if trajectories_files:
-                    trajectories_file_path = trajectories_files[0]
-                    trajectories_df = pd.read_csv(trajectories_file_path)
-                    trajectories_dfs[group_key].append(trajectories_df)
-                else:
-                    print(f"Warning: No trajectories file found for {folder_path}")
-                    trajectories_dfs[group_key].append(pd.DataFrame())  # Empty DataFrame as fallback
+            # Load trajectories CSV
+            trajectories_pattern = os.path.join(folder_path, "metrics", f"extracted_trajectories_{task_name}.csv")
+            trajectories_files = glob.glob(trajectories_pattern)
+            if trajectories_files:
+                trajectories_file_path = trajectories_files[0]
+                trajectories_df = pd.read_csv(trajectories_file_path)
+                trajectories_dfs[group_key].append(trajectories_df)
+            else:
+                print(f"Warning: No trajectories file found for {folder_path}")
+                trajectories_dfs[group_key].append(pd.DataFrame())  # Empty DataFrame as fallback
 
-                # Load env info
-                env_info_file_path = os.path.join(folder_path, "metrics", "env_info.yaml")
-                with open(env_info_file_path, 'r') as f:
-                    env_info = yaml.safe_load(f)
-                    
-            except Exception as e:
-                print(f"Error reading file in {folder_path}: {e}")
-                exit(0)
+            # Load env info
+            env_info_file_path = os.path.join(folder_path, "metrics", "env_info.yaml")
+            with open(env_info_file_path, 'r') as f:
+                env_info = yaml.safe_load(f)
 
     # Group by task
     task_dfs = {}

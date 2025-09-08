@@ -7,7 +7,7 @@ TASK="Isaac-RANS-Single-v0"
 NUM_ENVS=500
 TRACK_ID=0 # 0 is custom track, -1 for random
 EVAL_SEED=42
-CUSTOM_TRACK_ID=0 # 0 BCN, 1 JPN, 2 Monza, 10 points, 4 points, 11 alphapilot
+CUSTOM_TRACK_ID=1 # 0 BCN, 1 JPN, 2 Monza, 10 points, 4 points, 11 alphapilot
 BASE_LOG_DIR="logs/rsl_rl/multitask_racing_baseline_noTrackInfo"
 same_track_for_all_envs="True"
 
@@ -267,8 +267,27 @@ COMMON_ARGS="--task=${TASK} --headless --num_envs=${NUM_ENVS} --track_id=${TRACK
 # )
 
 # Baseline-finetuned BCN L 32x32 w Tinfo in Gobs  (C 256 tanh)
+# CHECKPOINTS=(
+# 2025-09-07_12-54-46_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_2630.pt  #66.3
+# 2025-09-07_13-41-57_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_3800.pt # 3800 80.5
+# 2025-09-07_14-28-38_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_4470.pt # 4470 61.10
+# 2025-09-07_15-15-22_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_3890.pt #3890 70.90
+# )
+
+# Baseline-finetuned JPN
+# CHECKPOINTS=(
+# 2025-09-07_19-30-32_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_2530.pt #2530 86.05 
+# 2025-09-07_20-16-43_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_4530.pt #4530 82.20
+# 2025-09-07_21-02-57_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_4130.pt #4130 92.51 
+# 2025-09-07_21-49-22_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_3910.pt #3900 80.30, 3910 77.31
+# )
+
+# Baseline-finetuned ITL
 CHECKPOINTS=(
-2025-09-06_20-55-38_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-42/model_2100.pt
+2025-09-07_19-31-54_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_2870.pt
+2025-09-07_20-20-30_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_4620.pt
+2025-09-07_21-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_4420.pt
+2025-09-07_21-54-00_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1/model_3710.pt
 )
 
 # Function to run evaluation for a single checkpoint
