@@ -229,7 +229,7 @@ TRACK_CFG = VisualizationMarkersCfg(
             radius=0.02,  # Thin line
             height=1.0,   # Will be scaled per segment
             axis="Z",
-            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 1.0, 0.0)),  # Yellow
+            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.6, 0.6, 0.6)),  # Yellow
         ),
     }
 )

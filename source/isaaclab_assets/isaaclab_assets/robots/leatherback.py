@@ -35,7 +35,7 @@ LEATHERBACK_CFG = ArticulationCfg(
         activate_contact_sensors=True,
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.2),
+        pos=(0.0, 0.0, 0.05),
         joint_pos={
             "Wheel__Knuckle__Front_Left": 0.0,
             "Wheel__Knuckle__Front_Right": 0.0,

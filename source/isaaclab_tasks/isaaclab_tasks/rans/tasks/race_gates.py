@@ -853,7 +853,7 @@ class RaceGatesTask(TaskCore):
         # We should create only one of them.
         self.next_goals_visualizer = VisualizationMarkers(gate_marker_cfg)
         self.passed_goals_visualizer = VisualizationMarkers(gate_marker_cfg_grey)
-        self.robot_pos_visualizer = VisualizationMarkers(robot_marker_cfg)
+        # self.robot_pos_visualizer = VisualizationMarkers(robot_marker_cfg)
         # Add track visualizer
         self.track_visualizer = VisualizationMarkers(
             TRACK_CFG.replace(prim_path=f"/Visuals/Command/task_{self._task_uid}/track")
@@ -914,7 +914,7 @@ class RaceGatesTask(TaskCore):
             self.next_goals_visualizer.visualize(next_goals_pos, orientations=next_goals_quat)
 
         # Update the robot visualization. TODO Ideally we should lift the diamond a bit.
-        self.robot_pos_visualizer.visualize(self._robot.root_link_pos_w[self._env_ids], self._robot.root_link_quat_w[self._env_ids])
+        # self.robot_pos_visualizer.visualize(self._robot.root_link_pos_w[self._env_ids], self._robot.root_link_quat_w[self._env_ids])
 
         # --- Track visualization ---
         # Visualize the track for all environments
