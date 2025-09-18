@@ -13,6 +13,8 @@ from isaaclab.utils.noise import NoiseModelCfg
 from .common import SpaceType, ViewerCfg
 from .ui import BaseEnvWindow
 
+from isaaclab_tasks.rans.utils.racing_scripts_and_data.lookat import get_lookat_point_flexible
+import numpy as np
 
 @configclass
 class DirectRLEnvCfg:
@@ -20,9 +22,23 @@ class DirectRLEnvCfg:
 
     Please refer to the :class:`isaaclab.envs.direct_rl_env.DirectRLEnv` class for more details.
     """
+  
+
+    # origin_type="asset_root",
+      # asset_name="Leatherback",
+      # env_index=4,
 
     # simulation settings
-    viewer: ViewerCfg = ViewerCfg()
+    viewer: ViewerCfg = ViewerCfg(
+      eye=(-18.45,16.82,23.92),
+      lookat= get_lookat_point_flexible(
+        (-18.45,16.82,23.92), 
+        (41.7,0.0,-133.88), 
+        distance=np.linalg.norm(np.array((-18.45,16.82,23.92))), 
+        rotation_order='zyx',
+        forward_axis='-z'
+      )
+    )
     """Viewer configuration. Default is ViewerCfg()."""
 
     sim: SimulationCfg = SimulationCfg()

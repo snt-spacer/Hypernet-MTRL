@@ -56,7 +56,8 @@ def get_lookat_point_flexible(camera_position, camera_orientation, distance, rot
     rotated_forward_vector = combined_rotation_matrix @ forward_vector
     lookat_point = np.array(camera_position) + rotated_forward_vector
 
-    return lookat_point
+    return tuple(float(x) for x in lookat_point)
+
 
 # Example usage with your values
 camera_pos = (2.48616, 1.99361, 7.09749)
