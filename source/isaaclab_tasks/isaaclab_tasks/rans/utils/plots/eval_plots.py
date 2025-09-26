@@ -307,7 +307,23 @@ def main():
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_20-20-30_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_21-07-05_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
             "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-07_21-54-00_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
-        ]
+        ],
+
+        # Expert JPN
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-04_06-04-13_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-04_09-10-09_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-04_06-04-27_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-04_09-15-45_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
+        ],
+
+        # Expert ITL
+        [
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-08_18-56-34_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-1",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-08_22-08-51_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-2",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-09_01-19-25_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-4",
+            "/workspace/isaaclab/logs/rsl_rl/multitask_racing_baseline_noTrackInfo/2025-09-09_04-25-49_rsl-rl_ppo_RaceGates_Leatherback_r-0_seed-5",
+        ],
 
     ]
 
@@ -351,6 +367,9 @@ def main():
             "Expert BCN",
             "Baseline-finetuned BCN",
             "Baseline-finetuned JPN",
+            "Baseline-finetuned ITL",
+            "Expert JPN",
+            "Expert ITL",
             
             # "Hypernet 32x32 w Tinfo in Gobs",
             # "Baseline 32x32 w Tinfo in Gobs",
@@ -389,7 +408,7 @@ def main():
         "zoom_in": False,
     }
 
-    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots_finetuned_itl" # Specify the folder path where you want to save the plots
+    save_plots_folder_path = "/workspace/isaaclab/source/isaaclab_tasks/isaaclab_tasks/rans/utils/racing_scripts_and_data/plots_rnd" # Specify the folder path where you want to save the plots
     if not os.path.exists(save_plots_folder_path):
         os.makedirs(save_plots_folder_path)
 
