@@ -1,4 +1,4 @@
-![Isaac Lab](docs/source/_static/isaaclab.jpg)
+![Racing](docs/source/_static/racing.png)
 
 ---
 
@@ -51,6 +51,8 @@ Floating Platform
 ```
 
 ### Eval
+You can download the weights form the google drive and add them inside the `logs` folder of the docker. [Download link](https://drive.google.com/drive/u/4/folders/1vGkaFCK4VKEPADZi0D2ksL3EVxNNWh0x).
+
 Racing
 ```
 ./scripts/reinforcement_learning/rsl_rl/racing_eval.sh
